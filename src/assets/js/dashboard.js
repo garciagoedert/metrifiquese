@@ -6,8 +6,8 @@ $(function () {
   // =====================================
   var chart = {
     series: [
-      { name: "Earnings this month:", data: [355, 390, 300, 350, 390, 180, 355, 390] },
-      { name: "Expense this month:", data: [280, 250, 325, 215, 250, 310, 280, 250] },
+      { name: "Pontuação:", data: [100, 80, 50, 50, 90, 80, 55, 90] },
+      // { name: "Expense this month:", data: [280, 250, 325, 215, 250, 310, 280, 250] },
     ],
 
     chart: {
@@ -26,7 +26,7 @@ $(function () {
 
     plotOptions: {
       bar: {
-        horizontal: false,
+        horizontal: true,
         columnWidth: "35%",
         borderRadius: [6],
         borderRadiusApplication: 'end',
@@ -57,7 +57,7 @@ $(function () {
 
     xaxis: {
       type: "category",
-      categories: ["16/08", "17/08", "18/08", "19/08", "20/08", "21/08", "22/08", "23/08"],
+      categories: ["Produtividade", "Engajamento", "Tarefas", "Soluções", "Crescimento", "Tempo", "Criatividade", "Objetivos"],
       labels: {
         style: { cssClass: "grey--text lighten-2--text fill-color" },
       },
@@ -67,7 +67,7 @@ $(function () {
     yaxis: {
       show: true,
       min: 0,
-      max: 400,
+      max: 100,
       tickAmount: 4,
       labels: {
         style: {
@@ -110,8 +110,8 @@ $(function () {
   // =====================================
   var breakup = {
     color: "#adb5bd",
-    series: [38, 40, 25],
-    labels: ["2022", "2021", "2020"],
+    series: [74, 26, 00],
+    labels: ["", "", ""],
     chart: {
       width: 180,
       type: "donut",
@@ -178,7 +178,7 @@ $(function () {
     },
     series: [
       {
-        name: "Earnings",
+        name: "Pontuação",
         color: "#49BEFF",
         data: [25, 66, 20, 40, 12, 58, 20],
       },
