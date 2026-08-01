@@ -3,12 +3,11 @@
  * Guarantees 100% data persistence without loss across code updates and browser sessions.
  */
 
-// Safely extract environment variables without throwing SyntaxError in classic script tags
 let envUrl = '';
 let envAnonKey = '';
 try {
-  envUrl = new Function('return (typeof import.meta !== "undefined" && import.meta.env) ? import.meta.env.VITE_SUPABASE_URL : ""')() || '';
-  envAnonKey = new Function('return (typeof import.meta !== "undefined" && import.meta.env) ? import.meta.env.VITE_SUPABASE_ANON_KEY : ""')() || '';
+  envUrl = typeof __SUPABASE_URL__ !== 'undefined' ? __SUPABASE_URL__ : '';
+  envAnonKey = typeof __SUPABASE_ANON_KEY__ !== 'undefined' ? __SUPABASE_ANON_KEY__ : '';
 } catch (e) {
   envUrl = '';
   envAnonKey = '';
