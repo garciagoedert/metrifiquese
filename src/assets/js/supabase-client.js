@@ -342,6 +342,9 @@ class LocalCRMStore {
             }
           });
           this.saveData(storeData);
+          if (typeof window !== 'undefined') {
+            window.dispatchEvent(new CustomEvent('tenants-synced', { detail: storeData.tenants }));
+          }
         }
       } catch (err) {
         console.warn('[Supabase Sync] Falha ao sincronizar empresas remota:', err);

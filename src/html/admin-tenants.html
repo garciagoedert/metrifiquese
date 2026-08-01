@@ -442,6 +442,11 @@
           this.bindEvents();
           this.checkInspectionBanner();
         });
+
+        window.addEventListener('tenants-synced', () => {
+          this.renderTenantsTable();
+          this.updateSummaryCards();
+        });
       }
 
       bindEvents() {
