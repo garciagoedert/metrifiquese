@@ -3,14 +3,25 @@
  * Guarantees 100% strict data isolation by tenant_id and Super Admin access control.
  */
 
+// Safely extract environment variables without throwing SyntaxError in classic script tags
+let envUrl = '';
+let envAnonKey = '';
+try {
+  envUrl = new Function('return (typeof import.meta !== "undefined" && import.meta.env) ? import.meta.env.VITE_SUPABASE_URL : ""')() || '';
+  envAnonKey = new Function('return (typeof import.meta !== "undefined" && import.meta.env) ? import.meta.env.VITE_SUPABASE_ANON_KEY : ""')() || '';
+} catch (e) {
+  envUrl = '';
+  envAnonKey = '';
+}
+
 const SUPABASE_CONFIG = {
-  url: (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_SUPABASE_URL) || window.localStorage.getItem('SUPABASE_URL') || '',
-  anonKey: (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_SUPABASE_ANON_KEY) || window.localStorage.getItem('SUPABASE_ANON_KEY') || ''
+  url: envUrl || (typeof window !== 'undefined' ? window.localStorage.getItem('SUPABASE_URL') : '') || '',
+  anonKey: envAnonKey || (typeof window !== 'undefined' ? window.localStorage.getItem('SUPABASE_ANON_KEY') : '') || ''
 };
 
 // Initialize Supabase JS Client if credentials & library are present
 let supabaseClient = null;
-if (window.supabase && SUPABASE_CONFIG.url && SUPABASE_CONFIG.anonKey) {
+if (typeof window !== 'undefined' && window.supabase && SUPABASE_CONFIG.url && SUPABASE_CONFIG.anonKey) {
   try {
     supabaseClient = window.supabase.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.anonKey);
     console.log('[Supabase Auth] Conectado ao Supabase Cloud:', SUPABASE_CONFIG.url);
@@ -321,7 +332,6 @@ class LocalCRMStore {
     } else {
       try {
         const data = JSON.parse(raw);
-        // Atualizar se o usuário 001 não for Paulo Garcia
         if (!data.users || !data.users[0] || data.users[0].email !== 'paulo@southsea.com.br') {
           data.users = INITIAL_DEMO_DATA.users;
           data.tenants = INITIAL_DEMO_DATA.tenants;
@@ -664,7 +674,6 @@ class LocalCRMStore {
   updateUser(userData) {
     const data = this.getData();
 
-    // Atualizar no array de usuários
     const userToUpdate = (data.users || []).find(u => (userData.id && u.id === userData.id) || (userData.email && u.email === userData.email) || u.is_super_admin);
     if (userToUpdate) {
       Object.assign(userToUpdate, userData);
