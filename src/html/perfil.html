@@ -200,7 +200,11 @@
         document.getElementById('user-avatar-input').value = user.avatar_url || '';
 
         document.querySelectorAll('.header-user-name').forEach(el => el.innerText = user.full_name);
-        document.querySelectorAll('.header-user-avatar').forEach(img => img.src = user.avatar_url);
+        document.querySelectorAll('.header-user-avatar').forEach(img => {
+          img.setAttribute('referrerpolicy', 'no-referrer');
+          img.onerror = () => { img.src = '../assets/images/profile/user-1.jpg'; };
+          if (user.avatar_url) img.src = user.avatar_url;
+        });
       }
 
       document.getElementById('profile-form').addEventListener('submit', (e) => {

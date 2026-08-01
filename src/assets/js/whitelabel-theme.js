@@ -88,6 +88,8 @@ class WhitelabelThemeEngine {
     if (user) {
       document.querySelectorAll('.header-user-name').forEach(el => el.innerText = user.full_name || 'Usuário');
       document.querySelectorAll('.header-user-avatar').forEach(img => {
+        img.setAttribute('referrerpolicy', 'no-referrer');
+        img.onerror = () => { img.src = '/src/assets/images/profile/user-1.jpg'; };
         if (user.avatar_url) img.src = user.avatar_url;
       });
     }

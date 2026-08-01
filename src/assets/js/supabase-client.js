@@ -83,7 +83,7 @@ const INITIAL_DEMO_DATA = {
       phone: '(11) 99887-6655',
       role: 'Super Admin Plataforma',
       is_super_admin: true,
-      avatar_url: '/src/assets/images/profile/user-1.jpg'
+      avatar_url: 'https://instagram.ffln1-1.fna.fbcdn.net/v/t51.82787-19/658968988_17956763901106219_4353182039587841370_n.jpg?stp=dst-jpg_s640x640_tt6&efg=eyJ2ZW5jb2RlX3RhZyI6InByb2ZpbGVfcGljLmRqYW5nby4xMDgwLmMyIn0&_nc_ht=instagram.ffln1-1.fna.fbcdn.net&_nc_cat=107&_nc_oc=Q6cZ2gHQ7zmgXpwEmvIUUSDkCUd6C0alcKSp971qs39wUvaAXRPpJ7ZZ-8D-PVC9rAzxHr1fNlaD1pe1iR2PdpYlCCxi&_nc_ohc=D_qV0EMM3bAQ7kNvwEhm8-2&_nc_gid=3q7MmEdXmEkyWixry7GE7g&edm=AAZTMJEBAAAA&ccb=7-5&oh=00_AQEsTlniOhUeINunzYKRs8jcV-xr0pMOKFeckOynLzUZSw&oe=6A73BCD6&_nc_sid=49cb7f'
     },
     {
       id: 'user-002',
@@ -118,7 +118,7 @@ const INITIAL_DEMO_DATA = {
       phone: '(11) 99887-6655',
       role: 'Super Admin Plataforma',
       is_super_admin: true,
-      avatar_url: '/src/assets/images/profile/user-1.jpg'
+      avatar_url: 'https://instagram.ffln1-1.fna.fbcdn.net/v/t51.82787-19/658968988_17956763901106219_4353182039587841370_n.jpg?stp=dst-jpg_s640x640_tt6&efg=eyJ2ZW5jb2RlX3RhZyI6InByb2ZpbGVfcGljLmRqYW5nby4xMDgwLmMyIn0&_nc_ht=instagram.ffln1-1.fna.fbcdn.net&_nc_cat=107&_nc_oc=Q6cZ2gHQ7zmgXpwEmvIUUSDkCUd6C0alcKSp971qs39wUvaAXRPpJ7ZZ-8D-PVC9rAzxHr1fNlaD1pe1iR2PdpYlCCxi&_nc_ohc=D_qV0EMM3bAQ7kNvwEhm8-2&_nc_gid=3q7MmEdXmEkyWixry7GE7g&edm=AAZTMJEBAAAA&ccb=7-5&oh=00_AQEsTlniOhUeINunzYKRs8jcV-xr0pMOKFeckOynLzUZSw&oe=6A73BCD6&_nc_sid=49cb7f'
     },
     active_tenant_id: 'tenant-demo-001',
     is_authenticated: true
