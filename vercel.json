@@ -7,52 +7,20 @@
   "rewrites": [
     { "source": "/", "destination": "/index.html" },
     { "source": "/index", "destination": "/index.html" },
-    { "source": "/src/html", "destination": "/index.html" },
-    { "source": "/src/html/index.html", "destination": "/index.html" },
-    
-    { "source": "/login", "destination": "/login.html" },
-    { "source": "/src/login", "destination": "/login.html" },
-    { "source": "/src/html/login", "destination": "/login.html" },
-    { "source": "/src/html/login.html", "destination": "/login.html" },
+    { "source": "/home", "destination": "/index.html" },
 
-    { "source": "/leads", "destination": "/leads.html" },
-    { "source": "/src/leads", "destination": "/leads.html" },
-    { "source": "/src/html/leads", "destination": "/leads.html" },
-    { "source": "/src/html/leads.html", "destination": "/leads.html" },
+    { "source": "/dashboard", "destination": "/src/html/index.html" },
+    { "source": "/crm", "destination": "/src/html/index.html" },
 
-    { "source": "/kanban", "destination": "/kanban.html" },
-    { "source": "/src/kanban", "destination": "/kanban.html" },
-    { "source": "/src/html/kanban", "destination": "/kanban.html" },
-    { "source": "/src/html/kanban.html", "destination": "/kanban.html" },
-
-    { "source": "/admin-tenants", "destination": "/admin-tenants.html" },
-    { "source": "/src/admin-tenants", "destination": "/admin-tenants.html" },
-    { "source": "/src/html/admin-tenants", "destination": "/admin-tenants.html" },
-    { "source": "/src/html/admin-tenants.html", "destination": "/admin-tenants.html" },
-
-    { "source": "/automacoes", "destination": "/automacoes.html" },
-    { "source": "/src/automacoes", "destination": "/automacoes.html" },
-    { "source": "/src/html/automacoes", "destination": "/automacoes.html" },
-    { "source": "/src/html/automacoes.html", "destination": "/automacoes.html" },
-
-    { "source": "/capturas", "destination": "/capturas.html" },
-    { "source": "/src/capturas", "destination": "/capturas.html" },
-    { "source": "/src/html/capturas", "destination": "/capturas.html" },
-    { "source": "/src/html/capturas.html", "destination": "/capturas.html" },
-
-    { "source": "/relatorios", "destination": "/relatorios.html" },
-    { "source": "/src/relatorios", "destination": "/relatorios.html" },
-    { "source": "/src/html/relatorios", "destination": "/relatorios.html" },
-    { "source": "/src/html/relatorios.html", "destination": "/relatorios.html" },
-
-    { "source": "/configuracoes-whitelabel", "destination": "/configuracoes-whitelabel.html" },
-    { "source": "/src/configuracoes-whitelabel", "destination": "/configuracoes-whitelabel.html" },
-    { "source": "/src/html/configuracoes-whitelabel", "destination": "/configuracoes-whitelabel.html" },
-    { "source": "/src/html/configuracoes-whitelabel.html", "destination": "/configuracoes-whitelabel.html" },
-
-    { "source": "/perfil", "destination": "/perfil.html" },
-    { "source": "/src/perfil", "destination": "/perfil.html" },
-    { "source": "/src/html/perfil", "destination": "/perfil.html" },
-    { "source": "/src/html/perfil.html", "destination": "/perfil.html" }
+    { "source": "/login", "destination": "/src/html/login.html" },
+    { "source": "/authentication-login", "destination": "/src/html/authentication-login.html" },
+    { "source": "/leads", "destination": "/src/html/leads.html" },
+    { "source": "/kanban", "destination": "/src/html/kanban.html" },
+    { "source": "/admin-tenants", "destination": "/src/html/admin-tenants.html" },
+    { "source": "/automacoes", "destination": "/src/html/automacoes.html" },
+    { "source": "/capturas", "destination": "/src/html/capturas.html" },
+    { "source": "/relatorios", "destination": "/src/html/relatorios.html" },
+    { "source": "/configuracoes-whitelabel", "destination": "/src/html/configuracoes-whitelabel.html" },
+    { "source": "/perfil", "destination": "/src/html/perfil.html" }
   ]
 }
