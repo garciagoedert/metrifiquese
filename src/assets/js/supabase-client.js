@@ -15,7 +15,7 @@ try {
 
 const SUPABASE_CONFIG = {
   url: envUrl || (typeof window !== 'undefined' ? window.localStorage.getItem('SUPABASE_URL') : '') || 'https://syvqisjpulryjlgksjrk.supabase.co',
-  anonKey: envAnonKey || (typeof window !== 'undefined' ? window.localStorage.getItem('SUPABASE_ANON_KEY') : '') || ''
+  anonKey: envAnonKey || (typeof window !== 'undefined' ? window.localStorage.getItem('SUPABASE_ANON_KEY') : '') || 'sb_publishable_O0sjGeACkgzBZJOlMMGpaA_LMHn3Ihl'
 };
 
 // Initialize Supabase JS Client if credentials & library are present
