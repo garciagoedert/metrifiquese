@@ -358,18 +358,10 @@ class LocalCRMStore {
           updated = true;
         }
 
-        // PRESERVE ALL TENANTS: Merge existing user-created tenants without ever wiping them
-        if (!data.tenants || data.tenants.length === 0) {
+        // Ensure tenants array exists
+        if (!data.tenants) {
           data.tenants = INITIAL_DEMO_DATA.tenants;
           updated = true;
-        } else {
-          // Merge initial seed tenants if missing, but NEVER delete user created tenants
-          INITIAL_DEMO_DATA.tenants.forEach(initT => {
-            if (!data.tenants.some(t => t.id === initT.id)) {
-              data.tenants.push(initT);
-              updated = true;
-            }
-          });
         }
 
         if (updated) {
