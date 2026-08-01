@@ -270,15 +270,22 @@
         location.reload();
       });
 
+      // Populate saved Supabase keys
+      const savedSbUrl = localStorage.getItem('SUPABASE_URL') || '';
+      const savedSbKey = localStorage.getItem('SUPABASE_ANON_KEY') || '';
+      if (savedSbUrl) document.getElementById('sb-url-input').value = savedSbUrl;
+      if (savedSbKey) document.getElementById('sb-key-input').value = savedSbKey;
+
       document.getElementById('btn-save-sb').addEventListener('click', () => {
-        const url = document.getElementById('sb-url-input').value;
-        const key = document.getElementById('sb-key-input').value;
+        const url = document.getElementById('sb-url-input').value.trim();
+        const key = document.getElementById('sb-key-input').value.trim();
         if (url && key) {
           localStorage.setItem('SUPABASE_URL', url);
           localStorage.setItem('SUPABASE_ANON_KEY', key);
-          alert('Credenciais do Supabase salvas!');
+          alert('Credenciais do Supabase salvas e ativas com sucesso!');
+          location.reload();
         } else {
-          alert('Preencha a URL e a Anon Key do Supabase.');
+          alert('Por favor, preencha a URL e a Chave Anon Key do Supabase.');
         }
       });
     });
