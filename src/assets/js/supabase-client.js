@@ -15,7 +15,7 @@ try {
 }
 
 const SUPABASE_CONFIG = {
-  url: envUrl || (typeof window !== 'undefined' ? window.localStorage.getItem('SUPABASE_URL') : '') || '',
+  url: envUrl || (typeof window !== 'undefined' ? window.localStorage.getItem('SUPABASE_URL') : '') || 'https://syvqisjpulryjlgksjrk.supabase.co',
   anonKey: envAnonKey || (typeof window !== 'undefined' ? window.localStorage.getItem('SUPABASE_ANON_KEY') : '') || ''
 };
 
@@ -323,6 +323,30 @@ class LocalCRMStore {
   constructor() {
     this.initStore();
     this.initSupabaseAuthListener();
+    this.fetchRemoteTenants();
+  }
+
+  async fetchRemoteTenants() {
+    if (supabaseClient) {
+      try {
+        const { data: dbTenants, error } = await supabaseClient.from('tenants').select('*');
+        if (!error && dbTenants && dbTenants.length > 0) {
+          const storeData = this.getData();
+          if (!storeData.tenants) storeData.tenants = [];
+          dbTenants.forEach(remoteT => {
+            const idx = storeData.tenants.findIndex(t => t.id === remoteT.id);
+            if (idx !== -1) {
+              storeData.tenants[idx] = { ...storeData.tenants[idx], ...remoteT };
+            } else {
+              storeData.tenants.push(remoteT);
+            }
+          });
+          this.saveData(storeData);
+        }
+      } catch (err) {
+        console.warn('[Supabase Sync] Falha ao sincronizar empresas remota:', err);
+      }
+    }
   }
 
   initStore() {
