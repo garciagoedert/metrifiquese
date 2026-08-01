@@ -324,30 +324,54 @@ class LocalCRMStore {
     this.initStore();
     this.initSupabaseAuthListener();
     this.fetchRemoteTenants();
+    this.initSupabaseRealtime();
   }
 
   async fetchRemoteTenants() {
     if (supabaseClient) {
       try {
         const { data: dbTenants, error } = await supabaseClient.from('tenants').select('*');
-        if (!error && dbTenants && dbTenants.length > 0) {
+        if (!error && dbTenants) {
           const storeData = this.getData();
-          if (!storeData.tenants) storeData.tenants = [];
-          dbTenants.forEach(remoteT => {
-            const idx = storeData.tenants.findIndex(t => t.id === remoteT.id);
-            if (idx !== -1) {
-              storeData.tenants[idx] = { ...storeData.tenants[idx], ...remoteT };
-            } else {
-              storeData.tenants.push(remoteT);
+          
+          const masterTenant = INITIAL_DEMO_DATA.tenants[0];
+          if (!dbTenants.some(t => t.id === masterTenant.id)) {
+            dbTenants.unshift(masterTenant);
+          }
+
+          const hasChanged = JSON.stringify(storeData.tenants) !== JSON.stringify(dbTenants);
+          if (hasChanged) {
+            storeData.tenants = dbTenants;
+            this.saveData(storeData);
+            if (typeof window !== 'undefined') {
+              window.dispatchEvent(new CustomEvent('tenants-synced', { detail: storeData.tenants }));
             }
-          });
-          this.saveData(storeData);
-          if (typeof window !== 'undefined') {
-            window.dispatchEvent(new CustomEvent('tenants-synced', { detail: storeData.tenants }));
           }
         }
       } catch (err) {
         console.warn('[Supabase Sync] Falha ao sincronizar empresas remota:', err);
+      }
+    }
+  }
+
+  initSupabaseRealtime() {
+    if (supabaseClient) {
+      try {
+        supabaseClient
+          .channel('public:tenants')
+          .on('postgres_changes', { event: '*', schema: 'public', table: 'tenants' }, () => {
+            this.fetchRemoteTenants();
+          })
+          .subscribe();
+      } catch (e) {
+        console.warn('[Supabase Realtime] Warning:', e);
+      }
+
+      // Auto-poll every 3 seconds for instant multi-device reactivity
+      if (typeof window !== 'undefined' && !window._tenantSyncTimer) {
+        window._tenantSyncTimer = setInterval(() => {
+          this.fetchRemoteTenants();
+        }, 3000);
       }
     }
   }
