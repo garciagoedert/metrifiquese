@@ -4,8 +4,8 @@
  */
 
 const SUPABASE_CONFIG = {
-  url: window.localStorage.getItem('SUPABASE_URL') || '',
-  anonKey: window.localStorage.getItem('SUPABASE_ANON_KEY') || ''
+  url: (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_SUPABASE_URL) || window.localStorage.getItem('SUPABASE_URL') || '',
+  anonKey: (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_SUPABASE_ANON_KEY) || window.localStorage.getItem('SUPABASE_ANON_KEY') || ''
 };
 
 // Initialize Supabase JS Client if credentials & library are present
@@ -66,8 +66,8 @@ const INITIAL_DEMO_DATA = {
     {
       id: 'user-001',
       tenant_id: 'tenant-demo-001',
-      full_name: 'Guilherme Garcia',
-      email: 'admin@metrifiquese.com.br',
+      full_name: 'Paulo Garcia',
+      email: 'paulo@southsea.com.br',
       password: '12345678',
       phone: '(11) 99887-6655',
       role: 'Super Admin Plataforma',
@@ -101,8 +101,8 @@ const INITIAL_DEMO_DATA = {
     user: {
       id: 'user-001',
       tenant_id: 'tenant-demo-001',
-      full_name: 'Guilherme Garcia',
-      email: 'admin@metrifiquese.com.br',
+      full_name: 'Paulo Garcia',
+      email: 'paulo@southsea.com.br',
       password: '12345678',
       phone: '(11) 99887-6655',
       role: 'Super Admin Plataforma',
@@ -321,13 +321,11 @@ class LocalCRMStore {
     } else {
       try {
         const data = JSON.parse(raw);
-        // Reseed users if missing passwords or tenant isolation attributes
-        if (!data.users || data.users.length < 3 || !data.users[1].password) {
+        // Atualizar se o usuário 001 não for Paulo Garcia
+        if (!data.users || !data.users[0] || data.users[0].email !== 'paulo@southsea.com.br') {
           data.users = INITIAL_DEMO_DATA.users;
           data.tenants = INITIAL_DEMO_DATA.tenants;
-          data.leads = INITIAL_DEMO_DATA.leads;
-          data.deals = INITIAL_DEMO_DATA.deals;
-          data.stages = INITIAL_DEMO_DATA.stages;
+          data.session = INITIAL_DEMO_DATA.session;
           localStorage.setItem('METRIFIQUESE_CRM_DATA', JSON.stringify(data));
         }
       } catch (e) {
@@ -358,7 +356,7 @@ class LocalCRMStore {
             email: session.user.email,
             full_name: session.user.user_metadata?.full_name || session.user.email.split('@')[0],
             role: session.user.user_metadata?.role || 'Usuário Supabase Auth',
-            is_super_admin: session.user.user_metadata?.is_super_admin || false,
+            is_super_admin: session.user.email === 'paulo@southsea.com.br' || session.user.user_metadata?.is_super_admin || false,
             avatar_url: session.user.user_metadata?.avatar_url || '/src/assets/images/profile/user-1.jpg'
           };
           this.updateUser(userObj);
@@ -537,7 +535,6 @@ class LocalCRMStore {
     const matchedUser = (data.users || INITIAL_DEMO_DATA.users).find(u => u.email.toLowerCase() === cleanEmail);
 
     if (matchedUser) {
-      // Validar senha se existir
       if (matchedUser.password && matchedUser.password !== password) {
         throw new Error('Senha incorreta. Verifique suas credenciais.');
       }
@@ -551,21 +548,26 @@ class LocalCRMStore {
       return { user: matchedUser, session: null };
     }
 
-    // 2. Se for uma tentativa de login Supabase Cloud ou usuário não cadastrado
+    // 2. Se for uma tentativa de login Supabase Cloud
     if (supabaseClient) {
       const { data: sbData, error } = await supabaseClient.auth.signInWithPassword({ email, password });
       if (error) throw new Error(error.message);
     }
 
-    // 3. Fallback: Se for email de admin master
-    if (cleanEmail.includes('admin') || cleanEmail.includes('metrifiquese.com.br')) {
+    // 3. Fallback: Se for o email do Paulo Garcia (Super Admin Master)
+    if (cleanEmail === 'paulo@southsea.com.br' || cleanEmail.includes('paulo') || cleanEmail.includes('southsea')) {
       const masterUser = (data.users || []).find(u => u.is_super_admin) || INITIAL_DEMO_DATA.users[0];
+      masterUser.email = 'paulo@southsea.com.br';
+      masterUser.full_name = 'Paulo Garcia';
+      masterUser.is_super_admin = true;
+      if (password) masterUser.password = password;
+
       data.session = { user: masterUser, active_tenant_id: 'tenant-demo-001', is_authenticated: true };
       this.saveData(data);
       return { user: masterUser, session: null };
     }
 
-    // 4. Se for um novo usuário de teste cadastrando diretamente no login: cria tenant isolado
+    // 4. Se for um novo usuário de teste cadastrando no login: cria tenant isolado
     const newTenantId = 'tenant-' + Date.now();
     const newTenantObj = {
       id: newTenantId,
@@ -661,12 +663,21 @@ class LocalCRMStore {
 
   updateUser(userData) {
     const data = this.getData();
-    data.user = { ...data.user, ...userData };
+
+    // Atualizar no array de usuários
+    const userToUpdate = (data.users || []).find(u => (userData.id && u.id === userData.id) || (userData.email && u.email === userData.email) || u.is_super_admin);
+    if (userToUpdate) {
+      Object.assign(userToUpdate, userData);
+    }
+
     if (data.session && data.session.user) {
       data.session.user = { ...data.session.user, ...userData };
+    } else {
+      data.session = { user: userToUpdate || userData, active_tenant_id: (userToUpdate && userToUpdate.tenant_id) || 'tenant-demo-001', is_authenticated: true };
     }
+
     this.saveData(data);
-    return data.user;
+    return data.session.user;
   }
 
   // --- MULTI-TENANT STRICTLY ISOLATED DATA GETTERS ---
@@ -763,7 +774,6 @@ class LocalCRMStore {
     const tenantStages = allStages.filter(s => s.tenant_id === tenantId);
 
     if (tenantStages.length === 0) {
-      // Retornar etapas default para novos tenants sem etapas customizadas
       return [
         { id: 'stage-def-1', tenant_id: tenantId, pipeline_id: 'pipe-1', name: 'Novo Lead', display_order: 1, color: '#5D87FF' },
         { id: 'stage-def-2', tenant_id: tenantId, pipeline_id: 'pipe-1', name: 'Em Atendimento', display_order: 2, color: '#FFAE1F' },

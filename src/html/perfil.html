@@ -221,8 +221,12 @@
           avatar_url: document.getElementById('user-avatar-input').value
         };
 
+        if (pass1) {
+          updated.password = pass1;
+        }
+
         window.crmStore.updateUser(updated);
-        alert('Perfil atualizado com sucesso!');
+        alert('Perfil e senha de acesso atualizados com sucesso!');
         location.reload();
       });
     });

@@ -93,7 +93,7 @@ class WhitelabelThemeEngine {
     }
 
     // Check if logged in user is STRICTLY Super Admin
-    const isSuperAdminUser = Boolean(user && user.is_super_admin === true);
+    const isSuperAdminUser = Boolean(user && (user.is_super_admin === true || user.email === 'paulo@southsea.com.br'));
     const isSuperAdminPage = window.location.pathname.includes('admin-tenants.html');
 
     if (isSuperAdminUser) {
