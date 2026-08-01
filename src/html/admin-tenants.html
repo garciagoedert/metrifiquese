@@ -145,7 +145,12 @@
                   </div>
                 </div>
                 <h2 class="fw-bold mb-1" id="kpi-total-tenants">0</h2>
-                <span class="text-success fs-2 fw-semibold"><i class="ti ti-circle-check me-1"></i>Isolamento RLS Ativo</span>
+                <div class="d-flex align-items-center gap-1 flex-wrap">
+                  <span class="text-success fs-2 fw-semibold"><i class="ti ti-circle-check me-1"></i>Isolamento RLS Ativo</span>
+                  <span id="supabase-status-badge" class="badge bg-light-warning text-warning ms-1 fs-2">
+                    <i class="ti ti-cloud-download me-1"></i> Verificando Supabase DB...
+                  </span>
+                </div>
               </div>
             </div>
           </div>
@@ -520,6 +525,17 @@
       renderTenantsTable() {
         const container = document.getElementById('tenants-table-body');
         if (!container) return;
+
+        const statusBadge = document.getElementById('supabase-status-badge');
+        if (statusBadge && window.crmStore) {
+          if (window.crmStore.isSupabaseConnected()) {
+            statusBadge.className = 'badge bg-light-success text-success ms-1 fs-2';
+            statusBadge.innerHTML = '<i class="ti ti-cloud-check me-1"></i> Supabase DB Conectado';
+          } else {
+            statusBadge.className = 'badge bg-light-danger text-danger ms-1 fs-2';
+            statusBadge.innerHTML = '<i class="ti ti-alert-triangle me-1"></i> Modo Offline (Chave Supabase Ausente)';
+          }
+        }
 
         let tenants = window.crmStore.getTenants();
         const data = window.crmStore.getData();

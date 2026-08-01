@@ -327,6 +327,10 @@ class LocalCRMStore {
     this.initSupabaseRealtime();
   }
 
+  isSupabaseConnected() {
+    return supabaseClient !== null;
+  }
+
   async fetchRemoteTenants() {
     if (supabaseClient) {
       try {
