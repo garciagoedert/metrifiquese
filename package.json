@@ -8,7 +8,7 @@
   },
   "scripts": {
     "dev": "vite --port 7000",
-    "build": "vite build",
+    "build": "vite build && node -e \"require('fs').cpSync('src/assets', 'dist/src/assets', {recursive: true})\"",
     "start": "vite --port 7000"
   },
   "devDependencies": {
