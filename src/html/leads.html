@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Dashboard | Metrifique-se CRM Whitelabel</title>
+  <title>Base de Leads | Metrifique-se CRM Whitelabel</title>
   <link rel="shortcut icon" type="image/png" href="../assets/images/logos/favicon.svg" />
   <link rel="stylesheet" href="../assets/css/styles.min.css" />
   <link rel="stylesheet" href="../assets/css/metrifiquese-theme.css" />
@@ -67,13 +67,13 @@
                 <span class="hide-menu">Gestão de Empresas</span>
               </a>
             </li>
-            <li class="sidebar-item selected">
+            <li class="sidebar-item">
               <a class="sidebar-link" href="./index.html">
                 <span><i class="ti ti-layout-dashboard"></i></span>
                 <span class="hide-menu">Dashboard</span>
               </a>
             </li>
-            <li class="sidebar-item">
+            <li class="sidebar-item selected">
               <a class="sidebar-link" href="./leads.html">
                 <span><i class="ti ti-users"></i></span>
                 <span class="hide-menu">Base de Leads</span>
@@ -116,113 +116,59 @@
 
     <div class="body-wrapper">
       <div class="container-fluid pt-3">
-        <!-- Top Banner -->
-        <div class="card shadow-sm border-0 mb-4 bg-white">
+        <!-- Page Control Bar -->
+        <div class="card shadow-sm border-0 mb-4">
           <div class="card-body p-4">
-            <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
-              <div>
-                <h4 class="fw-bold mb-1 text-dark">Painel de Performance Comercial</h4>
-                <p class="text-muted mb-0">Visão integrada da sua base de contatos, funil de oportunidades e automações de marketing.</p>
+            <div class="row g-3 align-items-center justify-content-between">
+              <div class="col-md-5">
+                <div class="input-group">
+                  <span class="input-group-text bg-white border-end-0"><i class="ti ti-search text-muted"></i></span>
+                  <input type="text" id="search-leads-input" class="form-control border-start-0 ps-0" placeholder="Buscar por nome, email ou empresa...">
+                </div>
               </div>
-              <div class="d-flex gap-2">
-                <a href="./leads.html" class="btn btn-outline-primary">
-                  <i class="ti ti-users me-1"></i> Ver Contatos
-                </a>
-                <a href="./kanban.html" class="btn btn-primary">
-                  <i class="ti ti-columns me-1"></i> Funil de Vendas
-                </a>
+
+              <div class="col-md-4">
+                <select id="filter-stage-select" class="form-select">
+                  <option value="all">Todos os Estágios de Vida</option>
+                  <option value="lead">Lead</option>
+                  <option value="mql">MQL (Marketing Qualified)</option>
+                  <option value="sql">SQL (Sales Qualified)</option>
+                  <option value="opportunity">Oportunidade</option>
+                  <option value="customer">Cliente</option>
+                  <option value="lost">Perdido</option>
+                </select>
+              </div>
+
+              <div class="col-md-3 text-end">
+                <button class="btn btn-primary w-100 d-inline-flex align-items-center justify-content-center gap-2 py-2 px-3 fw-bold shadow-sm" data-bs-toggle="modal" data-bs-target="#addLeadModal">
+                  <i class="ti ti-user-plus fs-5"></i>
+                  <span>Criar Contato</span>
+                </button>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- KPI Cards Row -->
-        <div class="row">
-          <div class="col-sm-6 col-xl-3">
-            <div class="card bg-white shadow-sm border-0 mb-4">
-              <div class="card-body p-4">
-                <div class="d-flex align-items-center justify-content-between mb-3">
-                  <span class="fw-semibold text-muted">Total de Leads</span>
-                  <div class="p-2 bg-light-primary text-primary rounded-circle">
-                    <i class="ti ti-users fs-6"></i>
-                  </div>
-                </div>
-                <h2 class="fw-bold mb-1" id="stat-total-leads">4</h2>
-                <span class="text-success fs-2 fw-semibold"><i class="ti ti-arrow-up-right me-1"></i>+12.5% este mês</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="col-sm-6 col-xl-3">
-            <div class="card bg-white shadow-sm border-0 mb-4">
-              <div class="card-body p-4">
-                <div class="d-flex align-items-center justify-content-between mb-3">
-                  <span class="fw-semibold text-muted">Taxa de Conversão</span>
-                  <div class="p-2 bg-light-success text-success rounded-circle">
-                    <i class="ti ti-percentage fs-6"></i>
-                  </div>
-                </div>
-                <h2 class="fw-bold mb-1" id="stat-conversion-rate">25.0%</h2>
-                <span class="text-success fs-2 fw-semibold"><i class="ti ti-arrow-up-right me-1"></i>Acima da média</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="col-sm-6 col-xl-3">
-            <div class="card bg-white shadow-sm border-0 mb-4">
-              <div class="card-body p-4">
-                <div class="d-flex align-items-center justify-content-between mb-3">
-                  <span class="fw-semibold text-muted">Valor em Funil (Pipeline)</span>
-                  <div class="p-2 bg-light-warning text-warning rounded-circle">
-                    <i class="ti ti-currency-dollar fs-6"></i>
-                  </div>
-                </div>
-                <h2 class="fw-bold mb-1" id="stat-pipeline-value">R$ 45.900,00</h2>
-                <span class="text-muted fs-2">Em negociações ativas</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="col-sm-6 col-xl-3">
-            <div class="card bg-white shadow-sm border-0 mb-4">
-              <div class="card-body p-4">
-                <div class="d-flex align-items-center justify-content-between mb-3">
-                  <span class="fw-semibold text-muted">Receita Fechada/Ganha</span>
-                  <div class="p-2 bg-light-info text-info rounded-circle">
-                    <i class="ti ti-trophy fs-6"></i>
-                  </div>
-                </div>
-                <h2 class="fw-bold mb-1" id="stat-won-value">R$ 25.000,00</h2>
-                <span class="text-success fs-2 fw-semibold"><i class="ti ti-circle-check me-1"></i>Meta atingida</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Charts Row -->
-        <div class="row">
-          <div class="col-lg-8 mb-4">
-            <div class="card shadow-sm border-0 h-100">
-              <div class="card-body p-4">
-                <div class="d-flex align-items-center justify-content-between mb-4">
-                  <div>
-                    <h5 class="fw-bold mb-1">Funil de Conversão de Contatos</h5>
-                    <p class="text-muted fs-2 mb-0">Evolução da qualificação dos contatos</p>
-                  </div>
-                  <a href="./relatorios.html" class="btn btn-sm btn-light">Ver Detalhes</a>
-                </div>
-                <div id="funnel-chart"></div>
-              </div>
-            </div>
-          </div>
-
-          <div class="col-lg-4 mb-4">
-            <div class="card shadow-sm border-0 h-100">
-              <div class="card-body p-4">
-                <h5 class="fw-bold mb-1">Origem dos Contatos</h5>
-                <p class="text-muted fs-2 mb-4">Canais de aquisição</p>
-                <div id="sources-chart"></div>
-              </div>
+        <!-- Leads Table Card -->
+        <div class="card shadow-sm border-0">
+          <div class="card-body p-0">
+            <div class="table-responsive">
+              <table class="table table-hover align-middle mb-0">
+                <thead class="bg-light">
+                  <tr>
+                    <th class="ps-4" style="width: 22%;">Contato</th>
+                    <th style="width: 22%;">Empresa & Cargo</th>
+                    <th style="width: 13%;">Estágio de Vida</th>
+                    <th style="width: 13%;">Lead Score</th>
+                    <th style="width: 12%;">Origem</th>
+                    <th style="width: 10%;">Tags</th>
+                    <th class="text-end pe-4" style="width: 8%; min-width: 140px;">Ações</th>
+                  </tr>
+                </thead>
+                <tbody id="leads-table-body">
+                  <!-- Renderizado via leads-manager.js -->
+                </tbody>
+              </table>
             </div>
           </div>
         </div>
@@ -230,12 +176,80 @@
     </div>
   </div>
 
+  <!-- Modal Adicionar Lead -->
+  <div class="modal fade" id="addLeadModal" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title fw-bold"><i class="ti ti-user-plus text-primary me-2"></i> Criar Novo Contato</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <form id="new-lead-form">
+          <div class="modal-body">
+            <div class="mb-3">
+              <label class="form-label">Nome Completo *</label>
+              <input type="text" id="lead-name-input" class="form-control" placeholder="Ex: Carlos Eduardo" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">E-mail *</label>
+              <input type="email" id="lead-email-input" class="form-control" placeholder="carlos@empresa.com" required>
+            </div>
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Telefone / WhatsApp</label>
+                <input type="text" id="lead-phone-input" class="form-control" placeholder="(11) 98765-4321">
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Empresa</label>
+                <input type="text" id="lead-company-input" class="form-control" placeholder="Nome da empresa">
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Origem do Lead</label>
+                <select id="lead-source-input" class="form-select">
+                  <option value="Google Ads">Google Ads</option>
+                  <option value="Facebook Ads">Facebook Ads</option>
+                  <option value="Orgânico">Orgânico / Busca</option>
+                  <option value="Indicação">Indicação</option>
+                  <option value="Outros">Outros</option>
+                </select>
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Score Inicial</label>
+                <input type="number" id="lead-score-input" class="form-control" value="10">
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
+            <button type="submit" class="btn btn-primary">Salvar Contato</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Detalhes & Perfil 3 Colunas -->
+  <div class="modal fade" id="leadDetailModal" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+      <div class="modal-content">
+        <div class="modal-header border-bottom bg-light py-3">
+          <h5 class="modal-title fw-bold text-dark"><i class="ti ti-id text-primary me-2"></i> Perfil 360° do Contato</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body p-4" id="lead-modal-details">
+          <!-- Conteúdo gerado dinamicamente -->
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script src="../assets/libs/jquery/dist/jquery.min.js"></script>
   <script src="../assets/libs/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-  <script src="../assets/libs/apexcharts/dist/apexcharts.min.js"></script>
   <script src="../assets/js/sidebarmenu.js"></script>
   <script src="../assets/js/app.min.js"></script>
-  <script src="../assets/js/analytics-manager.js"></script>
+  <script src="../assets/js/leads-manager.js"></script>
 
   <script>
     document.addEventListener('DOMContentLoaded', () => {

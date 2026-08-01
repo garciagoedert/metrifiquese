@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Dashboard | Metrifique-se CRM Whitelabel</title>
+  <title>Relatórios & Funil | Metrifique-se CRM Whitelabel</title>
   <link rel="shortcut icon" type="image/png" href="../assets/images/logos/favicon.svg" />
   <link rel="stylesheet" href="../assets/css/styles.min.css" />
   <link rel="stylesheet" href="../assets/css/metrifiquese-theme.css" />
@@ -41,10 +41,9 @@
         </a>
         <ul class="dropdown-menu dropdown-menu-end">
           <li><a class="dropdown-item" href="./perfil.html"><i class="ti ti-user me-2"></i>Meu Perfil</a></li>
-          <li><a class="dropdown-item" href="./admin-tenants.html"><i class="ti ti-building-store me-2"></i>Gestão de Empresas (SaaS)</a></li>
           <li><a class="dropdown-item" href="./configuracoes-whitelabel.html"><i class="ti ti-palette me-2"></i>Painel Whitelabel</a></li>
           <li><hr class="dropdown-divider"></li>
-          <li><a class="dropdown-item text-danger" href="./login.html" onclick="event.preventDefault(); window.crmStore.logout();"><i class="ti ti-logout me-2"></i>Sair</a></li>
+          <li><a class="dropdown-item text-danger" href="./login.html"><i class="ti ti-logout me-2"></i>Sair</a></li>
         </ul>
       </div>
     </div>
@@ -62,12 +61,6 @@
               <span class="hide-menu">CRM MENU</span>
             </li>
             <li class="sidebar-item">
-              <a class="sidebar-link text-primary fw-bold" href="./admin-tenants.html">
-                <span><i class="ti ti-building-store"></i></span>
-                <span class="hide-menu">Gestão de Empresas</span>
-              </a>
-            </li>
-            <li class="sidebar-item selected">
               <a class="sidebar-link" href="./index.html">
                 <span><i class="ti ti-layout-dashboard"></i></span>
                 <span class="hide-menu">Dashboard</span>
@@ -97,7 +90,7 @@
                 <span class="hide-menu">Formulários & Webhooks</span>
               </a>
             </li>
-            <li class="sidebar-item">
+            <li class="sidebar-item selected">
               <a class="sidebar-link" href="./relatorios.html">
                 <span><i class="ti ti-chart-bar"></i></span>
                 <span class="hide-menu">Relatórios & Funil</span>
@@ -116,111 +109,30 @@
 
     <div class="body-wrapper">
       <div class="container-fluid pt-3">
-        <!-- Top Banner -->
-        <div class="card shadow-sm border-0 mb-4 bg-white">
-          <div class="card-body p-4">
-            <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
-              <div>
-                <h4 class="fw-bold mb-1 text-dark">Painel de Performance Comercial</h4>
-                <p class="text-muted mb-0">Visão integrada da sua base de contatos, funil de oportunidades e automações de marketing.</p>
-              </div>
-              <div class="d-flex gap-2">
-                <a href="./leads.html" class="btn btn-outline-primary">
-                  <i class="ti ti-users me-1"></i> Ver Contatos
-                </a>
-                <a href="./kanban.html" class="btn btn-primary">
-                  <i class="ti ti-columns me-1"></i> Funil de Vendas
-                </a>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- KPI Cards Row -->
         <div class="row">
-          <div class="col-sm-6 col-xl-3">
-            <div class="card bg-white shadow-sm border-0 mb-4">
+          <div class="col-lg-12 mb-4">
+            <div class="card shadow-sm border-0">
               <div class="card-body p-4">
-                <div class="d-flex align-items-center justify-content-between mb-3">
-                  <span class="fw-semibold text-muted">Total de Leads</span>
-                  <div class="p-2 bg-light-primary text-primary rounded-circle">
-                    <i class="ti ti-users fs-6"></i>
-                  </div>
-                </div>
-                <h2 class="fw-bold mb-1" id="stat-total-leads">4</h2>
-                <span class="text-success fs-2 fw-semibold"><i class="ti ti-arrow-up-right me-1"></i>+12.5% este mês</span>
+                <h5 class="fw-bold mb-1 text-dark">Previsão e Crescimento de Receita (R$)</h5>
+                <p class="text-muted fs-2 mb-4">Histórico de oportunidades ganhas e funil ativo</p>
+                <div id="revenue-trend-chart"></div>
               </div>
             </div>
           </div>
 
-          <div class="col-sm-6 col-xl-3">
-            <div class="card bg-white shadow-sm border-0 mb-4">
+          <div class="col-lg-6 mb-4">
+            <div class="card shadow-sm border-0">
               <div class="card-body p-4">
-                <div class="d-flex align-items-center justify-content-between mb-3">
-                  <span class="fw-semibold text-muted">Taxa de Conversão</span>
-                  <div class="p-2 bg-light-success text-success rounded-circle">
-                    <i class="ti ti-percentage fs-6"></i>
-                  </div>
-                </div>
-                <h2 class="fw-bold mb-1" id="stat-conversion-rate">25.0%</h2>
-                <span class="text-success fs-2 fw-semibold"><i class="ti ti-arrow-up-right me-1"></i>Acima da média</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="col-sm-6 col-xl-3">
-            <div class="card bg-white shadow-sm border-0 mb-4">
-              <div class="card-body p-4">
-                <div class="d-flex align-items-center justify-content-between mb-3">
-                  <span class="fw-semibold text-muted">Valor em Funil (Pipeline)</span>
-                  <div class="p-2 bg-light-warning text-warning rounded-circle">
-                    <i class="ti ti-currency-dollar fs-6"></i>
-                  </div>
-                </div>
-                <h2 class="fw-bold mb-1" id="stat-pipeline-value">R$ 45.900,00</h2>
-                <span class="text-muted fs-2">Em negociações ativas</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="col-sm-6 col-xl-3">
-            <div class="card bg-white shadow-sm border-0 mb-4">
-              <div class="card-body p-4">
-                <div class="d-flex align-items-center justify-content-between mb-3">
-                  <span class="fw-semibold text-muted">Receita Fechada/Ganha</span>
-                  <div class="p-2 bg-light-info text-info rounded-circle">
-                    <i class="ti ti-trophy fs-6"></i>
-                  </div>
-                </div>
-                <h2 class="fw-bold mb-1" id="stat-won-value">R$ 25.000,00</h2>
-                <span class="text-success fs-2 fw-semibold"><i class="ti ti-circle-check me-1"></i>Meta atingida</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Charts Row -->
-        <div class="row">
-          <div class="col-lg-8 mb-4">
-            <div class="card shadow-sm border-0 h-100">
-              <div class="card-body p-4">
-                <div class="d-flex align-items-center justify-content-between mb-4">
-                  <div>
-                    <h5 class="fw-bold mb-1">Funil de Conversão de Contatos</h5>
-                    <p class="text-muted fs-2 mb-0">Evolução da qualificação dos contatos</p>
-                  </div>
-                  <a href="./relatorios.html" class="btn btn-sm btn-light">Ver Detalhes</a>
-                </div>
+                <h5 class="fw-bold mb-1 text-dark">Conversão do Funil de Vendas</h5>
                 <div id="funnel-chart"></div>
               </div>
             </div>
           </div>
 
-          <div class="col-lg-4 mb-4">
-            <div class="card shadow-sm border-0 h-100">
+          <div class="col-lg-6 mb-4">
+            <div class="card shadow-sm border-0">
               <div class="card-body p-4">
-                <h5 class="fw-bold mb-1">Origem dos Contatos</h5>
-                <p class="text-muted fs-2 mb-4">Canais de aquisição</p>
+                <h5 class="fw-bold mb-1 text-dark">Origem dos Contatos</h5>
                 <div id="sources-chart"></div>
               </div>
             </div>

@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Dashboard | Metrifique-se CRM Whitelabel</title>
+  <title>Funil de Vendas (Kanban) | Metrifique-se CRM Whitelabel</title>
   <link rel="shortcut icon" type="image/png" href="../assets/images/logos/favicon.svg" />
   <link rel="stylesheet" href="../assets/css/styles.min.css" />
   <link rel="stylesheet" href="../assets/css/metrifiquese-theme.css" />
@@ -67,7 +67,7 @@
                 <span class="hide-menu">Gestão de Empresas</span>
               </a>
             </li>
-            <li class="sidebar-item selected">
+            <li class="sidebar-item">
               <a class="sidebar-link" href="./index.html">
                 <span><i class="ti ti-layout-dashboard"></i></span>
                 <span class="hide-menu">Dashboard</span>
@@ -79,7 +79,7 @@
                 <span class="hide-menu">Base de Leads</span>
               </a>
             </li>
-            <li class="sidebar-item">
+            <li class="sidebar-item selected">
               <a class="sidebar-link" href="./kanban.html">
                 <span><i class="ti ti-columns"></i></span>
                 <span class="hide-menu">Funil de Vendas (Kanban)</span>
@@ -116,126 +116,107 @@
 
     <div class="body-wrapper">
       <div class="container-fluid pt-3">
-        <!-- Top Banner -->
-        <div class="card shadow-sm border-0 mb-4 bg-white">
+        <div class="card shadow-sm border-0 mb-4">
           <div class="card-body p-4">
             <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
               <div>
-                <h4 class="fw-bold mb-1 text-dark">Painel de Performance Comercial</h4>
-                <p class="text-muted mb-0">Visão integrada da sua base de contatos, funil de oportunidades e automações de marketing.</p>
+                <h5 class="fw-bold mb-1 text-dark">Pipeline de Negócios (Deals)</h5>
+                <p class="text-muted fs-2 mb-0">Arraste as oportunidades entre as etapas do funil para atualizar o processo comercial.</p>
               </div>
               <div class="d-flex gap-2">
-                <a href="./leads.html" class="btn btn-outline-primary">
-                  <i class="ti ti-users me-1"></i> Ver Contatos
-                </a>
-                <a href="./kanban.html" class="btn btn-primary">
-                  <i class="ti ti-columns me-1"></i> Funil de Vendas
-                </a>
+                <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#addStageModal">
+                  <i class="ti ti-plus me-1"></i> Nova Etapa / Coluna
+                </button>
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addDealModal">
+                  <i class="ti ti-plus me-1"></i> Nova Oportunidade
+                </button>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- KPI Cards Row -->
-        <div class="row">
-          <div class="col-sm-6 col-xl-3">
-            <div class="card bg-white shadow-sm border-0 mb-4">
-              <div class="card-body p-4">
-                <div class="d-flex align-items-center justify-content-between mb-3">
-                  <span class="fw-semibold text-muted">Total de Leads</span>
-                  <div class="p-2 bg-light-primary text-primary rounded-circle">
-                    <i class="ti ti-users fs-6"></i>
-                  </div>
-                </div>
-                <h2 class="fw-bold mb-1" id="stat-total-leads">4</h2>
-                <span class="text-success fs-2 fw-semibold"><i class="ti ti-arrow-up-right me-1"></i>+12.5% este mês</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="col-sm-6 col-xl-3">
-            <div class="card bg-white shadow-sm border-0 mb-4">
-              <div class="card-body p-4">
-                <div class="d-flex align-items-center justify-content-between mb-3">
-                  <span class="fw-semibold text-muted">Taxa de Conversão</span>
-                  <div class="p-2 bg-light-success text-success rounded-circle">
-                    <i class="ti ti-percentage fs-6"></i>
-                  </div>
-                </div>
-                <h2 class="fw-bold mb-1" id="stat-conversion-rate">25.0%</h2>
-                <span class="text-success fs-2 fw-semibold"><i class="ti ti-arrow-up-right me-1"></i>Acima da média</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="col-sm-6 col-xl-3">
-            <div class="card bg-white shadow-sm border-0 mb-4">
-              <div class="card-body p-4">
-                <div class="d-flex align-items-center justify-content-between mb-3">
-                  <span class="fw-semibold text-muted">Valor em Funil (Pipeline)</span>
-                  <div class="p-2 bg-light-warning text-warning rounded-circle">
-                    <i class="ti ti-currency-dollar fs-6"></i>
-                  </div>
-                </div>
-                <h2 class="fw-bold mb-1" id="stat-pipeline-value">R$ 45.900,00</h2>
-                <span class="text-muted fs-2">Em negociações ativas</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="col-sm-6 col-xl-3">
-            <div class="card bg-white shadow-sm border-0 mb-4">
-              <div class="card-body p-4">
-                <div class="d-flex align-items-center justify-content-between mb-3">
-                  <span class="fw-semibold text-muted">Receita Fechada/Ganha</span>
-                  <div class="p-2 bg-light-info text-info rounded-circle">
-                    <i class="ti ti-trophy fs-6"></i>
-                  </div>
-                </div>
-                <h2 class="fw-bold mb-1" id="stat-won-value">R$ 25.000,00</h2>
-                <span class="text-success fs-2 fw-semibold"><i class="ti ti-circle-check me-1"></i>Meta atingida</span>
-              </div>
-            </div>
-          </div>
+        <div class="row flex-nowrap overflow-auto pb-4" id="kanban-board-container" style="min-height: 550px;">
+          <!-- Renderizado via kanban-manager.js -->
         </div>
+      </div>
+    </div>
+  </div>
 
-        <!-- Charts Row -->
-        <div class="row">
-          <div class="col-lg-8 mb-4">
-            <div class="card shadow-sm border-0 h-100">
-              <div class="card-body p-4">
-                <div class="d-flex align-items-center justify-content-between mb-4">
-                  <div>
-                    <h5 class="fw-bold mb-1">Funil de Conversão de Contatos</h5>
-                    <p class="text-muted fs-2 mb-0">Evolução da qualificação dos contatos</p>
-                  </div>
-                  <a href="./relatorios.html" class="btn btn-sm btn-light">Ver Detalhes</a>
-                </div>
-                <div id="funnel-chart"></div>
-              </div>
-            </div>
-          </div>
-
-          <div class="col-lg-4 mb-4">
-            <div class="card shadow-sm border-0 h-100">
-              <div class="card-body p-4">
-                <h5 class="fw-bold mb-1">Origem dos Contatos</h5>
-                <p class="text-muted fs-2 mb-4">Canais de aquisição</p>
-                <div id="sources-chart"></div>
-              </div>
-            </div>
-          </div>
+  <!-- Modal Nova Oportunidade -->
+  <div class="modal fade" id="addDealModal" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title fw-bold"><i class="ti ti-cash text-primary me-2"></i> Criar Nova Oportunidade</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
         </div>
+        <form id="new-deal-form">
+          <div class="modal-body">
+            <div class="mb-3">
+              <label class="form-label">Título da Negociação *</label>
+              <input type="text" id="deal-title-input" class="form-control" placeholder="Ex: Contrato Anual CRM" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Vincular a um Contato *</label>
+              <select id="deal-lead-select" class="form-select" required>
+                <!-- Preenchido dinamicamente -->
+              </select>
+            </div>
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Valor Estimado (R$)</label>
+                <input type="number" step="0.01" id="deal-value-input" class="form-control" placeholder="5000.00">
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Etapa Inicial</label>
+                <select id="deal-stage-select" class="form-select">
+                  <!-- Preenchido dinamicamente -->
+                </select>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
+            <button type="submit" class="btn btn-primary">Salvar Oportunidade</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Nova Etapa / Coluna do Kanban -->
+  <div class="modal fade" id="addStageModal" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title fw-bold"><i class="ti ti-columns text-primary me-2"></i> Adicionar Coluna no Kanban</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <form id="new-stage-form">
+          <div class="modal-body">
+            <div class="mb-3">
+              <label class="form-label">Nome da Nova Coluna / Etapa *</label>
+              <input type="text" id="stage-name-input" class="form-control" placeholder="Ex: Qualificação de Agendamento" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Cor de Identificação</label>
+              <input type="color" id="stage-color-input" class="form-control form-control-color" value="#00A4BD">
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
+            <button type="submit" class="btn btn-primary">Criar Coluna</button>
+          </div>
+        </form>
       </div>
     </div>
   </div>
 
   <script src="../assets/libs/jquery/dist/jquery.min.js"></script>
   <script src="../assets/libs/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-  <script src="../assets/libs/apexcharts/dist/apexcharts.min.js"></script>
   <script src="../assets/js/sidebarmenu.js"></script>
   <script src="../assets/js/app.min.js"></script>
-  <script src="../assets/js/analytics-manager.js"></script>
+  <script src="../assets/js/kanban-manager.js"></script>
 
   <script>
     document.addEventListener('DOMContentLoaded', () => {

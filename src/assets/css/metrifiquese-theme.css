@@ -1,0 +1,280 @@
+/* ====================================================================
+   METRIFIQUE-SE CRM & WHITELABEL - DESIGN SYSTEM & THEME
+   Font: Plus Jakarta Sans (Google Fonts)
+   ==================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+
+:root {
+  --hs-orange: #FF7A59;
+  --hs-orange-hover: #FF5C35;
+  --hs-navy: #1E293B;
+  --hs-navy-dark: #0F172A;
+  --hs-teal: #00A4BD;
+  --hs-light-bg: #F8FAFC;
+  --hs-card-border: #E2E8F0;
+  
+  --bs-primary: #FF7A59;
+  --bs-primary-rgb: 255, 122, 89;
+  --theme-primary: #FF7A59;
+  --bs-body-font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+* {
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+}
+
+body {
+  background-color: var(--hs-light-bg) !important;
+  color: #334155 !important;
+  font-size: 0.925rem;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6 {
+  color: #0F172A !important;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+/* 1. CRM TOP NAVBAR HEADER (LIGHT THEME) */
+.app-header.hs-header {
+  background-color: #FFFFFF !important;
+  border-bottom: 1px solid #E2E8F0 !important;
+  box-shadow: 0 2px 10px rgba(15, 23, 42, 0.04) !important;
+  height: 60px;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1050;
+  padding: 0 1.5rem;
+}
+
+.hs-header .nav-link, 
+.hs-header .navbar-brand {
+  color: #1E293B !important;
+  font-size: 0.875rem;
+  font-weight: 600;
+  transition: all 0.15s ease;
+}
+
+.hs-header a.text-light {
+  color: #475569 !important;
+}
+
+.hs-header a.text-light:hover {
+  color: var(--hs-orange) !important;
+}
+
+.hs-header .header-user-name {
+  color: #1E293B !important;
+}
+
+.hs-header .input-group-text,
+.hs-header .form-control {
+  background-color: #F1F5F9 !important;
+  color: #1E293B !important;
+  border-color: #E2E8F0 !important;
+}
+
+.hs-header .form-control::placeholder {
+  color: #94A3B8 !important;
+}
+
+/* 2. CARDS & ELEVATION */
+.card {
+  border-radius: 12px !important;
+  border: 1px solid #E2E8F0 !important;
+  box-shadow: 0 4px 12px -2px rgba(15, 23, 42, 0.05) !important;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:hover {
+  box-shadow: 0 8px 24px -4px rgba(15, 23, 42, 0.08) !important;
+}
+
+/* 3. PRIMARY BUTTONS & ACCENTS */
+.btn-primary, 
+.bg-primary {
+  background-color: var(--hs-orange) !important;
+  border-color: var(--hs-orange) !important;
+  color: #FFFFFF !important;
+  font-weight: 600;
+  border-radius: 8px;
+  padding: 0.5rem 1.25rem;
+  box-shadow: 0 2px 6px rgba(255, 122, 89, 0.25);
+  transition: all 0.2s ease;
+}
+
+.btn-primary:hover, 
+.btn-primary:focus {
+  background-color: var(--hs-orange-hover) !important;
+  border-color: var(--hs-orange-hover) !important;
+  box-shadow: 0 4px 14px rgba(255, 122, 89, 0.4);
+  transform: translateY(-1px);
+}
+
+.btn-outline-primary {
+  color: var(--hs-orange) !important;
+  border-color: var(--hs-orange) !important;
+  border-radius: 8px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.btn-outline-primary:hover {
+  background-color: var(--hs-orange) !important;
+  color: #FFFFFF !important;
+}
+
+/* SOFT LIGHT BUTTONS */
+.btn-light-primary {
+  background-color: rgba(255, 122, 89, 0.12) !important;
+  color: var(--hs-orange) !important;
+  border: none !important;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+.btn-light-primary:hover {
+  background-color: var(--hs-orange) !important;
+  color: #FFFFFF !important;
+  transform: translateY(-1px);
+}
+
+.btn-light-danger {
+  background-color: #FEF2F2 !important;
+  color: #EF4444 !important;
+  border: 1px solid #FCA5A5 !important;
+  transition: all 0.2s ease;
+}
+.btn-light-danger:hover {
+  background-color: #EF4444 !important;
+  color: #FFFFFF !important;
+  border-color: #EF4444 !important;
+  transform: translateY(-1px);
+}
+
+.btn-light-success {
+  background-color: #F0FDF4 !important;
+  color: #16A34A !important;
+  border: 1px solid #86EFAC !important;
+}
+
+.text-primary, a.text-primary {
+  color: var(--hs-orange) !important;
+}
+
+.badge {
+  font-weight: 600;
+  border-radius: 6px;
+  padding: 0.4em 0.75em;
+  letter-spacing: 0.01em;
+}
+
+.badge.bg-primary {
+  background-color: var(--hs-orange) !important;
+}
+
+.badge.bg-light-primary {
+  background-color: rgba(255, 122, 89, 0.12) !important;
+  color: var(--hs-orange) !important;
+}
+
+/* 4. ACTION PILLS (Edit, Email, Call, Log, Task) */
+.hs-action-pill {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background-color: #FFFFFF;
+  border: 1px solid #CBD5E1;
+  color: #475569;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 1.1rem;
+}
+
+.hs-action-pill:hover {
+  border-color: var(--hs-orange) !important;
+  color: var(--hs-orange) !important;
+  background-color: rgba(255, 122, 89, 0.1) !important;
+  transform: translateY(-2px);
+}
+
+/* 5. PROGRESS BARS FOR DEALS */
+.hs-deal-progress {
+  height: 6px;
+  border-radius: 4px;
+  background-color: #E2E8F0;
+  overflow: hidden;
+}
+
+.hs-deal-progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #00A4BD 0%, #FF7A59 100%);
+  border-radius: 4px;
+}
+
+/* 6. SIDEBAR & CONTAINER FULL-WIDTH LAYOUT IMPROVEMENTS */
+.body-wrapper {
+  margin-top: 60px;
+}
+
+.body-wrapper .container-fluid {
+  max-width: 100% !important;
+  padding-left: 2rem !important;
+  padding-right: 2rem !important;
+}
+
+.left-sidebar {
+  top: 60px !important;
+  height: calc(100vh - 60px) !important;
+  border-right: 1px solid #E2E8F0;
+  background: #FFFFFF;
+}
+
+.sidebar-nav ul .sidebar-item.selected > .sidebar-link {
+  background-color: var(--hs-orange) !important;
+  color: #FFFFFF !important;
+  font-weight: 600;
+  border-radius: 8px;
+}
+
+.sidebar-nav ul .sidebar-link {
+  color: #475569;
+  font-weight: 500;
+  border-radius: 8px;
+  margin-bottom: 2px;
+}
+
+.sidebar-nav ul .sidebar-link:hover {
+  color: var(--hs-orange);
+  background: rgba(255, 122, 89, 0.08);
+}
+
+/* 7. TABLE SPACING & LAYOUT REFINEMENTS */
+.table-responsive {
+  overflow-x: auto !important;
+}
+
+.table th {
+  font-size: 0.775rem !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.05em !important;
+  color: #64748B !important;
+  font-weight: 700 !important;
+  padding: 0.85rem 1rem !important;
+  background-color: #F8FAFC !important;
+  border-bottom: 1px solid #E2E8F0 !important;
+}
+
+.table td {
+  padding: 1rem 1rem !important;
+  vertical-align: middle !important;
+  border-bottom: 1px solid #F1F5F9 !important;
+}

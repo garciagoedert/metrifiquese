@@ -1,0 +1,772 @@
+<!doctype html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Gestão de Empresas (SaaS Super Admin) | Metrifique-se CRM</title>
+  <link rel="shortcut icon" type="image/png" href="../assets/images/logos/favicon.svg" />
+  <link rel="stylesheet" href="../assets/css/styles.min.css" />
+  <link rel="stylesheet" href="../assets/css/metrifiquese-theme.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+  
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../assets/js/supabase-client.js"></script>
+  <script src="../assets/js/whitelabel-theme.js"></script>
+  <script src="../assets/js/notifications-manager.js"></script>
+</head>
+
+<body>
+  <!-- TOP NAVBAR HEADER -->
+  <header class="app-header hs-header d-flex align-items-center justify-content-between px-3">
+    <div class="d-flex align-items-center gap-4">
+      <a href="./index.html" class="navbar-brand me-2">
+        <img src="../assets/images/logos/metrifiquese.svg" height="28" alt="Logo" class="hs-brand-logo" />
+      </a>
+      <span class="badge bg-primary px-3 py-1-5 fs-2"><i class="ti ti-shield-lock me-1"></i> PAINEL SUPER ADMIN SAAS</span>
+    </div>
+
+    <div class="d-flex align-items-center gap-3">
+      <div class="input-group input-group-sm d-none d-lg-flex" style="width: 260px;">
+        <span class="input-group-text bg-light border-0 text-muted"><i class="ti ti-search"></i></span>
+        <input type="text" id="search-tenant-input" class="form-control bg-light text-dark border-0" placeholder="Buscar empresa, domínio ou plano...">
+      </div>
+
+      <a href="./configuracoes-whitelabel.html" class="text-secondary fs-5" title="Configurações Whitelabel"><i class="ti ti-settings"></i></a>
+      <a href="#" class="text-secondary fs-5 position-relative" title="Notificações"><i class="ti ti-bell"></i></a>
+
+      <div class="dropdown">
+        <a href="#" class="d-flex align-items-center text-dark text-decoration-none dropdown-toggle" data-bs-toggle="dropdown">
+          <img src="../assets/images/profile/user-1.jpg" width="30" height="30" class="rounded-circle me-2 header-user-avatar">
+          <span class="d-none d-md-inline fs-2 fw-semibold header-user-name">Guilherme Garcia</span>
+        </a>
+        <ul class="dropdown-menu dropdown-menu-end">
+          <li><a class="dropdown-item" href="./perfil.html"><i class="ti ti-user me-2"></i>Meu Perfil</a></li>
+          <li><a class="dropdown-item active" href="./admin-tenants.html"><i class="ti ti-building-store me-2"></i>Gestão de Empresas (SaaS)</a></li>
+          <li><hr class="dropdown-divider"></li>
+          <li><a class="dropdown-item text-danger" href="./login.html" onclick="event.preventDefault(); window.crmStore.logout();"><i class="ti ti-logout me-2"></i>Sair</a></li>
+        </ul>
+      </div>
+    </div>
+  </header>
+
+  <div class="page-wrapper" id="main-wrapper" data-layout="vertical" data-navbarbg="skin6" data-sidebartype="full"
+    data-sidebar-position="fixed" data-header-position="fixed">
+    
+    <aside class="left-sidebar">
+      <div>
+        <nav class="sidebar-nav scroll-sidebar" data-simplebar="">
+          <ul id="sidebarnav">
+            <li class="nav-small-cap">
+              <i class="ti ti-dots nav-small-cap-icon fs-4"></i>
+              <span class="hide-menu">SUPER ADMIN MENU</span>
+            </li>
+            <li class="sidebar-item selected">
+              <a class="sidebar-link" href="./admin-tenants.html">
+                <span><i class="ti ti-building-store"></i></span>
+                <span class="hide-menu">Gestão de Empresas</span>
+              </a>
+            </li>
+            <li class="sidebar-item">
+              <a class="sidebar-link" href="./index.html">
+                <span><i class="ti ti-layout-dashboard"></i></span>
+                <span class="hide-menu">Dashboard do CRM</span>
+              </a>
+            </li>
+            <li class="sidebar-item">
+              <a class="sidebar-link" href="./leads.html">
+                <span><i class="ti ti-users"></i></span>
+                <span class="hide-menu">Base de Leads</span>
+              </a>
+            </li>
+            <li class="sidebar-item">
+              <a class="sidebar-link" href="./kanban.html">
+                <span><i class="ti ti-columns"></i></span>
+                <span class="hide-menu">Funil de Vendas (Kanban)</span>
+              </a>
+            </li>
+            <li class="sidebar-item">
+              <a class="sidebar-link" href="./automacoes.html">
+                <span><i class="ti ti-robot"></i></span>
+                <span class="hide-menu">Automações & Scoring</span>
+              </a>
+            </li>
+            <li class="sidebar-item">
+              <a class="sidebar-link" href="./configuracoes-whitelabel.html">
+                <span><i class="ti ti-palette"></i></span>
+                <span class="hide-menu">Painel Whitelabel</span>
+              </a>
+            </li>
+          </ul>
+        </nav>
+      </div>
+    </aside>
+
+    <div class="body-wrapper">
+      <div class="container-fluid pt-3">
+        
+        <!-- BANNER DE MODO DE INSPEÇÃO (QUANDO ALTERNADO) -->
+        <div id="inspection-mode-banner" class="alert alert-warning d-none shadow-sm border-warning mb-4">
+          <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+            <div>
+              <strong class="text-dark"><i class="ti ti-eye me-1"></i> Modo de Inspeção Ativo:</strong>
+              Você está visualizando os dados isolados da empresa <span id="inspection-tenant-name" class="badge bg-dark text-white ms-1">---</span>
+            </div>
+            <button class="btn btn-sm btn-dark" onclick="window.adminTenantsManager.resetToMasterContext()">
+              <i class="ti ti-arrow-left me-1"></i> Voltar ao Master Admin
+            </button>
+          </div>
+        </div>
+
+        <!-- Top SaaS Control Bar -->
+        <div class="card shadow-sm border-0 mb-4 bg-white">
+          <div class="card-body p-4">
+            <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+              <div>
+                <h4 class="fw-bold mb-1 text-dark">Gestão de Empresas & Clientes Whitelabel</h4>
+                <p class="text-muted mb-0">Cadastre novas empresas, edite valores de mensalidade MRR, gerencie a equipe de cada cliente e controle o isolamento multi-tenant.</p>
+              </div>
+              <button class="btn btn-primary px-4 py-2-5 fw-bold shadow-sm" data-bs-toggle="modal" data-bs-target="#addTenantModal">
+                <i class="ti ti-building-plus me-1 fs-5"></i> Cadastrar Nova Empresa Cliente
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- SaaS KPI Cards -->
+        <div class="row">
+          <div class="col-sm-6 col-xl-4 mb-4">
+            <div class="card bg-white shadow-sm border-0">
+              <div class="card-body p-4">
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                  <span class="fw-semibold text-muted">Empresas / Tenants Ativos</span>
+                  <div class="p-2 bg-light-primary text-primary rounded-circle">
+                    <i class="ti ti-building-store fs-6"></i>
+                  </div>
+                </div>
+                <h2 class="fw-bold mb-1" id="kpi-total-tenants">0</h2>
+                <span class="text-success fs-2 fw-semibold"><i class="ti ti-circle-check me-1"></i>Isolamento RLS Ativo</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-sm-6 col-xl-4 mb-4">
+            <div class="card bg-white shadow-sm border-0">
+              <div class="card-body p-4">
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                  <span class="fw-semibold text-muted">Receita Recorrente Mensal (MRR)</span>
+                  <div class="p-2 bg-light-success text-success rounded-circle">
+                    <i class="ti ti-currency-dollar fs-6"></i>
+                  </div>
+                </div>
+                <h2 class="fw-bold mb-1" id="kpi-mrr-value">R$ 0,00</h2>
+                <span class="text-muted fs-2">Soma das mensalidades ativas</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-sm-6 col-xl-4 mb-4">
+            <div class="card bg-white shadow-sm border-0">
+              <div class="card-body p-4">
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                  <span class="fw-semibold text-muted">Total de Contatos no SaaS</span>
+                  <div class="p-2 bg-light-info text-info rounded-circle">
+                    <i class="ti ti-users fs-6"></i>
+                  </div>
+                </div>
+                <h2 class="fw-bold mb-1" id="kpi-total-saas-leads">0</h2>
+                <span class="text-muted fs-2">Processados em todas as empresas</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tenants List Table Card -->
+        <div class="card shadow-sm border-0">
+          <div class="card-header bg-white py-3 border-bottom d-flex align-items-center justify-content-between">
+            <h5 class="fw-bold mb-0 text-dark"><i class="ti ti-building text-primary me-2"></i> Empresas Cadastradas na Plataforma</h5>
+            <span class="badge bg-light-primary text-primary px-3 py-1 fs-2">SaaS Control Engine</span>
+          </div>
+          <div class="card-body p-0">
+            <div class="table-responsive">
+              <table class="table table-hover align-middle mb-0">
+                <thead class="bg-light">
+                  <tr>
+                    <th class="ps-4" style="width: 20%;">Empresa Cliente</th>
+                    <th style="width: 16%;">Domínio / CNAME</th>
+                    <th style="width: 14%;">Plano Contratado</th>
+                    <th style="width: 12%;">Mensalidade (MRR)</th>
+                    <th style="width: 10%;">Equipe</th>
+                    <th style="width: 8%;">Status</th>
+                    <th class="text-end pe-4" style="width: 20%;">Ações do Super Admin</th>
+                  </tr>
+                </thead>
+                <tbody id="tenants-table-body">
+                  <!-- Renderizado dinamicamente via JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Cadastrar Nova Empresa Cliente -->
+  <div class="modal fade" id="addTenantModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title fw-bold"><i class="ti ti-building-plus text-primary me-2"></i> Cadastrar Nova Empresa Cliente</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <form id="new-tenant-form">
+          <div class="modal-body p-4">
+            <h6 class="fw-bold text-primary mb-3 border-bottom pb-2">1. Dados da Empresa (Tenant)</h6>
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label fw-semibold">Nome da Empresa / Agência *</label>
+                <input type="text" id="tenant-name-input" class="form-control" placeholder="Ex: Agência Grow Digital" required>
+              </div>
+
+              <div class="col-md-6 mb-3">
+                <label class="form-label fw-semibold">Domínio Personalizado (CNAME)</label>
+                <input type="text" id="tenant-domain-input" class="form-control" placeholder="crm.growdigital.com.br">
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-md-4 mb-3">
+                <label class="form-label fw-semibold">Plano Contratado *</label>
+                <select id="tenant-plan-select" class="form-select" required>
+                  <option value="Plano Agência Whitelabel">Plano Agência Whitelabel</option>
+                  <option value="Plano Enterprise">Plano Enterprise</option>
+                  <option value="Plano Personalizado">Plano Personalizado</option>
+                </select>
+              </div>
+
+              <div class="col-md-4 mb-3">
+                <label class="form-label fw-semibold">Mensalidade (MRR R$) *</label>
+                <div class="input-group">
+                  <span class="input-group-text bg-light border-end-0">R$</span>
+                  <input type="number" step="0.01" id="tenant-price-input" class="form-control border-start-0" value="297.00" required>
+                </div>
+              </div>
+
+              <div class="col-md-4 mb-3">
+                <label class="form-label fw-semibold">Cor Primária da Marca</label>
+                <div class="d-flex align-items-center gap-2">
+                  <input type="color" id="tenant-color-picker" class="form-control form-control-color" value="#00A4BD">
+                  <input type="text" id="tenant-color-hex" class="form-control" value="#00A4BD">
+                </div>
+              </div>
+            </div>
+
+            <h6 class="fw-bold text-primary mt-4 mb-3 border-bottom pb-2">2. Dados do Primeiro Usuário Administrador</h6>
+
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label fw-semibold">Nome Completo do Admin *</label>
+                <input type="text" id="tenant-admin-name" class="form-control" placeholder="Ex: Marcos Silva" required>
+              </div>
+
+              <div class="col-md-6 mb-3">
+                <label class="form-label fw-semibold">E-mail de Acesso *</label>
+                <input type="email" id="tenant-admin-email" class="form-control" placeholder="marcos@growdigital.com.br" required>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Senha Inicial de Acesso *</label>
+              <input type="password" id="tenant-admin-password" class="form-control" value="12345678" required>
+            </div>
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
+            <button type="submit" class="btn btn-primary px-4 fw-bold">Criar Empresa & Ativar Acesso</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Editar Empresa Cliente -->
+  <div class="modal fade" id="editTenantModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title fw-bold"><i class="ti ti-edit text-primary me-2"></i> Editar Dados da Empresa Cliente</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <form id="edit-tenant-form">
+          <input type="hidden" id="edit-tenant-id">
+          <div class="modal-body p-4">
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label fw-semibold">Nome da Empresa / Agência *</label>
+                <input type="text" id="edit-tenant-name" class="form-control" required>
+              </div>
+
+              <div class="col-md-6 mb-3">
+                <label class="form-label fw-semibold">Domínio Personalizado (CNAME)</label>
+                <input type="text" id="edit-tenant-domain" class="form-control">
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-md-4 mb-3">
+                <label class="form-label fw-semibold">Plano Contratado *</label>
+                <select id="edit-tenant-plan" class="form-select" required>
+                  <option value="Plano Agência Whitelabel">Plano Agência Whitelabel</option>
+                  <option value="Plano Enterprise">Plano Enterprise</option>
+                  <option value="Plano Personalizado">Plano Personalizado</option>
+                </select>
+              </div>
+
+              <div class="col-md-4 mb-3">
+                <label class="form-label fw-semibold">Mensalidade (MRR R$) *</label>
+                <div class="input-group">
+                  <span class="input-group-text bg-light border-end-0">R$</span>
+                  <input type="number" step="0.01" id="edit-tenant-price" class="form-control border-start-0" required>
+                </div>
+              </div>
+
+              <div class="col-md-4 mb-3">
+                <label class="form-label fw-semibold">Status do Acesso *</label>
+                <select id="edit-tenant-status" class="form-select" required>
+                  <option value="active">Ativo (Acesso Liberado)</option>
+                  <option value="suspended">Suspenso (Bloqueado por Inadimplência)</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Cor Primária da Marca</label>
+              <div class="d-flex align-items-center gap-2">
+                <input type="color" id="edit-tenant-color-picker" class="form-control form-control-color" value="#00A4BD">
+                <input type="text" id="edit-tenant-color-hex" class="form-control" value="#00A4BD">
+              </div>
+            </div>
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
+            <button type="submit" class="btn btn-primary px-4 fw-bold">Salvar Alterações</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Gestão de Usuários da Empresa -->
+  <div class="modal fade" id="manageTenantUsersModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <div>
+            <h5 class="modal-title fw-bold" id="tenant-users-modal-title"><i class="ti ti-users text-primary me-2"></i> Usuários da Empresa</h5>
+            <small class="text-muted" id="tenant-users-modal-subtitle">Adicione e gerencie os membros desta empresa</small>
+          </div>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body p-4">
+          <!-- Formulário Adicionar Novo Usuário -->
+          <div class="card bg-light border-0 mb-4">
+            <div class="card-body p-3">
+              <h6 class="fw-bold text-dark mb-3"><i class="ti ti-user-plus text-primary me-1"></i> Adicionar Novo Usuário para esta Empresa</h6>
+              <form id="add-tenant-user-form">
+                <input type="hidden" id="modal-tenant-id-target">
+                <div class="row g-2">
+                  <div class="col-md-3">
+                    <input type="text" id="new-user-name" class="form-control form-control-sm" placeholder="Nome Completo *" required>
+                  </div>
+                  <div class="col-md-3">
+                    <input type="email" id="new-user-email" class="form-control form-control-sm" placeholder="email@empresa.com *" required>
+                  </div>
+                  <div class="col-md-3">
+                    <input type="text" id="new-user-password" class="form-control form-control-sm" value="12345678" placeholder="Senha Inicial *" required>
+                  </div>
+                  <div class="col-md-3">
+                    <input type="text" id="new-user-role" class="form-control form-control-sm" placeholder="Cargo (ex: Vendedor)">
+                  </div>
+                </div>
+                <div class="mt-3 text-end">
+                  <button type="submit" class="btn btn-sm btn-primary fw-bold">
+                    <i class="ti ti-plus me-1"></i> Criar Acesso para Usuário
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+
+          <!-- Tabela de Usuários Cadastrados -->
+          <h6 class="fw-bold text-dark mb-2">Membros da Equipe Cadastrados</h6>
+          <div class="table-responsive">
+            <table class="table table-sm table-hover align-middle mb-0">
+              <thead class="bg-light">
+                <tr>
+                  <th>Usuário</th>
+                  <th>E-mail (Login)</th>
+                  <th>Senha de Acesso</th>
+                  <th>Cargo / Função</th>
+                  <th class="text-end">Ação</th>
+                </tr>
+              </thead>
+              <tbody id="tenant-users-list-body">
+                <!-- Preenchido via JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="../assets/libs/jquery/dist/jquery.min.js"></script>
+  <script src="../assets/libs/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="../assets/js/sidebarmenu.js"></script>
+  <script src="../assets/js/app.min.js"></script>
+
+  <script>
+    class AdminTenantsManager {
+      constructor() {
+        this.currentFilterQuery = '';
+        this.init();
+      }
+
+      init() {
+        document.addEventListener('DOMContentLoaded', () => {
+          this.renderTenantsTable();
+          this.bindEvents();
+          this.checkInspectionBanner();
+        });
+      }
+
+      bindEvents() {
+        const searchInput = document.getElementById('search-tenant-input');
+        if (searchInput) {
+          searchInput.addEventListener('input', (e) => {
+            this.currentFilterQuery = e.target.value.toLowerCase().trim();
+            this.renderTenantsTable();
+          });
+        }
+
+        const colorPicker = document.getElementById('tenant-color-picker');
+        const colorHex = document.getElementById('tenant-color-hex');
+        if (colorPicker && colorHex) {
+          colorPicker.addEventListener('input', (e) => colorHex.value = e.target.value);
+          colorHex.addEventListener('input', (e) => {
+            if (/^#[0-9A-F]{6}$/i.test(e.target.value)) colorPicker.value = e.target.value;
+          });
+        }
+
+        const editColorPicker = document.getElementById('edit-tenant-color-picker');
+        const editColorHex = document.getElementById('edit-tenant-color-hex');
+        if (editColorPicker && editColorHex) {
+          editColorPicker.addEventListener('input', (e) => editColorHex.value = e.target.value);
+          editColorHex.addEventListener('input', (e) => {
+            if (/^#[0-9A-F]{6}$/i.test(e.target.value)) editColorPicker.value = e.target.value;
+          });
+        }
+
+        const newForm = document.getElementById('new-tenant-form');
+        if (newForm) {
+          newForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            this.handleCreateTenant();
+          });
+        }
+
+        const editForm = document.getElementById('edit-tenant-form');
+        if (editForm) {
+          editForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            this.handleSaveEditedTenant();
+          });
+        }
+
+        const addUserForm = document.getElementById('add-tenant-user-form');
+        if (addUserForm) {
+          addUserForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            this.handleAddUserToTenant();
+          });
+        }
+      }
+
+      checkInspectionBanner() {
+        const activeTenantId = window.crmStore.getActiveTenantId();
+        const banner = document.getElementById('inspection-mode-banner');
+        const bannerTenantName = document.getElementById('inspection-tenant-name');
+
+        if (activeTenantId !== 'tenant-demo-001') {
+          const tenant = window.crmStore.getTenants().find(t => t.id === activeTenantId);
+          if (banner && tenant) {
+            bannerTenantName.innerText = tenant.name;
+            banner.classList.remove('d-none');
+          }
+        } else if (banner) {
+          banner.classList.add('d-none');
+        }
+      }
+
+      renderTenantsTable() {
+        const container = document.getElementById('tenants-table-body');
+        if (!container) return;
+
+        let tenants = window.crmStore.getTenants();
+        const data = window.crmStore.getData();
+
+        if (this.currentFilterQuery) {
+          tenants = tenants.filter(t => 
+            t.name.toLowerCase().includes(this.currentFilterQuery) ||
+            (t.custom_domain && t.custom_domain.toLowerCase().includes(this.currentFilterQuery)) ||
+            (t.plan && t.plan.toLowerCase().includes(this.currentFilterQuery))
+          );
+        }
+
+        // Calc KPIs
+        const allTenants = window.crmStore.getTenants();
+        document.getElementById('kpi-total-tenants').innerText = allTenants.length;
+        
+        let totalMrr = 0;
+        allTenants.forEach(t => {
+          if (t.status !== 'suspended') {
+            totalMrr += t.monthly_price !== undefined ? parseFloat(t.monthly_price) : (t.plan.includes('Enterprise') ? 597 : 297);
+          }
+        });
+        document.getElementById('kpi-mrr-value').innerText = `R$ ${totalMrr.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
+        document.getElementById('kpi-total-saas-leads').innerText = (data.leads || []).length;
+
+        container.innerHTML = tenants.map(t => {
+          const isCurrentActive = window.crmStore.getActiveTenantId() === t.id;
+          const planBadge = (t.plan && t.plan.includes('Enterprise')) ? 'bg-light-primary text-primary' : 'bg-light-info text-info';
+          const tenantUsers = window.crmStore.getUsersByTenant(t.id);
+          const isSuspended = t.status === 'suspended';
+          const priceDisplay = (t.monthly_price !== undefined ? parseFloat(t.monthly_price) : (t.plan.includes('Enterprise') ? 597 : 297));
+
+          return `
+            <tr class="${isCurrentActive ? 'table-warning' : (isSuspended ? 'table-light text-muted' : '')}">
+              <td class="ps-4">
+                <div class="d-flex align-items-center">
+                  <div class="avatar-sm rounded-circle fw-bold me-3 d-flex align-items-center justify-content-center text-white shadow-sm" style="width: 40px; height: 40px; background-color: ${t.primary_color || '#FF7A59'};">
+                    ${t.name.charAt(0).toUpperCase()}
+                  </div>
+                  <div>
+                    <h6 class="mb-0 fw-semibold text-dark">${t.name} ${isCurrentActive ? '<span class="badge bg-warning text-dark ms-1 fs-1">Ativa Agora</span>' : ''}</h6>
+                    <small class="text-muted">ID: ${t.id}</small>
+                  </div>
+                </div>
+              </td>
+              <td>
+                <span class="fw-semibold text-dark">${t.custom_domain || `${t.slug}.metrifiquese.com.br`}</span>
+              </td>
+              <td>
+                <span class="badge ${planBadge} px-3 py-1-5 fw-semibold">${t.plan || 'Agência Whitelabel'}</span>
+              </td>
+              <td>
+                <strong class="text-dark fs-2">R$ ${priceDisplay.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</strong>
+                <small class="text-muted d-block">/mês</small>
+              </td>
+              <td>
+                <button class="btn btn-sm btn-light-info text-info px-2.5 py-1 fw-bold rounded-pill" onclick="window.adminTenantsManager.openUsersModal('${t.id}')">
+                  <i class="ti ti-users me-1"></i> ${tenantUsers.length} membro(s)
+                </button>
+              </td>
+              <td>
+                ${isSuspended ? 
+                  '<span class="badge bg-light-danger text-danger px-3 py-1-5 fw-semibold">Suspenso</span>' : 
+                  '<span class="badge bg-light-success text-success px-3 py-1-5 fw-semibold">Ativo</span>'}
+              </td>
+              <td class="text-end text-nowrap pe-4">
+                <div class="d-inline-flex align-items-center justify-content-end" style="gap: 12px !important;">
+                  <button class="btn btn-sm btn-primary text-nowrap fw-semibold px-3 d-inline-flex align-items-center justify-content-center gap-1 shadow-sm" style="height: 34px;" onclick="window.adminTenantsManager.inspectTenant('${t.id}')" title="Acessar CRM como esta empresa">
+                    <i class="ti ti-eye fs-4"></i>
+                    <span>Acessar</span>
+                  </button>
+                  <button class="btn btn-sm btn-light-primary text-primary px-3 fw-semibold d-inline-flex align-items-center justify-content-center gap-1" style="height: 34px;" onclick="window.adminTenantsManager.openEditModal('${t.id}')" title="Editar Empresa">
+                    <i class="ti ti-edit fs-4"></i>
+                    <span>Editar</span>
+                  </button>
+                  ${t.id !== 'tenant-demo-001' ? `
+                    <button class="btn btn-sm btn-light-danger text-danger rounded-circle p-0 d-inline-flex align-items-center justify-content-center" style="width: 34px; height: 34px;" onclick="window.adminTenantsManager.deleteTenant('${t.id}')" title="Excluir Empresa">
+                      <i class="ti ti-trash fs-4"></i>
+                    </button>
+                  ` : ''}
+                </div>
+              </td>
+            </tr>
+          `;
+        }).join('');
+      }
+
+      handleCreateTenant() {
+        const name = document.getElementById('tenant-name-input').value;
+        const domain = document.getElementById('tenant-domain-input').value;
+        const plan = document.getElementById('tenant-plan-select').value;
+        const monthlyPrice = document.getElementById('tenant-price-input').value;
+        const primaryColor = document.getElementById('tenant-color-picker').value;
+        const adminName = document.getElementById('tenant-admin-name').value;
+        const adminEmail = document.getElementById('tenant-admin-email').value;
+        const adminPassword = document.getElementById('tenant-admin-password').value;
+
+        window.crmStore.createTenantWithAdmin({
+          name, domain, plan, monthlyPrice, primaryColor, adminName, adminEmail, adminPassword
+        });
+
+        const modalEl = document.getElementById('addTenantModal');
+        if (modalEl && window.bootstrap) {
+          const modal = bootstrap.Modal.getInstance(modalEl);
+          if (modal) modal.hide();
+        }
+
+        document.getElementById('new-tenant-form').reset();
+        this.renderTenantsTable();
+        alert(`Empresa "${name}" criada com sucesso!\nMensalidade: R$ ${parseFloat(monthlyPrice).toLocaleString('pt-BR')}/mês\nO usuário ${adminEmail} foi cadastrado como Administrador.`);
+      }
+
+      openEditModal(tenantId) {
+        const tenants = window.crmStore.getTenants();
+        const tenant = tenants.find(t => t.id === tenantId);
+        if (!tenant) return;
+
+        const currentPrice = tenant.monthly_price !== undefined ? tenant.monthly_price : (tenant.plan.includes('Enterprise') ? 597 : 297);
+
+        document.getElementById('edit-tenant-id').value = tenant.id;
+        document.getElementById('edit-tenant-name').value = tenant.name;
+        document.getElementById('edit-tenant-domain').value = tenant.custom_domain || '';
+        document.getElementById('edit-tenant-plan').value = tenant.plan || 'Plano Agência Whitelabel';
+        document.getElementById('edit-tenant-price').value = currentPrice;
+        document.getElementById('edit-tenant-status').value = tenant.status || 'active';
+        document.getElementById('edit-tenant-color-picker').value = tenant.primary_color || '#FF7A59';
+        document.getElementById('edit-tenant-color-hex').value = tenant.primary_color || '#FF7A59';
+
+        const modalEl = document.getElementById('editTenantModal');
+        if (modalEl && window.bootstrap) {
+          const modal = new bootstrap.Modal(modalEl);
+          modal.show();
+        }
+      }
+
+      handleSaveEditedTenant() {
+        const tenantId = document.getElementById('edit-tenant-id').value;
+        const name = document.getElementById('edit-tenant-name').value;
+        const custom_domain = document.getElementById('edit-tenant-domain').value;
+        const plan = document.getElementById('edit-tenant-plan').value;
+        const monthly_price = document.getElementById('edit-tenant-price').value;
+        const status = document.getElementById('edit-tenant-status').value;
+        const primary_color = document.getElementById('edit-tenant-color-picker').value;
+
+        window.crmStore.updateTenantDetails(tenantId, {
+          name, custom_domain, plan, monthly_price, status, primary_color
+        });
+
+        const modalEl = document.getElementById('editTenantModal');
+        if (modalEl && window.bootstrap) {
+          const modal = bootstrap.Modal.getInstance(modalEl);
+          if (modal) modal.hide();
+        }
+
+        this.renderTenantsTable();
+        alert(`Empresa "${name}" e valor mensal (R$ ${parseFloat(monthly_price).toLocaleString('pt-BR')}) atualizados com sucesso!`);
+      }
+
+      openUsersModal(tenantId) {
+        const tenants = window.crmStore.getTenants();
+        const tenant = tenants.find(t => t.id === tenantId);
+        if (!tenant) return;
+
+        document.getElementById('modal-tenant-id-target').value = tenant.id;
+        document.getElementById('tenant-users-modal-title').innerHTML = `<i class="ti ti-users text-primary me-2"></i> Equipe: ${tenant.name}`;
+        document.getElementById('tenant-users-modal-subtitle').innerText = `Gestão de usuários da empresa (${tenant.custom_domain || tenant.slug})`;
+
+        this.renderTenantUsersList(tenant.id);
+
+        const modalEl = document.getElementById('manageTenantUsersModal');
+        if (modalEl && window.bootstrap) {
+          const modal = new bootstrap.Modal(modalEl);
+          modal.show();
+        }
+      }
+
+      renderTenantUsersList(tenantId) {
+        const usersListBody = document.getElementById('tenant-users-list-body');
+        if (!usersListBody) return;
+
+        const users = window.crmStore.getUsersByTenant(tenantId);
+        if (users.length === 0) {
+          usersListBody.innerHTML = `<tr><td colspan="5" class="text-center text-muted py-3">Nenhum usuário cadastrado nesta empresa ainda.</td></tr>`;
+          return;
+        }
+
+        usersListBody.innerHTML = users.map(u => `
+          <tr>
+            <td>
+              <div class="d-flex align-items-center">
+                <img src="${u.avatar_url || '/src/assets/images/profile/user-1.jpg'}" width="28" height="28" class="rounded-circle me-2">
+                <strong class="text-dark fs-2">${u.full_name}</strong>
+              </div>
+            </td>
+            <td class="fs-2 text-dark font-monospace">${u.email}</td>
+            <td><code class="text-dark bg-light px-2 py-1 rounded font-monospace">${u.password || '12345678'}</code></td>
+            <td><span class="badge bg-light-primary text-primary px-2 py-1 fs-1">${u.role || 'Membro'}</span></td>
+            <td class="text-end">
+              <button class="btn btn-sm btn-light-danger text-danger p-1 border-0" onclick="window.adminTenantsManager.deleteUser('${u.id}', '${tenantId}')" title="Excluir Usuário">
+                <i class="ti ti-trash fs-4"></i>
+              </button>
+            </td>
+          </tr>
+        `).join('');
+      }
+
+      handleAddUserToTenant() {
+        const tenantId = document.getElementById('modal-tenant-id-target').value;
+        const fullName = document.getElementById('new-user-name').value;
+        const email = document.getElementById('new-user-email').value;
+        const password = document.getElementById('new-user-password').value;
+        const role = document.getElementById('new-user-role').value;
+
+        window.crmStore.addUserToTenant(tenantId, { fullName, email, password, role });
+        document.getElementById('add-tenant-user-form').reset();
+        document.getElementById('new-user-password').value = '12345678';
+        document.getElementById('modal-tenant-id-target').value = tenantId;
+        this.renderTenantUsersList(tenantId);
+        this.renderTenantsTable();
+        alert(`Usuário "${fullName}" cadastrado com sucesso!\nLogin: ${email}\nSenha: ${password || '12345678'}`);
+      }
+
+      deleteUser(userId, tenantId) {
+        if (confirm('Deseja remover este usuário da empresa?')) {
+          window.crmStore.deleteUserFromTenant(userId);
+          this.renderTenantUsersList(tenantId);
+          this.renderTenantsTable();
+        }
+      }
+
+      inspectTenant(tenantId) {
+        window.crmStore.switchActiveTenant(tenantId);
+        window.location.href = './index.html';
+      }
+
+      resetToMasterContext() {
+        window.crmStore.switchActiveTenant('tenant-demo-001');
+        this.checkInspectionBanner();
+        this.renderTenantsTable();
+        alert('Contexto alterado de volta para Master Super Admin.');
+      }
+
+      deleteTenant(tenantId) {
+        if (confirm('Tem certeza que deseja excluir esta empresa? Todos os contatos e oportunidades dela serão removidos.')) {
+          window.crmStore.deleteTenant(tenantId);
+          this.renderTenantsTable();
+        }
+      }
+    }
+
+    window.adminTenantsManager = new AdminTenantsManager();
+  </script>
+</body>
+
+</html>

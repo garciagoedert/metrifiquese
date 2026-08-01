@@ -6,8 +6,14 @@
   "stackblitz": {
     "startCommand": "npm start"
   },
+  "scripts": {
+    "dev": "vite --port 7000",
+    "build": "vite build",
+    "start": "vite --port 7000"
+  },
   "devDependencies": {
-    "sass": "^1.54.8"
+    "sass": "^1.54.8",
+    "vite": "^4.0.0"
   },
   "dependencies": {
     "apexcharts": "^3.37.0",

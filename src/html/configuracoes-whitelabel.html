@@ -1,0 +1,281 @@
+<!doctype html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Configurações Whitelabel | Metrifique-se CRM Whitelabel</title>
+  <link rel="shortcut icon" type="image/png" href="../assets/images/logos/favicon.svg" />
+  <link rel="stylesheet" href="../assets/css/styles.min.css" />
+  <link rel="stylesheet" href="../assets/css/metrifiquese-theme.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+  
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../assets/js/supabase-client.js"></script>
+  <script src="../assets/js/whitelabel-theme.js"></script>
+  <script src="../assets/js/notifications-manager.js"></script>
+</head>
+
+<body>
+  <!-- TOP NAVBAR HEADER -->
+  <header class="app-header hs-header d-flex align-items-center justify-content-between px-3">
+    <div class="d-flex align-items-center gap-4">
+      <a href="./index.html" class="navbar-brand me-2">
+        <img src="../assets/images/logos/metrifiquese.svg" height="28" alt="Logo" class="hs-brand-logo" />
+      </a>
+    </div>
+
+    <div class="d-flex align-items-center gap-3">
+      <div class="input-group input-group-sm d-none d-lg-flex" style="width: 240px;">
+        <span class="input-group-text bg-light border-0 text-muted"><i class="ti ti-search"></i></span>
+        <input type="text" class="form-control bg-light text-dark border-0" placeholder="Buscar global (CRM)...">
+      </div>
+
+      <a href="./configuracoes-whitelabel.html" class="text-secondary fs-5" title="Configurações Whitelabel"><i class="ti ti-settings"></i></a>
+      <a href="#" class="text-secondary fs-5 position-relative" title="Notificações" onclick="window.notificationsManager && window.notificationsManager.markAllRead(); alert('Todas as notificações foram lidas.');"><i class="ti ti-bell"></i></a>
+
+      <div class="dropdown">
+        <a href="#" class="d-flex align-items-center text-dark text-decoration-none dropdown-toggle" data-bs-toggle="dropdown">
+          <img src="../assets/images/profile/user-1.jpg" width="30" height="30" class="rounded-circle me-2 header-user-avatar">
+          <span class="d-none d-md-inline fs-2 fw-semibold header-user-name">Guilherme Garcia</span>
+        </a>
+        <ul class="dropdown-menu dropdown-menu-end">
+          <li><a class="dropdown-item" href="./perfil.html"><i class="ti ti-user me-2"></i>Meu Perfil</a></li>
+          <li><a class="dropdown-item active" href="./configuracoes-whitelabel.html"><i class="ti ti-palette me-2"></i>Painel Whitelabel</a></li>
+          <li><hr class="dropdown-divider"></li>
+          <li><a class="dropdown-item text-danger" href="./login.html"><i class="ti ti-logout me-2"></i>Sair</a></li>
+        </ul>
+      </div>
+    </div>
+  </header>
+
+  <div class="page-wrapper" id="main-wrapper" data-layout="vertical" data-navbarbg="skin6" data-sidebartype="full"
+    data-sidebar-position="fixed" data-header-position="fixed">
+    
+    <aside class="left-sidebar">
+      <div>
+        <nav class="sidebar-nav scroll-sidebar" data-simplebar="">
+          <ul id="sidebarnav">
+            <li class="nav-small-cap">
+              <i class="ti ti-dots nav-small-cap-icon fs-4"></i>
+              <span class="hide-menu">CRM MENU</span>
+            </li>
+            <li class="sidebar-item">
+              <a class="sidebar-link" href="./index.html">
+                <span><i class="ti ti-layout-dashboard"></i></span>
+                <span class="hide-menu">Dashboard</span>
+              </a>
+            </li>
+            <li class="sidebar-item">
+              <a class="sidebar-link" href="./leads.html">
+                <span><i class="ti ti-users"></i></span>
+                <span class="hide-menu">Base de Leads</span>
+              </a>
+            </li>
+            <li class="sidebar-item">
+              <a class="sidebar-link" href="./kanban.html">
+                <span><i class="ti ti-columns"></i></span>
+                <span class="hide-menu">Funil de Vendas (Kanban)</span>
+              </a>
+            </li>
+            <li class="sidebar-item">
+              <a class="sidebar-link" href="./automacoes.html">
+                <span><i class="ti ti-robot"></i></span>
+                <span class="hide-menu">Automações & Scoring</span>
+              </a>
+            </li>
+            <li class="sidebar-item">
+              <a class="sidebar-link" href="./capturas.html">
+                <span><i class="ti ti-forms"></i></span>
+                <span class="hide-menu">Formulários & Webhooks</span>
+              </a>
+            </li>
+            <li class="sidebar-item">
+              <a class="sidebar-link" href="./relatorios.html">
+                <span><i class="ti ti-chart-bar"></i></span>
+                <span class="hide-menu">Relatórios & Funil</span>
+              </a>
+            </li>
+            <li class="sidebar-item selected">
+              <a class="sidebar-link" href="./configuracoes-whitelabel.html">
+                <span><i class="ti ti-palette"></i></span>
+                <span class="hide-menu">Painel Whitelabel</span>
+              </a>
+            </li>
+          </ul>
+        </nav>
+      </div>
+    </aside>
+
+    <div class="body-wrapper">
+      <div class="container-fluid pt-3">
+        <div class="row">
+          <div class="col-lg-7 mb-4">
+            <div class="card shadow-sm border-0">
+              <div class="card-body p-4">
+                <h5 class="fw-bold mb-1 text-dark"><i class="ti ti-brush text-primary me-2"></i> Personalização da Marca Whitelabel</h5>
+                <p class="text-muted fs-2 mb-4">Defina as cores, logo e nome da sua empresa para customizar a interface toda.</p>
+
+                <form id="whitelabel-form">
+                  <div class="mb-3">
+                    <label class="form-label fw-semibold">Nome da Empresa / Tenant *</label>
+                    <input type="text" id="wl-name-input" class="form-control" placeholder="Metrifique-se CRM">
+                  </div>
+
+                  <div class="mb-3">
+                    <label class="form-label fw-semibold">URL da Logo (PNG ou SVG) *</label>
+                    <input type="text" id="wl-logo-input" class="form-control" placeholder="/src/assets/images/logos/metrifiquese.svg">
+                  </div>
+
+                  <div class="row">
+                    <div class="col-md-6 mb-3">
+                      <label class="form-label fw-semibold">Cor Primária da Marca</label>
+                      <div class="d-flex align-items-center gap-2">
+                        <input type="color" id="wl-color-picker" class="form-control form-control-color" value="#FF7A59">
+                        <input type="text" id="wl-color-hex" class="form-control" value="#FF7A59">
+                      </div>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                      <label class="form-label fw-semibold">Domínio Personalizado (CNAME)</label>
+                      <input type="text" id="wl-domain-input" class="form-control" placeholder="crm.suaempresa.com.br">
+                    </div>
+                  </div>
+
+                  <div class="pt-3 border-top d-flex gap-2">
+                    <button type="submit" class="btn btn-primary px-4">
+                      <i class="ti ti-device-floppy me-1"></i> Salvar Marca Whitelabel
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary" id="btn-reset-wl">
+                      Restaurar Padrão
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-lg-5 mb-4">
+            <div class="card shadow-sm border-0 mb-4">
+              <div class="card-body p-4">
+                <h5 class="fw-bold mb-1 text-dark"><i class="ti ti-database text-primary me-2"></i> Conexão Supabase Cloud</h5>
+                <p class="text-muted fs-2 mb-3">Insira suas chaves do Supabase para sincronizar em nuvem.</p>
+
+                <div class="mb-3">
+                  <label class="form-label fw-semibold">SUPABASE_URL</label>
+                  <input type="text" id="sb-url-input" class="form-control" placeholder="https://xyzcompany.supabase.co">
+                </div>
+
+                <div class="mb-3">
+                  <label class="form-label fw-semibold">SUPABASE_ANON_KEY</label>
+                  <input type="password" id="sb-key-input" class="form-control" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6...">
+                </div>
+
+                <button class="btn btn-outline-primary w-100" id="btn-save-sb">
+                  <i class="ti ti-plug me-1"></i> Conectar ao Supabase
+                </button>
+              </div>
+            </div>
+
+            <div class="card shadow-sm border-0">
+              <div class="card-body p-4">
+                <h5 class="fw-bold mb-3 text-dark"><i class="ti ti-users text-primary me-2"></i> Membros da Equipe</h5>
+                <ul class="list-group list-group-flush">
+                  <li class="list-group-item d-flex align-items-center justify-content-between px-0">
+                    <div class="d-flex align-items-center">
+                      <img src="../assets/images/profile/user-1.jpg" width="36" height="36" class="rounded-circle me-3 header-user-avatar">
+                      <div>
+                        <h6 class="mb-0 fw-semibold header-user-name">Guilherme Garcia</h6>
+                        <small class="text-muted">admin@metrifiquese.com.br</small>
+                      </div>
+                    </div>
+                    <span class="badge bg-light-primary text-primary">Proprietário</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="../assets/libs/jquery/dist/jquery.min.js"></script>
+  <script src="../assets/libs/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="../assets/js/sidebarmenu.js"></script>
+  <script src="../assets/js/app.min.js"></script>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const user = window.crmStore ? window.crmStore.getUser() : null;
+      if (user) {
+        document.querySelectorAll('.header-user-name').forEach(el => el.innerText = user.full_name);
+        document.querySelectorAll('.header-user-avatar').forEach(img => img.src = user.avatar_url);
+      }
+
+      const tenant = window.crmStore.getTenant();
+      if (tenant) {
+        document.getElementById('wl-name-input').value = tenant.name || '';
+        document.getElementById('wl-logo-input').value = tenant.logo_url || '';
+        document.getElementById('wl-color-picker').value = tenant.primary_color || '#FF7A59';
+        document.getElementById('wl-color-hex').value = tenant.primary_color || '#FF7A59';
+        document.getElementById('wl-domain-input').value = tenant.custom_domain || '';
+      }
+
+      const colorPicker = document.getElementById('wl-color-picker');
+      const colorHex = document.getElementById('wl-color-hex');
+
+      colorPicker.addEventListener('input', (e) => {
+        colorHex.value = e.target.value;
+        window.whitelabelEngine.previewTheme(e.target.value, document.getElementById('wl-logo-input').value);
+      });
+
+      colorHex.addEventListener('input', (e) => {
+        if (/^#[0-9A-F]{6}$/i.test(e.target.value)) {
+          colorPicker.value = e.target.value;
+          window.whitelabelEngine.previewTheme(e.target.value, document.getElementById('wl-logo-input').value);
+        }
+      });
+
+      document.getElementById('whitelabel-form').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const updated = {
+          name: document.getElementById('wl-name-input').value,
+          logo_url: document.getElementById('wl-logo-input').value,
+          primary_color: colorPicker.value,
+          custom_domain: document.getElementById('wl-domain-input').value
+        };
+
+        window.crmStore.updateTenant(updated);
+        window.whitelabelEngine.applyTenantTheme();
+        alert('Configurações salvas!');
+      });
+
+      document.getElementById('btn-reset-wl').addEventListener('click', () => {
+        const defaultTenant = {
+          name: 'Metrifique-se CRM',
+          logo_url: '/src/assets/images/logos/metrifiquese.svg',
+          primary_color: '#FF7A59',
+          custom_domain: 'crm.metrifiquese.com.br'
+        };
+        window.crmStore.updateTenant(defaultTenant);
+        window.whitelabelEngine.applyTenantTheme();
+        location.reload();
+      });
+
+      document.getElementById('btn-save-sb').addEventListener('click', () => {
+        const url = document.getElementById('sb-url-input').value;
+        const key = document.getElementById('sb-key-input').value;
+        if (url && key) {
+          localStorage.setItem('SUPABASE_URL', url);
+          localStorage.setItem('SUPABASE_ANON_KEY', key);
+          alert('Credenciais do Supabase salvas!');
+        } else {
+          alert('Preencha a URL e a Anon Key do Supabase.');
+        }
+      });
+    });
+  </script>
+</body>
+
+</html>
