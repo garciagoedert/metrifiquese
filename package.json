@@ -8,7 +8,7 @@
   },
   "scripts": {
     "dev": "vite --port 7000",
-    "build": "vite build && node -e \"require('fs').cpSync('src/assets', 'dist/assets', {recursive: true}) && require('fs').cpSync('src/assets', 'dist/src/assets', {recursive: true}) && require('fs').cpSync('src/html', 'dist/src/html', {recursive: true}) && require('fs').cpSync('src/html', 'dist/src', {recursive: true}) && require('fs').cpSync('src/html', 'dist', {recursive: true})\"",
+    "build": "vite build && node -e \"const fs = require('fs'); ['dist/assets', 'dist/src/assets', 'dist/src/html/assets', 'dist/html/assets'].forEach(p => fs.cpSync('src/assets', p, {recursive: true})); ['dist/src/html', 'dist/src', 'dist/html', 'dist'].forEach(p => fs.cpSync('src/html', p, {recursive: true}));\"",
     "start": "vite --port 7000"
   },
   "devDependencies": {
