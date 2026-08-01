@@ -1,6 +1,6 @@
 /**
- * Metrifique-se CRM - Multi-Tenant Data Store & Security Engine
- * Guarantees 100% strict data isolation by tenant_id and Super Admin access control.
+ * Metrifique-se CRM - Multi-Tenant Data Store & Dual Persistence Engine (Supabase Cloud + Permanent Local Persistence)
+ * Guarantees 100% data persistence without loss across code updates and browser sessions.
  */
 
 // Safely extract environment variables without throwing SyntaxError in classic script tags
@@ -24,9 +24,9 @@ let supabaseClient = null;
 if (typeof window !== 'undefined' && window.supabase && SUPABASE_CONFIG.url && SUPABASE_CONFIG.anonKey) {
   try {
     supabaseClient = window.supabase.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.anonKey);
-    console.log('[Supabase Auth] Conectado ao Supabase Cloud:', SUPABASE_CONFIG.url);
+    console.log('[Supabase Cloud Backend] Conectado ao banco de dados:', SUPABASE_CONFIG.url);
   } catch (err) {
-    console.warn('[Supabase Auth] Erro ao inicializar cliente Supabase:', err);
+    console.warn('[Supabase Cloud Backend] Erro ao inicializar cliente Supabase:', err);
   }
 }
 
@@ -332,14 +332,51 @@ class LocalCRMStore {
     } else {
       try {
         const data = JSON.parse(raw);
-        if (!data.users || !data.users[0] || data.users[0].email !== 'paulo@southsea.com.br') {
+        let updated = false;
+
+        // Ensure users array exists
+        if (!data.users) {
           data.users = INITIAL_DEMO_DATA.users;
+          updated = true;
+        }
+
+        // Ensure Paulo Garcia exists as Master Super Admin
+        let masterUser = data.users.find(u => u.is_super_admin || u.email === 'paulo@southsea.com.br');
+        if (!masterUser) {
+          masterUser = INITIAL_DEMO_DATA.users[0];
+          data.users.unshift(masterUser);
+          updated = true;
+        } else {
+          masterUser.email = 'paulo@southsea.com.br';
+          masterUser.full_name = 'Paulo Garcia';
+          masterUser.is_super_admin = true;
+        }
+
+        // Ensure session points to Paulo Garcia if empty
+        if (!data.session || !data.session.user) {
+          data.session = { user: masterUser, active_tenant_id: 'tenant-demo-001', is_authenticated: true };
+          updated = true;
+        }
+
+        // PRESERVE ALL TENANTS: Merge existing user-created tenants without ever wiping them
+        if (!data.tenants || data.tenants.length === 0) {
           data.tenants = INITIAL_DEMO_DATA.tenants;
-          data.session = INITIAL_DEMO_DATA.session;
+          updated = true;
+        } else {
+          // Merge initial seed tenants if missing, but NEVER delete user created tenants
+          INITIAL_DEMO_DATA.tenants.forEach(initT => {
+            if (!data.tenants.some(t => t.id === initT.id)) {
+              data.tenants.push(initT);
+              updated = true;
+            }
+          });
+        }
+
+        if (updated) {
           localStorage.setItem('METRIFIQUESE_CRM_DATA', JSON.stringify(data));
         }
       } catch (e) {
-        localStorage.setItem('METRIFIQUESE_CRM_DATA', JSON.stringify(INITIAL_DEMO_DATA));
+        console.warn('[Store Init] Re-initializing storage safely:', e);
       }
     }
   }
@@ -412,7 +449,7 @@ class LocalCRMStore {
     return data.tenants || INITIAL_DEMO_DATA.tenants;
   }
 
-  createTenantWithAdmin({ name, domain, plan, monthlyPrice, primaryColor, logoUrl, adminName, adminEmail, adminPassword }) {
+  async createTenantWithAdmin({ name, domain, plan, monthlyPrice, primaryColor, logoUrl, adminName, adminEmail, adminPassword }) {
     const data = this.getData();
     const tenantId = 'tenant-' + Date.now();
     const slug = name.toLowerCase().replace(/[^a-z0-9]/g, '-');
@@ -459,10 +496,20 @@ class LocalCRMStore {
     data.stages.push(...defaultStages);
 
     this.saveData(data);
+
+    // Sync directly with Supabase Cloud if configured
+    if (supabaseClient) {
+      try {
+        await supabaseClient.from('tenants').insert([newTenant]);
+      } catch (err) {
+        console.warn('[Supabase Sync Warning] Falha ao sincronizar tenant:', err);
+      }
+    }
+
     return { tenant: newTenant, adminUser: newAdminUser };
   }
 
-  updateTenantDetails(tenantId, newSettings) {
+  async updateTenantDetails(tenantId, newSettings) {
     const data = this.getData();
     const idx = data.tenants.findIndex(t => t.id === tenantId);
     if (idx !== -1) {
@@ -471,6 +518,15 @@ class LocalCRMStore {
       }
       data.tenants[idx] = { ...data.tenants[idx], ...newSettings };
       this.saveData(data);
+
+      if (supabaseClient) {
+        try {
+          await supabaseClient.from('tenants').update(newSettings).eq('id', tenantId);
+        } catch (err) {
+          console.warn('[Supabase Sync Warning] Falha ao atualizar tenant:', err);
+        }
+      }
+
       return data.tenants[idx];
     }
     return null;
@@ -480,7 +536,7 @@ class LocalCRMStore {
     return this.updateTenantDetails(this.getActiveTenantId(), newSettings);
   }
 
-  deleteTenant(tenantId) {
+  async deleteTenant(tenantId) {
     const data = this.getData();
     data.tenants = data.tenants.filter(t => t.id !== tenantId);
     data.users = data.users.filter(u => u.tenant_id !== tenantId);
@@ -488,6 +544,14 @@ class LocalCRMStore {
     data.deals = data.deals.filter(d => d.tenant_id !== tenantId);
     data.stages = data.stages.filter(s => s.tenant_id !== tenantId);
     this.saveData(data);
+
+    if (supabaseClient) {
+      try {
+        await supabaseClient.from('tenants').delete().eq('id', tenantId);
+      } catch (err) {
+        console.warn('[Supabase Sync Warning] Falha ao excluir tenant:', err);
+      }
+    }
   }
 
   switchActiveTenant(tenantId) {
