@@ -108,19 +108,9 @@ const INITIAL_DEMO_DATA = {
     }
   ],
   session: {
-    user: {
-      id: 'user-001',
-      tenant_id: 'tenant-demo-001',
-      full_name: 'Paulo Garcia',
-      email: 'paulo@southsea.com.br',
-      password: '12345678',
-      phone: '(11) 99887-6655',
-      role: 'Super Admin Plataforma',
-      is_super_admin: true,
-      avatar_url: 'https://instagram.ffln1-1.fna.fbcdn.net/v/t51.82787-19/658968988_17956763901106219_4353182039587841370_n.jpg?stp=dst-jpg_s640x640_tt6&efg=eyJ2ZW5jb2RlX3RhZyI6InByb2ZpbGVfcGljLmRqYW5nby4xMDgwLmMyIn0&_nc_ht=instagram.ffln1-1.fna.fbcdn.net&_nc_cat=107&_nc_oc=Q6cZ2gHQ7zmgXpwEmvIUUSDkCUd6C0alcKSp971qs39wUvaAXRPpJ7ZZ-8D-PVC9rAzxHr1fNlaD1pe1iR2PdpYlCCxi&_nc_ohc=D_qV0EMM3bAQ7kNvwEhm8-2&_nc_gid=3q7MmEdXmEkyWixry7GE7g&edm=AAZTMJEBAAAA&ccb=7-5&oh=00_AQEsTlniOhUeINunzYKRs8jcV-xr0pMOKFeckOynLzUZSw&oe=6A73BCD6&_nc_sid=49cb7f'
-    },
-    active_tenant_id: 'tenant-demo-001',
-    is_authenticated: true
+    user: null,
+    active_tenant_id: null,
+    is_authenticated: false
   },
   notifications: [
     {
@@ -321,6 +311,7 @@ const INITIAL_DEMO_DATA = {
 class LocalCRMStore {
   constructor() {
     this.initStore();
+    this.requireAuth();
     this.initSupabaseAuthListener();
     this.fetchRemoteTenants();
     this.fetchRemoteLeads();
@@ -465,9 +456,9 @@ class LocalCRMStore {
           masterUser.is_super_admin = true;
         }
 
-        // Ensure session points to Paulo Garcia if empty
-        if (!data.session || !data.session.user) {
-          data.session = { user: masterUser, active_tenant_id: 'tenant-demo-001', is_authenticated: true };
+        // Ensure session structure exists
+        if (!data.session) {
+          data.session = { user: null, active_tenant_id: null, is_authenticated: false };
           updated = true;
         }
 
@@ -482,6 +473,23 @@ class LocalCRMStore {
         }
       } catch (e) {
         console.warn('[Store Init] Re-initializing storage safely:', e);
+      }
+    }
+  }
+
+  isAuthenticated() {
+    const data = this.getData();
+    return !!(data.session && data.session.is_authenticated && data.session.user);
+  }
+
+  requireAuth() {
+    if (typeof window !== 'undefined') {
+      const path = window.location.pathname.toLowerCase();
+      const isLandingPage = path === '/' || path === '/index.html' || (path.endsWith('index.html') && !path.includes('/src/html/'));
+      const isAuthPage = path.includes('login') || path.includes('authentication');
+      
+      if (!isLandingPage && !isAuthPage && !this.isAuthenticated()) {
+        window.location.href = '/src/html/login.html';
       }
     }
   }
