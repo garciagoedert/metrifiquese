@@ -17,6 +17,10 @@ class LeadsManager {
       this.renderLeadsTable();
       this.bindEvents();
     });
+
+    window.addEventListener('leads-synced', () => {
+      this.renderLeadsTable();
+    });
   }
 
   bindEvents() {

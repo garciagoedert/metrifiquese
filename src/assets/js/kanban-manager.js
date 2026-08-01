@@ -13,6 +13,9 @@ class KanbanManager {
       this.renderKanbanBoard();
       this.bindEvents();
     });
+
+    window.addEventListener('deals-synced', () => this.renderKanbanBoard());
+    window.addEventListener('leads-synced', () => this.renderKanbanBoard());
   }
 
   bindEvents() {

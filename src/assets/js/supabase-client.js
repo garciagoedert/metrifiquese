@@ -323,6 +323,8 @@ class LocalCRMStore {
     this.initStore();
     this.initSupabaseAuthListener();
     this.fetchRemoteTenants();
+    this.fetchRemoteLeads();
+    this.fetchRemoteDeals();
     this.initSupabaseRealtime();
   }
 
@@ -357,23 +359,80 @@ class LocalCRMStore {
     }
   }
 
+  async fetchRemoteLeads() {
+    if (supabaseClient) {
+      try {
+        const { data: dbLeads, error } = await supabaseClient.from('leads').select('*');
+        if (!error && dbLeads) {
+          const storeData = this.getData();
+          if (dbLeads.length > 0) {
+            if (!storeData.leads) storeData.leads = [];
+            dbLeads.forEach(rLead => {
+              const idx = storeData.leads.findIndex(l => l.id === rLead.id);
+              if (idx !== -1) {
+                storeData.leads[idx] = { ...storeData.leads[idx], ...rLead };
+              } else {
+                storeData.leads.push(rLead);
+              }
+            });
+            this.saveData(storeData);
+            if (typeof window !== 'undefined') {
+              window.dispatchEvent(new CustomEvent('leads-synced', { detail: storeData.leads }));
+            }
+          }
+        }
+      } catch (err) {
+        console.warn('[Supabase Sync] Falha ao buscar leads remotos:', err);
+      }
+    }
+  }
+
+  async fetchRemoteDeals() {
+    if (supabaseClient) {
+      try {
+        const { data: dbDeals, error } = await supabaseClient.from('deals').select('*');
+        if (!error && dbDeals) {
+          const storeData = this.getData();
+          if (dbDeals.length > 0) {
+            if (!storeData.deals) storeData.deals = [];
+            dbDeals.forEach(rDeal => {
+              const idx = storeData.deals.findIndex(d => d.id === rDeal.id);
+              if (idx !== -1) {
+                storeData.deals[idx] = { ...storeData.deals[idx], ...rDeal };
+              } else {
+                storeData.deals.push(rDeal);
+              }
+            });
+            this.saveData(storeData);
+            if (typeof window !== 'undefined') {
+              window.dispatchEvent(new CustomEvent('deals-synced', { detail: storeData.deals }));
+            }
+          }
+        }
+      } catch (err) {
+        console.warn('[Supabase Sync] Falha ao buscar oportunidades remotas:', err);
+      }
+    }
+  }
+
   initSupabaseRealtime() {
     if (supabaseClient) {
       try {
         supabaseClient
-          .channel('public:tenants')
-          .on('postgres_changes', { event: '*', schema: 'public', table: 'tenants' }, () => {
-            this.fetchRemoteTenants();
-          })
+          .channel('public:db-sync')
+          .on('postgres_changes', { event: '*', schema: 'public', table: 'tenants' }, () => this.fetchRemoteTenants())
+          .on('postgres_changes', { event: '*', schema: 'public', table: 'leads' }, () => this.fetchRemoteLeads())
+          .on('postgres_changes', { event: '*', schema: 'public', table: 'deals' }, () => this.fetchRemoteDeals())
           .subscribe();
       } catch (e) {
         console.warn('[Supabase Realtime] Warning:', e);
       }
 
-      // Auto-poll every 3 seconds for instant multi-device reactivity
       if (typeof window !== 'undefined' && !window._tenantSyncTimer) {
         window._tenantSyncTimer = setInterval(() => {
           this.fetchRemoteTenants();
+          this.fetchRemoteLeads();
+          this.fetchRemoteDeals();
         }, 3000);
       }
     }
@@ -815,6 +874,7 @@ class LocalCRMStore {
       lead.tenant_id = tenantId;
       lead.created_at = new Date().toISOString();
       lead.activities = lead.activities || [];
+      if (!data.leads) data.leads = [];
       data.leads.unshift(lead);
 
       this.addNotification({
@@ -826,6 +886,28 @@ class LocalCRMStore {
       if (idx !== -1) data.leads[idx] = { ...data.leads[idx], ...lead };
     }
     this.saveData(data);
+
+    if (supabaseClient) {
+      try {
+        const payload = {
+          id: lead.id,
+          tenant_id: lead.tenant_id || tenantId,
+          name: lead.name,
+          email: lead.email,
+          phone: lead.phone || '',
+          company: lead.company || '',
+          job_title: lead.job_title || '',
+          lifecycle_stage: lead.lifecycle_stage || 'lead',
+          score: parseInt(lead.score) || 0,
+          source: lead.source || 'Organic',
+          tags: lead.tags || []
+        };
+        supabaseClient.from('leads').upsert([payload]).then();
+      } catch (e) {
+        console.warn('[Supabase Sync] Falha ao salvar lead:', e);
+      }
+    }
+
     return lead;
   }
 
@@ -834,6 +916,15 @@ class LocalCRMStore {
     data.leads = data.leads.filter(l => l.id !== id);
     data.deals = data.deals.filter(d => d.lead_id !== id);
     this.saveData(data);
+
+    if (supabaseClient) {
+      try {
+        supabaseClient.from('leads').delete().eq('id', id).then();
+        supabaseClient.from('deals').delete().eq('lead_id', id).then();
+      } catch (e) {
+        console.warn('[Supabase Sync] Falha ao deletar lead:', e);
+      }
+    }
   }
 
   addLeadActivity(leadId, activity) {
@@ -862,6 +953,7 @@ class LocalCRMStore {
       deal.id = 'deal-' + Date.now();
       deal.tenant_id = tenantId;
       deal.created_at = new Date().toISOString();
+      if (!data.deals) data.deals = [];
       data.deals.unshift(deal);
 
       this.addNotification({
@@ -873,6 +965,25 @@ class LocalCRMStore {
       if (idx !== -1) data.deals[idx] = { ...data.deals[idx], ...deal };
     }
     this.saveData(data);
+
+    if (supabaseClient) {
+      try {
+        const payload = {
+          id: deal.id,
+          tenant_id: deal.tenant_id || tenantId,
+          lead_id: deal.lead_id,
+          pipeline_id: deal.pipeline_id || ('pipe-' + (deal.tenant_id || tenantId)),
+          stage_id: deal.stage_id,
+          title: deal.title,
+          value: parseFloat(deal.value) || 0,
+          status: deal.status || 'open'
+        };
+        supabaseClient.from('deals').upsert([payload]).then();
+      } catch (e) {
+        console.warn('[Supabase Sync] Falha ao salvar oportunidade:', e);
+      }
+    }
+
     return deal;
   }
 
@@ -883,8 +994,30 @@ class LocalCRMStore {
       deal.stage_id = newStageId;
       if (newStageId === 'stage-5' || newStageId.includes('won')) deal.status = 'won';
       this.saveData(data);
+
+      if (supabaseClient) {
+        try {
+          supabaseClient.from('deals').update({ stage_id: newStageId, updated_at: new Date().toISOString() }).eq('id', dealId).then();
+        } catch (e) {
+          console.warn('[Supabase Sync] Falha ao mover etapa no Supabase:', e);
+        }
+      }
     }
     return deal;
+  }
+
+  deleteDeal(id) {
+    const data = this.getData();
+    data.deals = data.deals.filter(d => d.id !== id);
+    this.saveData(data);
+
+    if (supabaseClient) {
+      try {
+        supabaseClient.from('deals').delete().eq('id', id).then();
+      } catch (e) {
+        console.warn('[Supabase Sync] Falha ao deletar oportunidade:', e);
+      }
+    }
   }
 
   getStages() {
