@@ -113,6 +113,11 @@ CREATE POLICY "Permitir insercao anonima de tenants" ON public.tenants FOR INSER
 CREATE POLICY "Permitir atualizacao anonima de tenants" ON public.tenants FOR UPDATE USING (true);
 CREATE POLICY "Permitir exclusao anonima de tenants" ON public.tenants FOR DELETE USING (true);
 
+CREATE POLICY "Permitir leitura anonima de profiles" ON public.profiles FOR SELECT USING (true);
+CREATE POLICY "Permitir insercao anonima de profiles" ON public.profiles FOR INSERT WITH CHECK (true);
+CREATE POLICY "Permitir atualizacao anonima de profiles" ON public.profiles FOR UPDATE USING (true);
+CREATE POLICY "Permitir exclusao anonima de profiles" ON public.profiles FOR DELETE USING (true);
+
 CREATE POLICY "Permitir leitura anonima de leads" ON public.leads FOR SELECT USING (true);
 CREATE POLICY "Permitir insercao anonima de leads" ON public.leads FOR INSERT WITH CHECK (true);
 CREATE POLICY "Permitir atualizacao anonima de leads" ON public.leads FOR UPDATE USING (true);

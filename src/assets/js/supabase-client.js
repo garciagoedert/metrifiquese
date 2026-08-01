@@ -160,141 +160,8 @@ const INITIAL_DEMO_DATA = {
     { id: 'stage-302', tenant_id: 'tenant-003', pipeline_id: 'pipe-3', name: 'Demonstração Técnica', display_order: 2, color: '#FFAE1F' },
     { id: 'stage-303', tenant_id: 'tenant-003', pipeline_id: 'pipe-3', name: 'Fechado / Contrato', display_order: 3, color: '#13DEB9' }
   ],
-  leads: [
-    {
-      id: 'lead-101',
-      tenant_id: 'tenant-demo-001',
-      name: 'Carlos Eduardo (Master)',
-      email: 'carlos.eduardo@techsolutions.com.br',
-      phone: '(11) 98765-4321',
-      company: 'Tech Solutions Ltda',
-      job_title: 'Diretor de Operações',
-      lifecycle_stage: 'opportunity',
-      score: 85,
-      source: 'Google Ads',
-      tags: ['Alta Prioridade', 'Decisor', 'Inbound'],
-      created_at: new Date(Date.now() - 86400000 * 3).toISOString(),
-      activities: [
-        { id: 'act-1', type: 'call', title: 'Reunião de alinhamento', desc: 'Cliente solicitou proposta comercial de 50 licenças.', date: 'Ontem' }
-      ]
-    },
-    {
-      id: 'lead-102',
-      tenant_id: 'tenant-demo-001',
-      name: 'Mariana Silva (Master)',
-      email: 'mariana.silva@inovacao.io',
-      phone: '(21) 99876-1234',
-      company: 'Inovação Digital',
-      job_title: 'Gerente de Marketing',
-      lifecycle_stage: 'mql',
-      score: 60,
-      source: 'Facebook Ads',
-      tags: ['E-book Baixado', 'Nutrição'],
-      created_at: new Date(Date.now() - 86400000 * 5).toISOString(),
-      activities: []
-    },
-    {
-      id: 'lead-103',
-      tenant_id: 'tenant-demo-001',
-      name: 'Roberto Mendes (Master)',
-      email: 'roberto@logisticaexpress.com',
-      phone: '(31) 97654-9876',
-      company: 'Logística Express',
-      job_title: 'CEO',
-      lifecycle_stage: 'customer',
-      score: 110,
-      source: 'Indicação',
-      tags: ['VIP', 'Cliente'],
-      created_at: new Date(Date.now() - 86400000 * 10).toISOString(),
-      activities: []
-    },
-    // Lead Tenant 2 (Exclusivo Agência Scale)
-    {
-      id: 'lead-201',
-      tenant_id: 'tenant-002',
-      name: 'Juliana Costa (Agência Scale)',
-      email: 'juliana@clientescale.com.br',
-      phone: '(11) 96666-5555',
-      company: 'Cliente Exclusivo Scale',
-      job_title: 'Proprietária',
-      lifecycle_stage: 'opportunity',
-      score: 95,
-      source: 'Instagram Ads',
-      tags: ['Campanha Tráfego'],
-      created_at: new Date(Date.now() - 86400000 * 1).toISOString(),
-      activities: []
-    },
-    // Lead Tenant 3 (Exclusivo Tech Solutions Corp)
-    {
-      id: 'lead-301',
-      tenant_id: 'tenant-003',
-      name: 'Fernando Ramos (Tech Solutions)',
-      email: 'fernando@techcorp-cliente.com',
-      phone: '(21) 97777-3333',
-      company: 'Cliente Enterprise Tech',
-      job_title: 'VP Sales',
-      lifecycle_stage: 'lead',
-      score: 45,
-      source: 'LinkedIn B2B',
-      tags: ['Enterprise'],
-      created_at: new Date(Date.now() - 86400000 * 2).toISOString(),
-      activities: []
-    }
-  ],
-  deals: [
-    {
-      id: 'deal-201',
-      tenant_id: 'tenant-demo-001',
-      lead_id: 'lead-101',
-      stage_id: 'stage-4',
-      title: 'Contrato CRM Whitelabel 50 Licenças',
-      value: 12500.00,
-      status: 'open',
-      created_at: new Date(Date.now() - 86400000 * 2).toISOString()
-    },
-    {
-      id: 'deal-202',
-      tenant_id: 'tenant-demo-001',
-      lead_id: 'lead-102',
-      stage_id: 'stage-2',
-      title: 'Plano Enterprise Anual',
-      value: 8400.00,
-      status: 'open',
-      created_at: new Date(Date.now() - 86400000 * 4).toISOString()
-    },
-    {
-      id: 'deal-203',
-      tenant_id: 'tenant-demo-001',
-      lead_id: 'lead-103',
-      stage_id: 'stage-5',
-      title: 'Implementação Customizada CRM',
-      value: 25000.00,
-      status: 'won',
-      created_at: new Date(Date.now() - 86400000 * 8).toISOString()
-    },
-    // Deal Tenant 2
-    {
-      id: 'deal-301',
-      tenant_id: 'tenant-002',
-      lead_id: 'lead-201',
-      stage_id: 'stage-202',
-      title: 'Gestão de Tráfego Mensal R$ 3.500',
-      value: 3500.00,
-      status: 'open',
-      created_at: new Date(Date.now() - 86400000 * 1).toISOString()
-    },
-    // Deal Tenant 3
-    {
-      id: 'deal-401',
-      tenant_id: 'tenant-003',
-      lead_id: 'lead-301',
-      stage_id: 'stage-301',
-      title: 'Licenciamento Enterprise R$ 15.000',
-      value: 15000.00,
-      status: 'open',
-      created_at: new Date(Date.now() - 86400000 * 2).toISOString()
-    }
-  ],
+  leads: [],
+  deals: [],
   automations: [
     {
       id: 'auto-401',
@@ -356,16 +223,9 @@ class LocalCRMStore {
         const { data: dbLeads, error } = await supabaseClient.from('leads').select('*');
         if (!error && dbLeads) {
           const storeData = this.getData();
-          if (dbLeads.length > 0) {
-            if (!storeData.leads) storeData.leads = [];
-            dbLeads.forEach(rLead => {
-              const idx = storeData.leads.findIndex(l => l.id === rLead.id);
-              if (idx !== -1) {
-                storeData.leads[idx] = { ...storeData.leads[idx], ...rLead };
-              } else {
-                storeData.leads.push(rLead);
-              }
-            });
+          const hasChanged = JSON.stringify(storeData.leads || []) !== JSON.stringify(dbLeads);
+          if (hasChanged) {
+            storeData.leads = dbLeads;
             this.saveData(storeData);
             if (typeof window !== 'undefined') {
               window.dispatchEvent(new CustomEvent('leads-synced', { detail: storeData.leads }));
@@ -384,16 +244,9 @@ class LocalCRMStore {
         const { data: dbDeals, error } = await supabaseClient.from('deals').select('*');
         if (!error && dbDeals) {
           const storeData = this.getData();
-          if (dbDeals.length > 0) {
-            if (!storeData.deals) storeData.deals = [];
-            dbDeals.forEach(rDeal => {
-              const idx = storeData.deals.findIndex(d => d.id === rDeal.id);
-              if (idx !== -1) {
-                storeData.deals[idx] = { ...storeData.deals[idx], ...rDeal };
-              } else {
-                storeData.deals.push(rDeal);
-              }
-            });
+          const hasChanged = JSON.stringify(storeData.deals || []) !== JSON.stringify(dbDeals);
+          if (hasChanged) {
+            storeData.deals = dbDeals;
             this.saveData(storeData);
             if (typeof window !== 'undefined') {
               window.dispatchEvent(new CustomEvent('deals-synced', { detail: storeData.deals }));
@@ -406,6 +259,37 @@ class LocalCRMStore {
     }
   }
 
+  async fetchRemoteProfiles() {
+    if (supabaseClient) {
+      try {
+        const { data: dbProfiles, error } = await supabaseClient.from('profiles').select('*');
+        if (!error && dbProfiles && dbProfiles.length > 0) {
+          const storeData = this.getData();
+          let updated = false;
+          dbProfiles.forEach(p => {
+            const u = (storeData.users || []).find(user => user.id === p.id || user.email === p.email);
+            if (u) {
+              if (p.avatar_url && u.avatar_url !== p.avatar_url) { u.avatar_url = p.avatar_url; updated = true; }
+              if (p.full_name && u.full_name !== p.full_name) { u.full_name = p.full_name; updated = true; }
+            }
+            if (storeData.session && storeData.session.user && (storeData.session.user.id === p.id || storeData.session.user.email === p.email)) {
+              if (p.avatar_url && storeData.session.user.avatar_url !== p.avatar_url) { storeData.session.user.avatar_url = p.avatar_url; updated = true; }
+              if (p.full_name && storeData.session.user.full_name !== p.full_name) { storeData.session.user.full_name = p.full_name; updated = true; }
+            }
+          });
+          if (updated) {
+            this.saveData(storeData);
+            if (typeof window !== 'undefined') {
+              window.dispatchEvent(new CustomEvent('profile-synced'));
+            }
+          }
+        }
+      } catch (e) {
+        console.warn('[Supabase Sync] Falha ao buscar perfis remotos:', e);
+      }
+    }
+  }
+
   initSupabaseRealtime() {
     if (supabaseClient) {
       try {
@@ -414,6 +298,7 @@ class LocalCRMStore {
           .on('postgres_changes', { event: '*', schema: 'public', table: 'tenants' }, () => this.fetchRemoteTenants())
           .on('postgres_changes', { event: '*', schema: 'public', table: 'leads' }, () => this.fetchRemoteLeads())
           .on('postgres_changes', { event: '*', schema: 'public', table: 'deals' }, () => this.fetchRemoteDeals())
+          .on('postgres_changes', { event: '*', schema: 'public', table: 'profiles' }, () => this.fetchRemoteProfiles())
           .subscribe();
       } catch (e) {
         console.warn('[Supabase Realtime] Warning:', e);
@@ -424,6 +309,7 @@ class LocalCRMStore {
           this.fetchRemoteTenants();
           this.fetchRemoteLeads();
           this.fetchRemoteDeals();
+          this.fetchRemoteProfiles();
         }, 3000);
       }
     }
@@ -863,6 +749,23 @@ class LocalCRMStore {
     }
 
     this.saveData(data);
+
+    if (supabaseClient && userToUpdate) {
+      try {
+        const profilePayload = {
+          id: userToUpdate.id || 'user-001',
+          tenant_id: userToUpdate.tenant_id || 'tenant-demo-001',
+          full_name: userToUpdate.full_name || 'Paulo Garcia',
+          email: userToUpdate.email || 'paulo@southsea.com.br',
+          role: userToUpdate.role || 'admin',
+          avatar_url: userToUpdate.avatar_url || ''
+        };
+        supabaseClient.from('profiles').upsert([profilePayload]).then();
+      } catch (e) {
+        console.warn('[Supabase Sync] Falha ao sincronizar perfil no Supabase:', e);
+      }
+    }
+
     return data.session.user;
   }
 
