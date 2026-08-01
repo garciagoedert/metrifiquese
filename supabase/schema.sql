@@ -5,7 +5,7 @@
 -- Habilitar extensões necessárias
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
--- 1. TABELA DE ORGANIZAÇÕES / TENANTS (WHITELABEL)
+-- Recriar tabelas com suporte a IDs de texto flexíveis
 CREATE TABLE IF NOT EXISTS public.tenants (
     id VARCHAR(255) PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
@@ -21,7 +21,6 @@ CREATE TABLE IF NOT EXISTS public.tenants (
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- 2. TABELA DE PERFIS DE USUÁRIOS (PROFILES)
 CREATE TABLE IF NOT EXISTS public.profiles (
     id VARCHAR(255) PRIMARY KEY,
     tenant_id VARCHAR(255) NOT NULL REFERENCES public.tenants(id) ON DELETE CASCADE,
@@ -34,7 +33,6 @@ CREATE TABLE IF NOT EXISTS public.profiles (
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- 3. TABELA DE LEADS (BASE DE CONTATOS & INBOUND)
 CREATE TABLE IF NOT EXISTS public.leads (
     id VARCHAR(255) PRIMARY KEY,
     tenant_id VARCHAR(255) NOT NULL REFERENCES public.tenants(id) ON DELETE CASCADE,
@@ -53,7 +51,6 @@ CREATE TABLE IF NOT EXISTS public.leads (
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- 4. TABELAS DE FUNIL E ETAPAS (PIPELINES & PIPELINE_STAGES)
 CREATE TABLE IF NOT EXISTS public.pipelines (
     id VARCHAR(255) PRIMARY KEY,
     tenant_id VARCHAR(255) NOT NULL REFERENCES public.tenants(id) ON DELETE CASCADE,
@@ -72,7 +69,6 @@ CREATE TABLE IF NOT EXISTS public.pipeline_stages (
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- 5. TABELA DE OPORTUNIDADES / DEALS (KANBAN)
 CREATE TABLE IF NOT EXISTS public.deals (
     id VARCHAR(255) PRIMARY KEY,
     tenant_id VARCHAR(255) NOT NULL REFERENCES public.tenants(id) ON DELETE CASCADE,
@@ -88,7 +84,7 @@ CREATE TABLE IF NOT EXISTS public.deals (
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- Habilitar RLS em todas as tabelas
+-- Habilitar RLS nas tabelas
 ALTER TABLE public.tenants ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.leads ENABLE ROW LEVEL SECURITY;
@@ -96,7 +92,23 @@ ALTER TABLE public.pipelines ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.pipeline_stages ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.deals ENABLE ROW LEVEL SECURITY;
 
--- Liberar políticas de leitura e gravação para anon / public
+-- Remover políticas existentes para evitar erros de duplicidade
+DROP POLICY IF EXISTS "Permitir leitura anonima de tenants" ON public.tenants;
+DROP POLICY IF EXISTS "Permitir insercao anonima de tenants" ON public.tenants;
+DROP POLICY IF EXISTS "Permitir atualizacao anonima de tenants" ON public.tenants;
+DROP POLICY IF EXISTS "Permitir exclusao anonima de tenants" ON public.tenants;
+
+DROP POLICY IF EXISTS "Permitir leitura anonima de leads" ON public.leads;
+DROP POLICY IF EXISTS "Permitir insercao anonima de leads" ON public.leads;
+DROP POLICY IF EXISTS "Permitir atualizacao anonima de leads" ON public.leads;
+DROP POLICY IF EXISTS "Permitir exclusao anonima de leads" ON public.leads;
+
+DROP POLICY IF EXISTS "Permitir leitura anonima de deals" ON public.deals;
+DROP POLICY IF EXISTS "Permitir insercao anonima de deals" ON public.deals;
+DROP POLICY IF EXISTS "Permitir atualizacao anonima de deals" ON public.deals;
+DROP POLICY IF EXISTS "Permitir exclusao anonima de deals" ON public.deals;
+
+-- Criar políticas de leitura e escrita anônimas livres
 CREATE POLICY "Permitir leitura anonima de tenants" ON public.tenants FOR SELECT USING (true);
 CREATE POLICY "Permitir insercao anonima de tenants" ON public.tenants FOR INSERT WITH CHECK (true);
 CREATE POLICY "Permitir atualizacao anonima de tenants" ON public.tenants FOR UPDATE USING (true);
