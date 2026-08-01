@@ -2,11 +2,22 @@
 -- METRIFIQUE-SE - ESQUEMA DE BANCO DE DADOS SUPABASE (MULTI-TENANT CRM)
 -- ====================================================================
 
+-- 1. DROPPAR TABELAS ANTIGAS PARA GARANTIR ESTRUTURA LIMPA VARCHAR
+DROP TABLE IF EXISTS public.deals CASCADE;
+DROP TABLE IF EXISTS public.lead_activities CASCADE;
+DROP TABLE IF EXISTS public.lead_forms CASCADE;
+DROP TABLE IF EXISTS public.automation_rules CASCADE;
+DROP TABLE IF EXISTS public.leads CASCADE;
+DROP TABLE IF EXISTS public.pipeline_stages CASCADE;
+DROP TABLE IF EXISTS public.pipelines CASCADE;
+DROP TABLE IF EXISTS public.profiles CASCADE;
+DROP TABLE IF EXISTS public.tenants CASCADE;
+
 -- Habilitar extensões necessárias
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
--- Recriar tabelas com suporte a IDs de texto flexíveis
-CREATE TABLE IF NOT EXISTS public.tenants (
+-- 2. TABELA DE ORGANIZAÇÕES / TENANTS (WHITELABEL)
+CREATE TABLE public.tenants (
     id VARCHAR(255) PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     slug VARCHAR(100) NOT NULL,
@@ -21,7 +32,8 @@ CREATE TABLE IF NOT EXISTS public.tenants (
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
-CREATE TABLE IF NOT EXISTS public.profiles (
+-- 3. TABELA DE PERFIS DE USUÁRIOS (PROFILES)
+CREATE TABLE public.profiles (
     id VARCHAR(255) PRIMARY KEY,
     tenant_id VARCHAR(255) NOT NULL REFERENCES public.tenants(id) ON DELETE CASCADE,
     full_name VARCHAR(255) NOT NULL,
@@ -33,7 +45,8 @@ CREATE TABLE IF NOT EXISTS public.profiles (
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
-CREATE TABLE IF NOT EXISTS public.leads (
+-- 4. TABELA DE LEADS (BASE DE CONTATOS & INBOUND)
+CREATE TABLE public.leads (
     id VARCHAR(255) PRIMARY KEY,
     tenant_id VARCHAR(255) NOT NULL REFERENCES public.tenants(id) ON DELETE CASCADE,
     name VARCHAR(255) NOT NULL,
@@ -51,7 +64,8 @@ CREATE TABLE IF NOT EXISTS public.leads (
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
-CREATE TABLE IF NOT EXISTS public.pipelines (
+-- 5. TABELAS DE FUNIL E ETAPAS (PIPELINES & PIPELINE_STAGES)
+CREATE TABLE public.pipelines (
     id VARCHAR(255) PRIMARY KEY,
     tenant_id VARCHAR(255) NOT NULL REFERENCES public.tenants(id) ON DELETE CASCADE,
     name VARCHAR(255) NOT NULL DEFAULT 'Funil de Vendas Padrão',
@@ -59,7 +73,7 @@ CREATE TABLE IF NOT EXISTS public.pipelines (
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
-CREATE TABLE IF NOT EXISTS public.pipeline_stages (
+CREATE TABLE public.pipeline_stages (
     id VARCHAR(255) PRIMARY KEY,
     pipeline_id VARCHAR(255) NOT NULL REFERENCES public.pipelines(id) ON DELETE CASCADE,
     tenant_id VARCHAR(255) NOT NULL REFERENCES public.tenants(id) ON DELETE CASCADE,
@@ -69,7 +83,8 @@ CREATE TABLE IF NOT EXISTS public.pipeline_stages (
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
-CREATE TABLE IF NOT EXISTS public.deals (
+-- 6. TABELA DE OPORTUNIDADES / DEALS (KANBAN)
+CREATE TABLE public.deals (
     id VARCHAR(255) PRIMARY KEY,
     tenant_id VARCHAR(255) NOT NULL REFERENCES public.tenants(id) ON DELETE CASCADE,
     lead_id VARCHAR(255) NOT NULL REFERENCES public.leads(id) ON DELETE CASCADE,
@@ -84,7 +99,7 @@ CREATE TABLE IF NOT EXISTS public.deals (
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- Habilitar RLS nas tabelas
+-- 7. HABILITAR RLS NAS TABELAS
 ALTER TABLE public.tenants ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.leads ENABLE ROW LEVEL SECURITY;
@@ -92,23 +107,7 @@ ALTER TABLE public.pipelines ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.pipeline_stages ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.deals ENABLE ROW LEVEL SECURITY;
 
--- Remover políticas existentes para evitar erros de duplicidade
-DROP POLICY IF EXISTS "Permitir leitura anonima de tenants" ON public.tenants;
-DROP POLICY IF EXISTS "Permitir insercao anonima de tenants" ON public.tenants;
-DROP POLICY IF EXISTS "Permitir atualizacao anonima de tenants" ON public.tenants;
-DROP POLICY IF EXISTS "Permitir exclusao anonima de tenants" ON public.tenants;
-
-DROP POLICY IF EXISTS "Permitir leitura anonima de leads" ON public.leads;
-DROP POLICY IF EXISTS "Permitir insercao anonima de leads" ON public.leads;
-DROP POLICY IF EXISTS "Permitir atualizacao anonima de leads" ON public.leads;
-DROP POLICY IF EXISTS "Permitir exclusao anonima de leads" ON public.leads;
-
-DROP POLICY IF EXISTS "Permitir leitura anonima de deals" ON public.deals;
-DROP POLICY IF EXISTS "Permitir insercao anonima de deals" ON public.deals;
-DROP POLICY IF EXISTS "Permitir atualizacao anonima de deals" ON public.deals;
-DROP POLICY IF EXISTS "Permitir exclusao anonima de deals" ON public.deals;
-
--- Criar políticas de leitura e escrita anônimas livres
+-- 8. CRIAR POLÍTICAS DE PERMISSÃO ANÔNIMAS LIVRES
 CREATE POLICY "Permitir leitura anonima de tenants" ON public.tenants FOR SELECT USING (true);
 CREATE POLICY "Permitir insercao anonima de tenants" ON public.tenants FOR INSERT WITH CHECK (true);
 CREATE POLICY "Permitir atualizacao anonima de tenants" ON public.tenants FOR UPDATE USING (true);
