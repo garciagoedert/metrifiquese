@@ -18,7 +18,7 @@ export default defineConfig(({ mode }) => {
           main: resolve(__dirname, 'index.html'),
           login: resolve(__dirname, 'src/html/login.html'),
           authLogin: resolve(__dirname, 'src/html/authentication-login.html'),
-          crmDashboard: resolve(__dirname, 'src/html/index.html'),
+          crmDashboard: resolve(__dirname, 'src/html/dashboard.html'),
           leads: resolve(__dirname, 'src/html/leads.html'),
           kanban: resolve(__dirname, 'src/html/kanban.html'),
           adminTenants: resolve(__dirname, 'src/html/admin-tenants.html'),

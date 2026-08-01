@@ -124,7 +124,7 @@ class WhitelabelThemeEngine {
       // Se um usuário comum tentar abrir admin-tenants.html diretamente via URL, bloqueia e redireciona
       if (isSuperAdminPage) {
         alert('Acesso Negado: O Painel Super Admin é restrito exclusivamente ao administrador master da plataforma.');
-        window.location.href = './index.html';
+        window.location.href = './dashboard.html';
       }
     }
   }

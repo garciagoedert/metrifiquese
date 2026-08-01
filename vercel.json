@@ -6,7 +6,7 @@
   "rewrites": [
     { "source": "/", "destination": "/index.html" },
     { "source": "/home", "destination": "/index.html" },
-    { "source": "/dashboard", "destination": "/src/html/index.html" },
-    { "source": "/crm", "destination": "/src/html/index.html" }
+    { "source": "/dashboard", "destination": "/src/html/dashboard.html" },
+    { "source": "/crm", "destination": "/src/html/dashboard.html" }
   ]
 }
