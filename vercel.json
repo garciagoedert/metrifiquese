@@ -3,24 +3,10 @@
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
   "cleanUrls": true,
-  "trailingSlash": false,
   "rewrites": [
     { "source": "/", "destination": "/index.html" },
-    { "source": "/index", "destination": "/index.html" },
     { "source": "/home", "destination": "/index.html" },
-
     { "source": "/dashboard", "destination": "/src/html/index.html" },
-    { "source": "/crm", "destination": "/src/html/index.html" },
-
-    { "source": "/login", "destination": "/src/html/login.html" },
-    { "source": "/authentication-login", "destination": "/src/html/authentication-login.html" },
-    { "source": "/leads", "destination": "/src/html/leads.html" },
-    { "source": "/kanban", "destination": "/src/html/kanban.html" },
-    { "source": "/admin-tenants", "destination": "/src/html/admin-tenants.html" },
-    { "source": "/automacoes", "destination": "/src/html/automacoes.html" },
-    { "source": "/capturas", "destination": "/src/html/capturas.html" },
-    { "source": "/relatorios", "destination": "/src/html/relatorios.html" },
-    { "source": "/configuracoes-whitelabel", "destination": "/src/html/configuracoes-whitelabel.html" },
-    { "source": "/perfil", "destination": "/src/html/perfil.html" }
+    { "source": "/crm", "destination": "/src/html/index.html" }
   ]
 }
