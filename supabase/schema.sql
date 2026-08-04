@@ -99,15 +99,27 @@ CREATE TABLE public.deals (
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- 7. HABILITAR RLS NAS TABELAS
+-- 7. TABELA DE NOTIFICAÇÕES (NOTIFICATIONS)
+CREATE TABLE public.notifications (
+    id VARCHAR(255) PRIMARY KEY,
+    tenant_id VARCHAR(255) NOT NULL REFERENCES public.tenants(id) ON DELETE CASCADE,
+    title VARCHAR(255) NOT NULL,
+    message TEXT NOT NULL,
+    time VARCHAR(100) DEFAULT 'Agora',
+    is_read BOOLEAN DEFAULT false,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- 8. HABILITAR RLS NAS TABELAS
 ALTER TABLE public.tenants ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.leads ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.pipelines ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.pipeline_stages ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.deals ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.notifications ENABLE ROW LEVEL SECURITY;
 
--- 8. CRIAR POLÍTICAS DE PERMISSÃO ANÔNIMAS LIVRES
+-- 9. CRIAR POLÍTICAS DE PERMISSÃO ANÔNIMAS LIVRES
 CREATE POLICY "Permitir leitura anonima de tenants" ON public.tenants FOR SELECT USING (true);
 CREATE POLICY "Permitir insercao anonima de tenants" ON public.tenants FOR INSERT WITH CHECK (true);
 CREATE POLICY "Permitir atualizacao anonima de tenants" ON public.tenants FOR UPDATE USING (true);
@@ -127,3 +139,9 @@ CREATE POLICY "Permitir leitura anonima de deals" ON public.deals FOR SELECT USI
 CREATE POLICY "Permitir insercao anonima de deals" ON public.deals FOR INSERT WITH CHECK (true);
 CREATE POLICY "Permitir atualizacao anonima de deals" ON public.deals FOR UPDATE USING (true);
 CREATE POLICY "Permitir exclusao anonima de deals" ON public.deals FOR DELETE USING (true);
+
+CREATE POLICY "Permitir leitura anonima de notifications" ON public.notifications FOR SELECT USING (true);
+CREATE POLICY "Permitir insercao anonima de notifications" ON public.notifications FOR INSERT WITH CHECK (true);
+CREATE POLICY "Permitir atualizacao anonima de notifications" ON public.notifications FOR UPDATE USING (true);
+CREATE POLICY "Permitir exclusao anonima de notifications" ON public.notifications FOR DELETE USING (true);
+

@@ -180,14 +180,38 @@ class LocalCRMStore {
     this.initStore();
     this.requireAuth();
     this.initSupabaseAuthListener();
+    this.ensureDefaultCloudData();
     this.fetchRemoteTenants();
     this.fetchRemoteLeads();
     this.fetchRemoteDeals();
+    this.fetchRemoteProfiles();
+    this.fetchRemoteNotifications();
     this.initSupabaseRealtime();
   }
 
   isSupabaseConnected() {
     return supabaseClient !== null;
+  }
+
+  async ensureDefaultCloudData() {
+    if (!supabaseClient) return;
+    try {
+      const masterTenant = INITIAL_DEMO_DATA.tenants[0];
+      await supabaseClient.from('tenants').upsert([masterTenant]);
+
+      const masterUser = INITIAL_DEMO_DATA.users[0];
+      const profilePayload = {
+        id: masterUser.id,
+        tenant_id: masterUser.tenant_id,
+        full_name: masterUser.full_name,
+        email: masterUser.email,
+        role: masterUser.role,
+        avatar_url: masterUser.avatar_url
+      };
+      await supabaseClient.from('profiles').upsert([profilePayload]);
+    } catch (e) {
+      console.warn('[Supabase Cloud Auto-seed]', e);
+    }
   }
 
   async fetchRemoteTenants() {
@@ -267,13 +291,21 @@ class LocalCRMStore {
           const storeData = this.getData();
           let updated = false;
           dbProfiles.forEach(p => {
-            const u = (storeData.users || []).find(user => user.id === p.id || user.email === p.email);
+            const u = (storeData.users || []).find(user => 
+              user.id === p.id || 
+              (user.email && p.email && user.email.toLowerCase() === p.email.toLowerCase()) || 
+              (user.is_super_admin && p.email === 'paulo@southsea.com.br')
+            );
             if (u) {
-              if (p.avatar_url && u.avatar_url !== p.avatar_url) { u.avatar_url = p.avatar_url; updated = true; }
+              if (p.avatar_url !== undefined && u.avatar_url !== p.avatar_url) { u.avatar_url = p.avatar_url; updated = true; }
               if (p.full_name && u.full_name !== p.full_name) { u.full_name = p.full_name; updated = true; }
             }
-            if (storeData.session && storeData.session.user && (storeData.session.user.id === p.id || storeData.session.user.email === p.email)) {
-              if (p.avatar_url && storeData.session.user.avatar_url !== p.avatar_url) { storeData.session.user.avatar_url = p.avatar_url; updated = true; }
+            if (storeData.session && storeData.session.user && (
+              storeData.session.user.id === p.id || 
+              (storeData.session.user.email && p.email && storeData.session.user.email.toLowerCase() === p.email.toLowerCase()) ||
+              (storeData.session.user.is_super_admin && p.email === 'paulo@southsea.com.br')
+            )) {
+              if (p.avatar_url !== undefined && storeData.session.user.avatar_url !== p.avatar_url) { storeData.session.user.avatar_url = p.avatar_url; updated = true; }
               if (p.full_name && storeData.session.user.full_name !== p.full_name) { storeData.session.user.full_name = p.full_name; updated = true; }
             }
           });
@@ -290,6 +322,28 @@ class LocalCRMStore {
     }
   }
 
+  async fetchRemoteNotifications() {
+    if (supabaseClient) {
+      try {
+        const { data: dbNotifs, error } = await supabaseClient.from('notifications').select('*');
+        if (!error && dbNotifs) {
+          const storeData = this.getData();
+          const currentNotifs = storeData.notifications || [];
+          const hasChanged = JSON.stringify(currentNotifs) !== JSON.stringify(dbNotifs);
+          if (hasChanged) {
+            storeData.notifications = dbNotifs;
+            this.saveData(storeData);
+            if (typeof window !== 'undefined') {
+              window.dispatchEvent(new CustomEvent('notifications-updated'));
+            }
+          }
+        }
+      } catch (err) {
+        console.warn('[Supabase Sync] Falha ao buscar notificações remotas:', err);
+      }
+    }
+  }
+
   initSupabaseRealtime() {
     if (supabaseClient) {
       try {
@@ -299,6 +353,7 @@ class LocalCRMStore {
           .on('postgres_changes', { event: '*', schema: 'public', table: 'leads' }, () => this.fetchRemoteLeads())
           .on('postgres_changes', { event: '*', schema: 'public', table: 'deals' }, () => this.fetchRemoteDeals())
           .on('postgres_changes', { event: '*', schema: 'public', table: 'profiles' }, () => this.fetchRemoteProfiles())
+          .on('postgres_changes', { event: '*', schema: 'public', table: 'notifications' }, () => this.fetchRemoteNotifications())
           .subscribe();
       } catch (e) {
         console.warn('[Supabase Realtime] Warning:', e);
@@ -310,7 +365,8 @@ class LocalCRMStore {
           this.fetchRemoteLeads();
           this.fetchRemoteDeals();
           this.fetchRemoteProfiles();
-        }, 3000);
+          this.fetchRemoteNotifications();
+        }, 2500);
       }
     }
   }
@@ -740,7 +796,7 @@ class LocalCRMStore {
     const currentUser = (data.session && data.session.user) ? data.session.user : (data.users && data.users[0]);
     const userToUpdate = (data.users || []).find(u => 
       (userData.id && u.id === userData.id) || 
-      (userData.email && u.email === userData.email) || 
+      (userData.email && u.email && userData.email && u.email.toLowerCase() === userData.email.toLowerCase()) || 
       (currentUser && (u.id === currentUser.id || u.email === currentUser.email)) ||
       u.is_super_admin
     );
@@ -764,21 +820,23 @@ class LocalCRMStore {
     if (supabaseClient) {
       const activeUser = (data.session && data.session.user) || userToUpdate;
       if (activeUser) {
-        try {
-          const profilePayload = {
-            id: activeUser.id || 'user-001',
-            tenant_id: activeUser.tenant_id || 'tenant-demo-001',
-            full_name: activeUser.full_name || 'Paulo Garcia',
-            email: activeUser.email || 'paulo@southsea.com.br',
-            role: activeUser.role || 'admin',
-            avatar_url: activeUser.avatar_url || ''
-          };
-          supabaseClient.from('profiles').upsert([profilePayload]).then(({ error }) => {
-            if (error) console.warn('[Supabase Sync Profile Error]', error);
-          });
-        } catch (e) {
-          console.warn('[Supabase Sync] Falha ao sincronizar perfil no Supabase:', e);
-        }
+        this.ensureDefaultCloudData().then(() => {
+          try {
+            const profilePayload = {
+              id: activeUser.id || 'user-001',
+              tenant_id: activeUser.tenant_id || 'tenant-demo-001',
+              full_name: activeUser.full_name || 'Paulo Garcia',
+              email: activeUser.email || 'paulo@southsea.com.br',
+              role: activeUser.role || 'admin',
+              avatar_url: activeUser.avatar_url || ''
+            };
+            supabaseClient.from('profiles').upsert([profilePayload]).then(({ error }) => {
+              if (error) console.warn('[Supabase Sync Profile Error]', error);
+            });
+          } catch (e) {
+            console.warn('[Supabase Sync] Falha ao sincronizar perfil no Supabase:', e);
+          }
+        });
       }
     }
 
@@ -1009,9 +1067,31 @@ class LocalCRMStore {
     notif.is_read = false;
     data.notifications.unshift(notif);
     this.saveData(data);
+
     if (typeof window !== 'undefined') {
       window.dispatchEvent(new CustomEvent('notifications-updated'));
     }
+
+    if (supabaseClient) {
+      this.ensureDefaultCloudData().then(() => {
+        try {
+          const payload = {
+            id: notif.id,
+            tenant_id: tenantId,
+            title: notif.title,
+            message: notif.message,
+            time: notif.time,
+            is_read: false
+          };
+          supabaseClient.from('notifications').upsert([payload]).then(({ error }) => {
+            if (error) console.warn('[Supabase Sync Add Notification Error]', error);
+          });
+        } catch (e) {
+          console.warn('[Supabase Sync Add Notification Exception]', e);
+        }
+      });
+    }
+
     return notif;
   }
 
@@ -1022,8 +1102,19 @@ class LocalCRMStore {
       if (n) n.is_read = true;
     }
     this.saveData(data);
+
     if (typeof window !== 'undefined') {
       window.dispatchEvent(new CustomEvent('notifications-updated'));
+    }
+
+    if (supabaseClient) {
+      try {
+        supabaseClient.from('notifications').update({ is_read: true }).eq('id', notifId).then(({ error }) => {
+          if (error) console.warn('[Supabase Sync Mark Notification Error]', error);
+        });
+      } catch (e) {
+        console.warn('[Supabase Sync Mark Notification Exception]', e);
+      }
     }
   }
 
@@ -1034,8 +1125,19 @@ class LocalCRMStore {
       data.notifications.filter(n => n.tenant_id === tenantId).forEach(n => n.is_read = true);
     }
     this.saveData(data);
+
     if (typeof window !== 'undefined') {
       window.dispatchEvent(new CustomEvent('notifications-updated'));
+    }
+
+    if (supabaseClient) {
+      try {
+        supabaseClient.from('notifications').update({ is_read: true }).eq('tenant_id', tenantId).then(({ error }) => {
+          if (error) console.warn('[Supabase Sync Mark All Read Error]', error);
+        });
+      } catch (e) {
+        console.warn('[Supabase Sync Mark All Read Exception]', e);
+      }
     }
   }
 
@@ -1046,8 +1148,19 @@ class LocalCRMStore {
       data.notifications = data.notifications.filter(n => n.tenant_id !== tenantId);
     }
     this.saveData(data);
+
     if (typeof window !== 'undefined') {
       window.dispatchEvent(new CustomEvent('notifications-updated'));
+    }
+
+    if (supabaseClient) {
+      try {
+        supabaseClient.from('notifications').delete().eq('tenant_id', tenantId).then(({ error }) => {
+          if (error) console.warn('[Supabase Sync Clear Notifications Error]', error);
+        });
+      } catch (e) {
+        console.warn('[Supabase Sync Clear Notifications Exception]', e);
+      }
     }
   }
 
