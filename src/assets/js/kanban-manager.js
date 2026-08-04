@@ -1,6 +1,6 @@
 /**
  * Metrifique-se CRM - Kanban Sales Funnel Manager
- * Handles Drag and Drop, Column Creation & Column Editing.
+ * Handles Drag and Drop, Column Creation, Column Editing & Interactive Searchable Contact Selection.
  */
 
 class KanbanManager {
@@ -9,13 +9,23 @@ class KanbanManager {
   }
 
   init() {
-    document.addEventListener('DOMContentLoaded', () => {
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', () => {
+        this.renderKanbanBoard();
+        this.bindEvents();
+        this.setupLeadSearch();
+      });
+    } else {
       this.renderKanbanBoard();
       this.bindEvents();
-    });
+      this.setupLeadSearch();
+    }
 
     window.addEventListener('deals-synced', () => this.renderKanbanBoard());
-    window.addEventListener('leads-synced', () => this.renderKanbanBoard());
+    window.addEventListener('leads-synced', () => {
+      this.renderKanbanBoard();
+      this.setupLeadSearch();
+    });
   }
 
   bindEvents() {
@@ -34,13 +44,137 @@ class KanbanManager {
         this.handleCreateStage();
       });
     }
+
+    const addDealBtn = document.querySelectorAll('[data-bs-target="#addDealModal"]');
+    addDealBtn.forEach(btn => {
+      btn.addEventListener('click', () => {
+        this.setupLeadSearch();
+      });
+    });
+  }
+
+  setupLeadSearch() {
+    const searchInput = document.getElementById('deal-lead-search');
+    const resultsContainer = document.getElementById('deal-lead-results');
+    const hiddenSelect = document.getElementById('deal-lead-select');
+    const clearBtn = document.getElementById('deal-lead-clear-btn');
+
+    if (!searchInput || !resultsContainer || !hiddenSelect) return;
+
+    if (searchInput.dataset.searchBound === 'true') return;
+    searchInput.dataset.searchBound = 'true';
+
+    const renderResults = (query = '') => {
+      const leads = window.crmStore ? window.crmStore.getLeads() : [];
+      const cleanQuery = query.toLowerCase().trim();
+
+      const filtered = leads.filter(l => {
+        if (!cleanQuery) return true;
+        const nameMatch = (l.name || '').toLowerCase().includes(cleanQuery);
+        const companyMatch = (l.company || '').toLowerCase().includes(cleanQuery);
+        const emailMatch = (l.email || '').toLowerCase().includes(cleanQuery);
+        return nameMatch || companyMatch || emailMatch;
+      });
+
+      if (filtered.length === 0) {
+        resultsContainer.innerHTML = `
+          <div class="list-group-item text-muted text-center py-3 fs-2 bg-white">
+            <i class="ti ti-user-x d-block fs-5 opacity-50 mb-1"></i>
+            Nenhum contato encontrado
+          </div>
+        `;
+        resultsContainer.style.display = 'block';
+        return;
+      }
+
+      resultsContainer.innerHTML = filtered.map(l => {
+        const safeName = (l.name || '').replace(/'/g, "\\'");
+        const safeCompany = (l.company || '').replace(/'/g, "\\'");
+        return `
+          <button type="button" class="list-group-item list-group-item-action px-3 py-2 border-bottom d-flex align-items-center justify-content-between text-start bg-white" onclick="window.kanbanManager.selectLeadForDeal('${l.id}', '${safeName}', '${safeCompany}');">
+            <div class="d-flex align-items-center gap-2">
+              <div class="bg-light-primary text-primary p-2 rounded-circle d-flex align-items-center justify-content-center" style="width: 32px; height: 32px; flex-shrink: 0;">
+                <i class="ti ti-user fs-4"></i>
+              </div>
+              <div>
+                <strong class="text-dark fs-2 d-block mb-0">${l.name}</strong>
+                <small class="text-muted fs-1">${l.company ? l.company + ' • ' : ''}${l.email || 'Sem e-mail'}</small>
+              </div>
+            </div>
+            <span class="badge bg-light text-primary border fs-1">Selecionar</span>
+          </button>
+        `;
+      }).join('');
+
+      resultsContainer.style.display = 'block';
+    };
+
+    searchInput.addEventListener('focus', () => {
+      if (!hiddenSelect.value) {
+        renderResults(searchInput.value);
+      }
+    });
+
+    searchInput.addEventListener('input', (e) => {
+      hiddenSelect.value = '';
+      if (clearBtn) clearBtn.classList.add('d-none');
+      renderResults(e.target.value);
+    });
+
+    document.addEventListener('click', (e) => {
+      const isInside = searchInput.contains(e.target) || resultsContainer.contains(e.target);
+      if (!isInside) {
+        resultsContainer.style.display = 'none';
+      }
+    });
+
+    if (clearBtn) {
+      clearBtn.addEventListener('click', () => {
+        hiddenSelect.value = '';
+        searchInput.value = '';
+        searchInput.readOnly = false;
+        clearBtn.classList.add('d-none');
+        resultsContainer.style.display = 'none';
+        searchInput.focus();
+      });
+    }
+  }
+
+  selectLeadForDeal(leadId, leadName, company) {
+    const searchInput = document.getElementById('deal-lead-search');
+    const resultsContainer = document.getElementById('deal-lead-results');
+    const hiddenSelect = document.getElementById('deal-lead-select');
+    const clearBtn = document.getElementById('deal-lead-clear-btn');
+
+    if (hiddenSelect) hiddenSelect.value = leadId;
+    if (searchInput) {
+      searchInput.value = company ? `${leadName} (${company})` : leadName;
+      searchInput.readOnly = true;
+    }
+    if (clearBtn) clearBtn.classList.remove('d-none');
+    if (resultsContainer) resultsContainer.style.display = 'none';
   }
 
   openDealModal(leadId) {
-    const selectLead = document.getElementById('deal-lead-select');
-    if (selectLead && leadId) {
-      selectLead.value = leadId;
+    this.setupLeadSearch();
+    if (leadId) {
+      const leads = window.crmStore ? window.crmStore.getLeads() : [];
+      const lead = leads.find(l => l.id === leadId);
+      if (lead) {
+        this.selectLeadForDeal(lead.id, lead.name, lead.company);
+      }
+    } else {
+      const searchInput = document.getElementById('deal-lead-search');
+      const hiddenSelect = document.getElementById('deal-lead-select');
+      const clearBtn = document.getElementById('deal-lead-clear-btn');
+      if (hiddenSelect) hiddenSelect.value = '';
+      if (searchInput) {
+        searchInput.value = '';
+        searchInput.readOnly = false;
+      }
+      if (clearBtn) clearBtn.classList.add('d-none');
     }
+
     const modalEl = document.getElementById('addDealModal');
     if (modalEl && window.bootstrap) {
       const modal = new bootstrap.Modal(modalEl);
@@ -138,16 +272,12 @@ class KanbanManager {
       `;
     }).join('');
 
-    const selectLead = document.getElementById('deal-lead-select');
-    if (selectLead) {
-      selectLead.innerHTML = '<option value="">Selecione um Contato...</option>' +
-        leads.map(l => `<option value="${l.id}">${l.name} (${l.company || 'Sem empresa'})</option>`).join('');
-    }
-
     const selectStage = document.getElementById('deal-stage-select');
     if (selectStage) {
       selectStage.innerHTML = stages.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
     }
+
+    this.setupLeadSearch();
   }
 
   handleDragStart(e, dealId) {
@@ -181,7 +311,7 @@ class KanbanManager {
     const stageId = document.getElementById('deal-stage-select').value || 'stage-1';
 
     if (!title || !leadId) {
-      alert('Preencha o título da oportunidade e selecione um contato.');
+      alert('Preencha o título da oportunidade e selecione um contato na busca.');
       return;
     }
 
@@ -202,6 +332,16 @@ class KanbanManager {
     }
 
     document.getElementById('new-deal-form').reset();
+    const searchInput = document.getElementById('deal-lead-search');
+    const hiddenSelect = document.getElementById('deal-lead-select');
+    const clearBtn = document.getElementById('deal-lead-clear-btn');
+    if (hiddenSelect) hiddenSelect.value = '';
+    if (searchInput) {
+      searchInput.value = '';
+      searchInput.readOnly = false;
+    }
+    if (clearBtn) clearBtn.classList.add('d-none');
+
     this.renderKanbanBoard();
   }
 
