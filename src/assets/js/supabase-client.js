@@ -737,32 +737,48 @@ class LocalCRMStore {
   updateUser(userData) {
     const data = this.getData();
 
-    const userToUpdate = (data.users || []).find(u => (userData.id && u.id === userData.id) || (userData.email && u.email === userData.email) || u.is_super_admin);
+    const currentUser = (data.session && data.session.user) ? data.session.user : (data.users && data.users[0]);
+    const userToUpdate = (data.users || []).find(u => 
+      (userData.id && u.id === userData.id) || 
+      (userData.email && u.email === userData.email) || 
+      (currentUser && (u.id === currentUser.id || u.email === currentUser.email)) ||
+      u.is_super_admin
+    );
+
     if (userToUpdate) {
       Object.assign(userToUpdate, userData);
     }
 
     if (data.session && data.session.user) {
       data.session.user = { ...data.session.user, ...userData };
-    } else {
-      data.session = { user: userToUpdate || userData, active_tenant_id: (userToUpdate && userToUpdate.tenant_id) || 'tenant-demo-001', is_authenticated: true };
+    } else if (userToUpdate) {
+      data.session = { user: userToUpdate, active_tenant_id: userToUpdate.tenant_id || 'tenant-demo-001', is_authenticated: true };
     }
 
     this.saveData(data);
 
-    if (supabaseClient && userToUpdate) {
-      try {
-        const profilePayload = {
-          id: userToUpdate.id || 'user-001',
-          tenant_id: userToUpdate.tenant_id || 'tenant-demo-001',
-          full_name: userToUpdate.full_name || 'Paulo Garcia',
-          email: userToUpdate.email || 'paulo@southsea.com.br',
-          role: userToUpdate.role || 'admin',
-          avatar_url: userToUpdate.avatar_url || ''
-        };
-        supabaseClient.from('profiles').upsert([profilePayload]).then();
-      } catch (e) {
-        console.warn('[Supabase Sync] Falha ao sincronizar perfil no Supabase:', e);
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('profile-synced'));
+    }
+
+    if (supabaseClient) {
+      const activeUser = (data.session && data.session.user) || userToUpdate;
+      if (activeUser) {
+        try {
+          const profilePayload = {
+            id: activeUser.id || 'user-001',
+            tenant_id: activeUser.tenant_id || 'tenant-demo-001',
+            full_name: activeUser.full_name || 'Paulo Garcia',
+            email: activeUser.email || 'paulo@southsea.com.br',
+            role: activeUser.role || 'admin',
+            avatar_url: activeUser.avatar_url || ''
+          };
+          supabaseClient.from('profiles').upsert([profilePayload]).then(({ error }) => {
+            if (error) console.warn('[Supabase Sync Profile Error]', error);
+          });
+        } catch (e) {
+          console.warn('[Supabase Sync] Falha ao sincronizar perfil no Supabase:', e);
+        }
       }
     }
 
@@ -993,7 +1009,22 @@ class LocalCRMStore {
     notif.is_read = false;
     data.notifications.unshift(notif);
     this.saveData(data);
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('notifications-updated'));
+    }
     return notif;
+  }
+
+  markNotificationRead(notifId) {
+    const data = this.getData();
+    if (data.notifications) {
+      const n = data.notifications.find(item => item.id === notifId);
+      if (n) n.is_read = true;
+    }
+    this.saveData(data);
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('notifications-updated'));
+    }
   }
 
   markNotificationsRead() {
@@ -1003,6 +1034,21 @@ class LocalCRMStore {
       data.notifications.filter(n => n.tenant_id === tenantId).forEach(n => n.is_read = true);
     }
     this.saveData(data);
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('notifications-updated'));
+    }
+  }
+
+  clearNotifications() {
+    const data = this.getData();
+    const tenantId = this.getActiveTenantId();
+    if (data.notifications) {
+      data.notifications = data.notifications.filter(n => n.tenant_id !== tenantId);
+    }
+    this.saveData(data);
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('notifications-updated'));
+    }
   }
 
   getAutomations() {

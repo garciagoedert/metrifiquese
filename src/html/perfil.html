@@ -157,8 +157,19 @@
                   </div>
 
                   <div class="mb-3">
-                    <label class="form-label fw-semibold">URL da Foto de Perfil (Avatar)</label>
-                    <input type="text" id="user-avatar-input" class="form-control">
+                    <label class="form-label fw-semibold">Foto de Perfil (Avatar)</label>
+                    <div class="card p-3 border-dashed bg-light mb-2">
+                      <div class="d-flex align-items-center gap-3">
+                        <img src="../assets/images/profile/user-1.jpg" width="60" height="60" class="rounded-circle header-user-avatar border border-2 border-primary object-fit-cover">
+                        <div class="flex-grow-1">
+                          <label class="form-label mb-1 fw-bold fs-2 text-dark">Enviar Imagem do Dispositivo</label>
+                          <input type="file" id="user-avatar-file-input" class="form-control form-control-sm" accept="image/*">
+                          <small class="text-muted fs-1 mt-1 d-block">Formatações aceitas: JPG, PNG, WEBP. A imagem será otimizada para carregar em qualquer dispositivo.</small>
+                        </div>
+                      </div>
+                    </div>
+                    <label class="form-label fw-semibold fs-2 text-muted">Ou Link / URL Direto da Imagem</label>
+                    <input type="text" id="user-avatar-input" class="form-control" placeholder="https://exemplo.com/sua-foto.jpg">
                   </div>
 
                   <hr class="my-4">
@@ -206,11 +217,71 @@
         document.getElementById('user-role-input').value = user.role || '';
         document.getElementById('user-avatar-input').value = user.avatar_url || '';
 
-        document.querySelectorAll('.header-user-name').forEach(el => el.innerText = user.full_name);
+        document.querySelectorAll('.header-user-name').forEach(el => el.innerText = user.full_name || 'Usuário');
         document.querySelectorAll('.header-user-avatar').forEach(img => {
           img.setAttribute('referrerpolicy', 'no-referrer');
           img.onerror = () => { img.src = '../assets/images/profile/user-1.jpg'; };
           if (user.avatar_url) img.src = user.avatar_url;
+        });
+      }
+
+      // Handle Image File Upload & Base64 Optimization
+      const fileInput = document.getElementById('user-avatar-file-input');
+      const avatarUrlInput = document.getElementById('user-avatar-input');
+
+      if (fileInput) {
+        fileInput.addEventListener('change', (e) => {
+          const file = e.target.files[0];
+          if (!file) return;
+
+          const reader = new FileReader();
+          reader.onload = (event) => {
+            const img = new Image();
+            img.onload = () => {
+              const canvas = document.createElement('canvas');
+              const MAX_WIDTH = 300;
+              const MAX_HEIGHT = 300;
+              let width = img.width;
+              let height = img.height;
+
+              if (width > height) {
+                if (width > MAX_WIDTH) {
+                  height *= MAX_WIDTH / width;
+                  width = MAX_WIDTH;
+                }
+              } else {
+                if (height > MAX_HEIGHT) {
+                  width *= MAX_HEIGHT / height;
+                  height = MAX_HEIGHT;
+                }
+              }
+
+              canvas.width = width;
+              canvas.height = height;
+              const ctx = canvas.getContext('2d');
+              ctx.drawImage(img, 0, 0, width, height);
+
+              const optimizedDataUrl = canvas.toDataURL('image/jpeg', 0.85);
+              avatarUrlInput.value = optimizedDataUrl;
+
+              document.querySelectorAll('.header-user-avatar').forEach(previewImg => {
+                previewImg.src = optimizedDataUrl;
+              });
+            };
+            img.src = event.target.result;
+          };
+          reader.readAsDataURL(file);
+        });
+      }
+
+      if (avatarUrlInput) {
+        avatarUrlInput.addEventListener('input', (e) => {
+          const val = e.target.value.trim();
+          if (val) {
+            document.querySelectorAll('.header-user-avatar').forEach(previewImg => {
+              previewImg.src = val;
+            });
+          }
         });
       }
 
@@ -237,7 +308,7 @@
         }
 
         window.crmStore.updateUser(updated);
-        alert('Perfil e senha de acesso atualizados com sucesso!');
+        alert('Perfil e foto atualizados com sucesso!');
         location.reload();
       });
     });

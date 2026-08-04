@@ -84,15 +84,37 @@ class WhitelabelThemeEngine {
     if (!window.crmStore) return;
     const user = window.crmStore.getUser();
 
-    // 1. Atualizar nome e foto do usuário nos cabeçalhos
-    if (user) {
-      document.querySelectorAll('.header-user-name').forEach(el => el.innerText = user.full_name || 'Usuário');
-      document.querySelectorAll('.header-user-avatar').forEach(img => {
-        img.setAttribute('referrerpolicy', 'no-referrer');
-        img.onerror = () => { img.src = '/src/assets/images/profile/user-1.jpg'; };
-        if (user.avatar_url) img.src = user.avatar_url;
+    this.updateUserHeaderUI(user);
+
+    if (typeof window !== 'undefined' && !window._profileSyncedListenerAttached) {
+      window._profileSyncedListenerAttached = true;
+      window.addEventListener('profile-synced', () => {
+        if (window.crmStore) {
+          this.updateUserHeaderUI(window.crmStore.getUser());
+        }
       });
     }
+  }
+
+  updateUserHeaderUI(user) {
+    if (!user) return;
+    document.querySelectorAll('.header-user-name').forEach(el => el.innerText = user.full_name || 'Usuário');
+    document.querySelectorAll('.header-user-avatar').forEach(img => {
+      img.setAttribute('referrerpolicy', 'no-referrer');
+      img.onerror = () => {
+        if (!img.dataset.hasFallback) {
+          img.dataset.hasFallback = 'true';
+          img.src = '../assets/images/profile/user-1.jpg';
+        }
+      };
+      if (user.avatar_url && user.avatar_url.trim() !== '') {
+        delete img.dataset.hasFallback;
+        img.src = user.avatar_url;
+      }
+    });
+  }
+
+  applyUserSecurityGuardRef() {
 
     // Check if logged in user is STRICTLY Super Admin
     const isSuperAdminUser = Boolean(user && (user.is_super_admin === true || user.email === 'paulo@southsea.com.br'));
