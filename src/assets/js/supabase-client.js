@@ -263,10 +263,14 @@ class LocalCRMStore {
         const { data: dbDeals, error } = await supabaseClient.from('deals').select('*');
         if (!error && dbDeals) {
           const storeData = this.getData();
-          const localDeals = storeData.deals || [];
+          const deletedIds = storeData.deleted_deal_ids || [];
 
-          // Merge local deals that might be pending sync
-          const mergedDeals = [...dbDeals];
+          // Filter out deals deleted locally
+          const validDbDeals = dbDeals.filter(d => !deletedIds.includes(d.id));
+          const localDeals = (storeData.deals || []).filter(d => !deletedIds.includes(d.id));
+
+          // Merge local deals pending sync
+          const mergedDeals = [...validDbDeals];
           localDeals.forEach(ld => {
             if (!mergedDeals.some(rd => rd.id === ld.id)) {
               mergedDeals.push(ld);
@@ -1248,15 +1252,23 @@ class LocalCRMStore {
 
   moveDealStage(dealId, newStageId) {
     const data = this.getData();
-    const deal = data.deals.find(d => d.id === dealId);
+    const deal = (data.deals || []).find(d => d.id === dealId);
     if (deal) {
       deal.stage_id = newStageId;
-      if (newStageId === 'stage-5' || newStageId.includes('won')) deal.status = 'won';
+      if (newStageId === 'stage-5' || newStageId.includes('won')) {
+        deal.status = 'won';
+      } else if (newStageId === 'stage-lost' || newStageId.includes('lost')) {
+        deal.status = 'lost';
+      }
       this.saveData(data);
 
       if (supabaseClient) {
         try {
-          supabaseClient.from('deals').update({ stage_id: newStageId, updated_at: new Date().toISOString() }).eq('id', dealId).then();
+          supabaseClient.from('deals').update({ 
+            stage_id: newStageId, 
+            status: deal.status,
+            updated_at: new Date().toISOString() 
+          }).eq('id', dealId).then();
         } catch (e) {
           console.warn('[Supabase Sync] Falha ao mover etapa no Supabase:', e);
         }
@@ -1265,17 +1277,27 @@ class LocalCRMStore {
     return deal;
   }
 
-  deleteDeal(id) {
+  async deleteDeal(id) {
     const data = this.getData();
-    data.deals = data.deals.filter(d => d.id !== id);
+    if (!data.deleted_deal_ids) data.deleted_deal_ids = [];
+    if (!data.deleted_deal_ids.includes(id)) {
+      data.deleted_deal_ids.push(id);
+    }
+    data.deals = (data.deals || []).filter(d => d.id !== id);
     this.saveData(data);
 
     if (supabaseClient) {
       try {
-        supabaseClient.from('deals').delete().eq('id', id).then();
+        const { error } = await supabaseClient.from('deals').delete().eq('id', id);
+        if (error) console.warn('[Supabase Sync Delete Deal Error]', error);
+        else console.log('[Supabase Sync Delete Deal Success]', id);
       } catch (e) {
         console.warn('[Supabase Sync] Falha ao deletar oportunidade:', e);
       }
+    }
+
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('deals-synced', { detail: data.deals }));
     }
   }
 

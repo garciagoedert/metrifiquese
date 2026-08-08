@@ -224,9 +224,11 @@ class KanbanManager {
                   <button class="btn btn-sm btn-light p-1 rounded-circle" data-bs-toggle="dropdown">
                     <i class="ti ti-dots-vertical fs-3"></i>
                   </button>
-                  <ul class="dropdown-menu dropdown-menu-end">
+                  <ul class="dropdown-menu dropdown-menu-end shadow-sm fs-2">
                     <li><a class="dropdown-item text-success" href="#" onclick="window.kanbanManager.markDealStatus('${deal.id}', 'stage-5')"><i class="ti ti-trophy me-2"></i>Marcar Ganho</a></li>
-                    <li><a class="dropdown-item text-danger" href="#" onclick="window.kanbanManager.markDealStatus('${deal.id}', 'stage-lost')"><i class="ti ti-x me-2"></i>Marcar Perdido</a></li>
+                    <li><a class="dropdown-item text-warning" href="#" onclick="window.kanbanManager.markDealStatus('${deal.id}', 'stage-lost')"><i class="ti ti-x me-2"></i>Marcar Perdido</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item text-danger" href="#" onclick="window.kanbanManager.deleteDealPrompt('${deal.id}')"><i class="ti ti-trash me-2"></i>Excluir Oportunidade</a></li>
                   </ul>
                 </div>
               </div>
@@ -379,6 +381,13 @@ class KanbanManager {
       if (window.crmStore.deleteStage(stageId)) {
         this.renderKanbanBoard();
       }
+    }
+  }
+
+  deleteDealPrompt(dealId) {
+    if (confirm('Tem certeza que deseja excluir esta oportunidade comercial permanentemente?')) {
+      window.crmStore.deleteDeal(dealId);
+      this.renderKanbanBoard();
     }
   }
 }
