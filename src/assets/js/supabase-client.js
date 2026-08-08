@@ -214,9 +214,37 @@ class LocalCRMStore {
     }
   }
 
+  async syncLocalTenantsToCloud() {
+    if (!supabaseClient) return;
+    try {
+      const data = this.getData();
+      const tenantsToSync = (data.tenants || []).map(t => ({
+        id: t.id,
+        name: t.name,
+        slug: t.slug || (t.name ? t.name.toLowerCase().replace(/[^a-z0-9]/g, '-') : 'tenant'),
+        logo_url: t.logo_url || '/src/assets/images/logos/metrifiquese.svg',
+        primary_color: t.primary_color || '#FF7A59',
+        secondary_color: t.secondary_color || '#00A4BD',
+        custom_domain: t.custom_domain || '',
+        plan: t.plan || 'Plano Agência Whitelabel',
+        monthly_price: parseFloat(t.monthly_price) || 0,
+        status: t.status || 'active'
+      }));
+
+      if (tenantsToSync.length > 0) {
+        const { error } = await supabaseClient.from('tenants').upsert(tenantsToSync);
+        if (error) console.warn('[Supabase Sync Tenants]', error);
+        else console.log('[Supabase Sync Tenants] Sincronizadas', tenantsToSync.length, 'empresas para o Supabase');
+      }
+    } catch (err) {
+      console.warn('[Supabase Sync Tenants Warning]', err);
+    }
+  }
+
   async fetchRemoteTenants() {
     if (supabaseClient) {
       try {
+        await this.syncLocalTenantsToCloud();
         const { data: dbTenants, error } = await supabaseClient.from('tenants').select('*');
         if (!error && dbTenants) {
           const storeData = this.getData();
@@ -311,10 +339,13 @@ class LocalCRMStore {
   async fetchRemoteProfiles() {
     if (supabaseClient) {
       try {
-        // 1. Push any local users (e.g. Caue or newly created team members) to Supabase Cloud
+        // 1. FIRST push local tenants to Supabase Cloud (so foreign keys exist!)
+        await this.syncLocalTenantsToCloud();
+
+        // 2. THEN push local users to Supabase Cloud
         await this.syncLocalUsersToCloud();
 
-        // 2. Fetch profiles from Supabase Cloud
+        // 3. Fetch profiles from Supabase Cloud
         const { data: dbProfiles, error } = await supabaseClient.from('profiles').select('*');
         if (!error && dbProfiles && dbProfiles.length > 0) {
           const storeData = this.getData();
