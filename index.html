@@ -10,74 +10,167 @@
   <link rel="stylesheet" href="./src/assets/css/metrifiquese-theme.css" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
   
+  <!-- Google Fonts: Alfa Slab One & Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
   <style>
-    .hero-section {
-      background: linear-gradient(135deg, #0F172A 0%, #1E293B 100%);
-      color: #FFFFFF;
-      padding: 100px 0 80px;
+    :root {
+      --brand-green: #22C55E;
+      --brand-green-hover: #16A34A;
+      --brand-dark-green: #143E2B;
+      --brand-magenta: #800A40;
+      --brand-dark-bg: #121214;
+      --brand-card-bg: #18181B;
+      --brand-border: #27272A;
+    }
+
+    body {
+      background-color: var(--brand-dark-bg) !important;
+      color: #F4F4F5 !important;
+      font-family: 'Plus Jakarta Sans', sans-serif !important;
+    }
+
+    .font-alfa {
+      font-family: 'Alfa Slab One', serif, cursive !important;
+      letter-spacing: 0.02em;
+    }
+
+    .text-emerald {
+      color: var(--brand-green) !important;
+    }
+
+    .bg-emerald {
+      background-color: var(--brand-green) !important;
+      color: #FFFFFF !important;
+    }
+
+    .bg-emerald:hover {
+      background-color: var(--brand-green-hover) !important;
+      color: #FFFFFF !important;
+    }
+
+    .bg-magenta-pill {
+      background-color: var(--brand-magenta) !important;
+      color: #FFFFFF !important;
+    }
+
+    .hero-section-dark {
+      background: radial-gradient(circle at 50% 0%, #1F2923 0%, #121214 75%);
+      padding: 120px 0 90px;
       position: relative;
-      overflow: hidden;
     }
 
-    .hero-badge {
-      background: rgba(255, 122, 89, 0.15);
-      border: 1px solid rgba(255, 122, 89, 0.4);
-      color: #FF7A59;
-      font-weight: 600;
-      padding: 6px 16px;
-      border-radius: 50px;
-      display: inline-block;
+    .brand-circle-icon {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Alfa Slab One', serif;
+      font-size: 20px;
+      color: var(--brand-green);
+      line-height: 1;
+      box-shadow: 0 4px 14px rgba(34, 197, 94, 0.2);
     }
 
-    .feature-card {
-      background: #FFFFFF;
-      border-radius: 16px;
+    .brand-circle-icon.icon-dark-green { background-color: var(--brand-dark-green); border: 2px solid #22C55E; }
+    .brand-circle-icon.icon-black { background-color: #000000; border: 2px solid #3F3F46; }
+    .brand-circle-icon.icon-magenta { background-color: var(--brand-magenta); border: 2px solid #A21CAF; }
+
+    .identity-card {
+      background: var(--brand-card-bg);
+      border: 1px solid var(--brand-border);
+      border-radius: 20px;
       padding: 32px;
-      border: 1px solid #E2E8F0;
       transition: all 0.3s ease;
     }
 
-    .feature-card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 20px 40px -15px rgba(15, 23, 42, 0.1);
-      border-color: #FF7A59;
+    .identity-card:hover {
+      border-color: var(--brand-green);
+      box-shadow: 0 10px 30px -10px rgba(34, 197, 94, 0.25);
     }
 
-    .preview-mockup-card {
-      background: #FFFFFF;
-      border-radius: 16px;
-      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-      border: 1px solid rgba(255, 255, 255, 0.1);
+    .preview-mockup-dark {
+      background: #18181B;
+      border-radius: 20px;
+      box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.7);
+      border: 1px solid var(--brand-border);
       overflow: hidden;
+    }
+
+    .btn-emerald-lg {
+      background-color: var(--brand-green) !important;
+      color: #000000 !important;
+      font-weight: 800 !important;
+      border-radius: 50px !important;
+      padding: 14px 32px !important;
+      transition: all 0.3s ease !important;
+      border: none !important;
+    }
+
+    .btn-emerald-lg:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px rgba(34, 197, 94, 0.4) !important;
+      background-color: #26E06A !important;
+    }
+
+    .btn-outline-brand {
+      border: 2px solid var(--brand-border) !important;
+      color: #F4F4F5 !important;
+      border-radius: 50px !important;
+      padding: 14px 28px !important;
+      font-weight: 700 !important;
+    }
+
+    .btn-outline-brand:hover {
+      border-color: var(--brand-green) !important;
+      color: var(--brand-green) !important;
+      background-color: rgba(34, 197, 94, 0.08) !important;
+    }
+
+    .badge-brand-highlight {
+      background: rgba(34, 197, 94, 0.12);
+      border: 1px solid rgba(34, 197, 94, 0.3);
+      color: var(--brand-green);
+      font-weight: 700;
+      padding: 8px 18px;
+      border-radius: 50px;
+      display: inline-block;
     }
   </style>
 </head>
 
 <body>
-  <!-- LANDING PAGE TOP NAVIGATION HEADER -->
-  <nav class="navbar navbar-expand-lg fixed-top bg-dark border-bottom border-dark border-opacity-50 py-3">
+  <!-- NAVIGATION NAVBAR -->
+  <nav class="navbar navbar-expand-lg fixed-top py-3" style="background-color: rgba(18, 18, 20, 0.95); backdrop-filter: blur(12px); border-bottom: 1px solid var(--brand-border);">
     <div class="container">
-      <a class="navbar-brand d-flex align-items-center" href="./index.html">
-        <img src="./src/assets/images/logos/metrifiquese.svg" height="32" alt="Metrifique-se Logo">
+      <a class="navbar-brand d-flex align-items-center gap-2 text-decoration-none" href="./index.html">
+        <div class="brand-circle-icon icon-dark-green" style="width: 36px; height: 36px; font-size: 18px;">M</div>
+        <div class="lh-1">
+          <span class="font-alfa text-emerald fs-4">Metrifique</span><span class="fw-black text-white fs-4">se</span>
+        </div>
       </a>
       
-      <button class="navbar-toggler text-white" type="button" data-bs-toggle="collapse" data-bs-target="#navHome">
-        <i class="ti ti-menu-2"></i>
+      <button class="navbar-toggler text-white border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navHome">
+        <i class="ti ti-menu-2 fs-7"></i>
       </button>
 
       <div class="collapse navbar-collapse" id="navHome">
         <ul class="navbar-nav mx-auto mb-2 mb-lg-0 fw-semibold">
-          <li class="nav-item"><a class="nav-link text-light px-3" href="#recursos">Recursos</a></li>
-          <li class="nav-item"><a class="nav-link text-light px-3" href="#whitelabel">Whitelabel</a></li>
-          <li class="nav-item"><a class="nav-link text-light px-3" href="#planos">Planos & Preços</a></li>
-          <li class="nav-item"><a class="nav-link text-light px-3" href="https://wa.me/5548910570005" target="_blank" rel="noopener"><i class="ti ti-brand-whatsapp me-1 text-success"></i>Falar no WhatsApp</a></li>
+          <li class="nav-item"><a class="nav-link text-zinc-300 px-3" href="#identidade" style="color: #D4D4D8;">Identidade Visual</a></li>
+          <li class="nav-item"><a class="nav-link text-zinc-300 px-3" href="#recursos" style="color: #D4D4D8;">Recursos</a></li>
+          <li class="nav-item"><a class="nav-link text-zinc-300 px-3" href="#planos" style="color: #D4D4D8;">Planos Whitelabel</a></li>
+          <li class="nav-item"><a class="nav-link text-emerald px-3" href="https://wa.me/5548910570005" target="_blank" rel="noopener"><i class="ti ti-brand-whatsapp me-1"></i>Contato Comercial</a></li>
         </ul>
 
         <div class="d-flex align-items-center gap-2">
-          <a href="./src/html/login.html" class="btn btn-outline-light px-4">
+          <a href="./src/html/login.html" class="btn btn-outline-brand px-4 py-2" style="padding: 8px 20px !important;">
             <i class="ti ti-lock me-1"></i> Fazer Login
           </a>
-          <a href="./src/html/index.html" class="btn btn-primary px-4">
+          <a href="./src/html/index.html" class="btn btn-emerald-lg px-4 py-2" style="padding: 8px 22px !important; color: #000 !important;">
             <i class="ti ti-layout-dashboard me-1"></i> Acessar CRM
           </a>
         </div>
@@ -86,80 +179,133 @@
   </nav>
 
   <!-- HERO SECTION -->
-  <section class="hero-section">
+  <section class="hero-section-dark">
     <div class="container pt-5">
-      <div class="row align-items-center g-5">
+      <div class="row align-items-center g-5 pt-3">
         <div class="col-lg-6">
-          <div class="hero-badge mb-3">
-            <i class="ti ti-sparkles me-1"></i> CRM Whitelabel de Leads #1 para Agências & Empresas
+          <div class="badge-brand-highlight mb-3">
+            <i class="ti ti-sparkles me-1 text-emerald"></i> CRM Whitelabel #1 para Agências & Empresas
           </div>
 
-          <h1 class="display-4 fw-extrabold mb-4 text-white">
-            Tenha seu próprio <span style="color: #FF7A59;">CRM Whitelabel</span> de Vendas e Leads
+          <h1 class="display-3 fw-black mb-3 text-white lh-sm">
+            Tenha seu próprio CRM <span class="font-alfa text-emerald d-inline-block">Metrifique<span class="text-white" style="font-family:'Plus Jakarta Sans'; font-weight:900;">se</span></span>
           </h1>
 
-          <p class="fs-4 text-slate-300 mb-4" style="color: #94A3B8;">
-            Gerencie contatos, funil Kanban comercial, automações de qualificação e ofereça a plataforma com a sua marca e no seu próprio domínio para seus clientes.
+          <p class="fs-4 text-zinc-400 mb-4" style="color: #A1A1AA; line-height: 1.6;">
+            Gerencie contatos, funil Kanban comercial e automações oferecendo a plataforma comercial mais completa do mercado sob a sua marca, suas cores e seu domínio próprio.
           </p>
 
           <div class="d-flex align-items-center gap-3 flex-wrap mb-4">
-            <a href="./src/html/login.html" class="btn btn-primary btn-lg px-4 py-3 fw-bold">
-              <i class="ti ti-rocket me-2"></i> Entrar na Plataforma CRM
+            <a href="./src/html/login.html" class="btn btn-emerald-lg d-inline-flex align-items-center gap-2">
+              <i class="ti ti-rocket fs-5"></i>
+              <span>Entrar no CRM Whitelabel</span>
             </a>
-            <a href="https://wa.me/5548910570005?text=Ol%C3%A1%21+Tenho+interesse+no+Metrifique-se+CRM+Whitelabel+e+gostaria+de+saber+mais." target="_blank" rel="noopener" class="btn btn-success btn-lg px-4 py-3 fw-bold" style="background: #25D366; border-color: #25D366;">
-              <i class="ti ti-brand-whatsapp me-2"></i> Falar com Consultor
+            <a href="https://wa.me/5548910570005?text=Ol%C3%A1%21+Tenho+interesse+no+Metrifique-se+CRM+Whitelabel+e+gostaria+de+saber+mais." target="_blank" rel="noopener" class="btn btn-outline-brand d-inline-flex align-items-center gap-2" style="border-color: #25D366 !important; color: #25D366 !important;">
+              <i class="ti ti-brand-whatsapp fs-5"></i>
+              <span>Falar no WhatsApp</span>
             </a>
           </div>
 
-          <div class="d-flex align-items-center gap-4 text-muted fs-2 pt-2">
-            <span><i class="ti ti-check text-success me-1"></i> Supabase Multi-tenant</span>
-            <span><i class="ti ti-check text-success me-1"></i> Domínio Próprio</span>
-            <span><i class="ti ti-check text-success me-1"></i> Lead Scoring</span>
+          <div class="d-flex align-items-center gap-4 text-zinc-400 fs-2 pt-2" style="color: #A1A1AA;">
+            <span><i class="ti ti-circle-check-filled text-emerald me-1"></i> Supabase Multi-tenant</span>
+            <span><i class="ti ti-circle-check-filled text-emerald me-1"></i> Domínio Próprio</span>
+            <span><i class="ti ti-circle-check-filled text-emerald me-1"></i> Lead Scoring</span>
           </div>
         </div>
 
-        <!-- MOCKUP DO CRM INTERATIVO NA HERO -->
+        <!-- MOCKUP DO CRM NA HERO COM A NOVA ID VISUAL -->
         <div class="col-lg-6">
-          <div class="preview-mockup-card p-3">
-            <div class="d-flex align-items-center justify-content-between p-2 rounded mb-3" style="background: #1E293B; color: #FFF;">
+          <div class="preview-mockup-dark p-3">
+            <div class="d-flex align-items-center justify-content-between p-3 rounded-3 mb-3" style="background: #27272A; border: 1px solid #3F3F46;">
               <div class="d-flex align-items-center gap-2">
-                <span class="badge bg-danger rounded-circle p-1"></span>
-                <span class="badge bg-warning rounded-circle p-1"></span>
-                <span class="badge bg-success rounded-circle p-1"></span>
-                <span class="fw-bold ms-2 fs-2" id="hero-preview-title">Metrifique-se CRM</span>
+                <div class="brand-circle-icon icon-dark-green" style="width:28px; height:28px; font-size:14px;">M</div>
+                <span class="font-alfa text-emerald fs-4 mb-0">Metrifique<span class="text-white" style="font-family:'Plus Jakarta Sans'; font-weight:900;">se</span></span>
               </div>
-              <small class="text-muted">Demonstração ao Vivo</small>
+              <span class="badge bg-emerald text-dark fw-bold px-2 py-1 fs-1">Demonstração ao Vivo</span>
             </div>
 
             <div class="row g-2 mb-3">
               <div class="col-6">
-                <div class="p-3 bg-light rounded border">
-                  <small class="text-muted d-block">Leads Capturados</small>
-                  <strong class="fs-5 text-dark">1.480</strong>
-                  <span class="badge bg-light-success text-success ms-2">+24%</span>
+                <div class="p-3 rounded-3 border" style="background: #202024; border-color: #27272A !important;">
+                  <small class="text-zinc-400 d-block mb-1" style="color:#A1A1AA;">Leads Capturados</small>
+                  <strong class="fs-5 text-white">1.480</strong>
+                  <span class="badge bg-emerald text-dark ms-2 fw-bold">+24%</span>
                 </div>
               </div>
               <div class="col-6">
-                <div class="p-3 bg-light rounded border">
-                  <small class="text-muted d-block">Receita em Pipeline</small>
-                  <strong class="fs-5 text-success">R$ 148.900,00</strong>
+                <div class="p-3 rounded-3 border" style="background: #202024; border-color: #27272A !important;">
+                  <small class="text-zinc-400 d-block mb-1" style="color:#A1A1AA;">Receita em Pipeline</small>
+                  <strong class="fs-5 text-emerald">R$ 148.900,00</strong>
                 </div>
               </div>
             </div>
 
-            <div class="p-3 bg-light rounded border">
+            <div class="p-3 rounded-3 border" style="background: #202024; border-color: #27272A !important;">
               <div class="d-flex align-items-center justify-content-between mb-2">
-                <span class="fw-bold text-dark fs-2"><i class="ti ti-columns me-1 text-primary"></i> Pipeline de Negócios</span>
-                <span class="badge bg-primary">Funil Ativo</span>
+                <span class="fw-bold text-white fs-2"><i class="ti ti-columns me-1 text-emerald"></i> Funil Comercial Kanban</span>
+                <span class="badge bg-emerald text-dark fw-bold">Funil Ativo</span>
               </div>
-              <div class="card p-2 border mb-0 shadow-sm">
+              <div class="p-3 rounded-3 border mb-0 shadow-sm" style="background: #18181B; border-color: #22C55E !important;">
                 <div class="d-flex justify-content-between mb-1">
-                  <span class="fw-bold text-dark fs-2">Carlos Eduardo</span>
-                  <span class="fw-bold text-success fs-2">R$ 12.500</span>
+                  <span class="fw-bold text-white fs-3">Carlos Eduardo</span>
+                  <span class="fw-bold text-emerald fs-3">R$ 12.500</span>
                 </div>
-                <small class="text-muted">Proposta de Licenciamento CRM Whitelabel</small>
+                <small class="text-zinc-400 d-block" style="color:#A1A1AA;">Proposta de Licenciamento CRM Whitelabel</small>
               </div>
             </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- SEÇÃO DE APRESENTAÇÃO DA NOVA IDENTIDADE VISUAL -->
+  <section class="py-5 border-top border-bottom" id="identidade" style="background-color: #18181B; border-color: #27272A !important;">
+    <div class="container py-4">
+      <div class="row align-items-center g-5">
+        <div class="col-lg-6">
+          <span class="badge bg-magenta-pill px-3 py-2 fs-2 mb-3"><i class="ti ti-palette me-1"></i> NOVA IDENTIDADE VISUAL</span>
+          <h2 class="display-6 fw-black text-white mb-3">
+            Design Moderno & <span class="font-alfa text-emerald">Marca Forte</span>
+          </h2>
+          <p class="fs-4 text-zinc-400 mb-4" style="color: #A1A1AA;">
+            Sua plataforma CRM com tipografia marcante, selos modulares e esquema de cores de alto impacto visual para encantar seus clientes.
+          </p>
+
+          <div class="row g-3">
+            <div class="col-4 text-center">
+              <div class="p-4 rounded-4 border d-flex flex-column align-items-center justify-content-center" style="background: #121214; border-color: #27272A !important;">
+                <div class="brand-circle-icon icon-dark-green mb-2" style="width: 54px; height: 54px; font-size: 26px;">M</div>
+                <small class="text-zinc-400 fs-1" style="color:#A1A1AA;">Dark Green</small>
+              </div>
+            </div>
+            <div class="col-4 text-center">
+              <div class="p-4 rounded-4 border d-flex flex-column align-items-center justify-content-center" style="background: #121214; border-color: #27272A !important;">
+                <div class="brand-circle-icon icon-black mb-2" style="width: 54px; height: 54px; font-size: 26px;">M</div>
+                <small class="text-zinc-400 fs-1" style="color:#A1A1AA;">Pitch Black</small>
+              </div>
+            </div>
+            <div class="col-4 text-center">
+              <div class="p-4 rounded-4 border d-flex flex-column align-items-center justify-content-center" style="background: #121214; border-color: #27272A !important;">
+                <div class="brand-circle-icon icon-magenta mb-2" style="width: 54px; height: 54px; font-size: 26px;">M</div>
+                <small class="text-zinc-400 fs-1" style="color:#A1A1AA;">Magenta Berry</small>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-lg-6">
+          <div class="p-5 rounded-4 border text-center" style="background: #121214; border-color: #27272A !important;">
+            <div class="mb-4">
+              <span class="font-alfa text-emerald display-3">Metrifique</span><span class="font-sans text-white display-3" style="font-weight: 900;">se</span>
+            </div>
+            <div class="p-3 rounded-3" style="background: #27272A;">
+              <span class="font-alfa text-emerald display-4">Metrifique</span><span class="font-sans text-dark display-4" style="font-weight: 900; color: #000000 !important;">se</span>
+            </div>
+            <p class="text-zinc-400 fs-2 mt-4 mb-0" style="color:#A1A1AA;">
+              <i class="ti ti-check text-emerald me-1"></i> Tipografia Slab Serif Serifada com contraste Sans-Serif pesado.
+            </p>
           </div>
         </div>
       </div>
@@ -168,46 +314,47 @@
 
 
   <!-- CTA WHATSAPP SECTION -->
-  <section class="py-5 bg-white border-bottom" id="whitelabel">
+  <section class="py-5 border-bottom" id="whitelabel" style="background-color: #121214; border-color: #27272A !important;">
     <div class="container py-4">
       <div class="row justify-content-center text-center mb-5">
         <div class="col-lg-8">
-          <span class="badge bg-light-success text-success px-3 py-2 fs-2 mb-2"><i class="ti ti-brand-whatsapp me-1"></i> ATENDIMENTO PERSONALIZADO</span>
-          <h2 class="fw-bold display-6">Quer o Seu CRM Whitelabel?</h2>
-          <p class="text-muted fs-4">Fale agora com um consultor especialista. Configuramos tudo para você em menos de 24 horas.</p>
-          <a href="https://wa.me/5548910570005?text=Ol%C3%A1%21+Tenho+interesse+no+Metrifique-se+CRM+Whitelabel+e+gostaria+de+saber+mais." target="_blank" rel="noopener" class="btn btn-lg px-5 py-3 fw-bold mt-2 shadow" style="background: #25D366; border-color: #25D366; color: #fff; border-radius: 50px;">
-            <i class="ti ti-brand-whatsapp me-2 fs-5"></i> Iniciar Conversa no WhatsApp
+          <span class="badge bg-emerald text-dark fw-bold px-3 py-2 fs-2 mb-3"><i class="ti ti-brand-whatsapp me-1"></i> ATENDIMENTO DIRETO NO WHATSAPP</span>
+          <h2 class="fw-black display-6 text-white mb-3">Quer o Seu CRM Whitelabel Pronto?</h2>
+          <p class="text-zinc-400 fs-4 mb-4" style="color: #A1A1AA;">Fale agora com nosso especialista comercial. Configuramos sua plataforma com seu domínio e logo em menos de 24 horas.</p>
+          <a href="https://wa.me/5548910570005?text=Ol%C3%A1%21+Tenho+interesse+no+Metrifique-se+CRM+Whitelabel+e+gostaria+de+saber+mais." target="_blank" rel="noopener" class="btn btn-emerald-lg px-5 py-3 fs-4 shadow-lg d-inline-flex align-items-center gap-2" style="background: #25D366 !important; color: #FFFFFF !important;">
+            <i class="ti ti-brand-whatsapp fs-3"></i>
+            <span>Iniciar Conversa no WhatsApp</span>
           </a>
-          <p class="text-muted fs-2 mt-3"><i class="ti ti-clock me-1"></i> Respondemos em minutos &bull; Seg – Sex, 9h às 18h</p>
+          <p class="text-zinc-400 fs-2 mt-3 mb-0" style="color:#A1A1AA;"><i class="ti ti-clock me-1 text-emerald"></i> Respondemos em minutos &bull; Seg – Sex, 9h às 18h</p>
         </div>
       </div>
 
       <div class="row g-4 justify-content-center">
         <div class="col-md-4">
-          <div class="text-center p-4 border rounded-4 h-100">
-            <div class="p-3 bg-light-success text-success rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 56px; height: 56px;">
+          <div class="identity-card text-center h-100">
+            <div class="p-3 bg-emerald text-dark rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 56px; height: 56px;">
               <i class="ti ti-headset fs-5"></i>
             </div>
-            <h6 class="fw-bold mb-2">Onboarding Guiado</h6>
-            <p class="text-muted fs-2 mb-0">Nosso time configura o CRM com a sua marca do zero, sem você precisar entender de tecnologia.</p>
+            <h5 class="fw-bold text-white mb-2">Onboarding Guiado</h5>
+            <p class="text-zinc-400 fs-2 mb-0" style="color:#A1A1AA;">Nosso time configura a plataforma com sua logo e cores do zero, sem complicação técnica.</p>
           </div>
         </div>
         <div class="col-md-4">
-          <div class="text-center p-4 border rounded-4 h-100">
-            <div class="p-3 bg-light-primary text-primary rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 56px; height: 56px;">
+          <div class="identity-card text-center h-100">
+            <div class="p-3 bg-magenta-pill text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 56px; height: 56px;">
               <i class="ti ti-palette fs-5"></i>
             </div>
-            <h6 class="fw-bold mb-2">Marca 100% Personalizada</h6>
-            <p class="text-muted fs-2 mb-0">Nome, cores, logo e domínio próprio. Seus clientes nunca saberão que é o Metrifique-se.</p>
+            <h5 class="fw-bold text-white mb-2">Marca 100% Personalizada</h5>
+            <p class="text-zinc-400 fs-2 mb-0" style="color:#A1A1AA;">Nome, cores, logotipo e domínio próprio (`crm.suaempresa.com.br`). Seus clientes usam sua marca.</p>
           </div>
         </div>
         <div class="col-md-4">
-          <div class="text-center p-4 border rounded-4 h-100">
-            <div class="p-3 bg-light-warning text-warning rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 56px; height: 56px;">
+          <div class="identity-card text-center h-100">
+            <div class="p-3 bg-emerald text-dark rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 56px; height: 56px;">
               <i class="ti ti-bolt fs-5"></i>
             </div>
-            <h6 class="fw-bold mb-2">Ativo em 24 Horas</h6>
-            <p class="text-muted fs-2 mb-0">Do primeiro contato à plataforma no ar. Processo rápido e sem burocracia.</p>
+            <h5 class="fw-bold text-white mb-2">Ativo em 24 Horas</h5>
+            <p class="text-zinc-400 fs-2 mb-0" style="color:#A1A1AA;">Do alinhamento inicial ao sistema no ar. Processo rápido e pronto para vender.</p>
           </div>
         </div>
       </div>
@@ -215,51 +362,51 @@
   </section>
 
   <!-- RECURSOS DO CRM GRID -->
-  <section class="py-5 bg-light" id="recursos">
+  <section class="py-5" id="recursos" style="background-color: #18181B;">
     <div class="container py-4">
       <div class="text-center mb-5">
-        <h2 class="fw-bold display-6 mb-2">Tudo que Você Precisa em um CRM de Leads</h2>
-        <p class="text-muted fs-4">Desenvolvido com padrões modernos de CRM comercial e automações.</p>
+        <h2 class="fw-black display-6 text-white mb-2">Tudo que Sua Operação Precisa</h2>
+        <p class="text-zinc-400 fs-4" style="color:#A1A1AA;">Recursos comerciais avançados com alta performance.</p>
       </div>
 
       <div class="row g-4">
         <div class="col-md-6 col-lg-3">
-          <div class="feature-card h-100">
-            <div class="p-3 bg-light-primary text-primary rounded-circle d-inline-block mb-3">
+          <div class="identity-card h-100">
+            <div class="p-3 bg-emerald text-dark rounded-circle d-inline-block mb-3">
               <i class="ti ti-columns fs-6"></i>
             </div>
-            <h5 class="fw-bold mb-2">Funil Kanban Interativo</h5>
-            <p class="text-muted fs-2 mb-0">Arraste negociações com Drag and Drop nativo, visualizando o valor acumulado em R$ e barras de progresso de fechamento.</p>
+            <h5 class="fw-bold text-white mb-2">Funil Kanban Interativo</h5>
+            <p class="text-zinc-400 fs-2 mb-0" style="color:#A1A1AA;">Arraste negociações com Drag and Drop nativo, acompanhando o valor total em R$ e métricas por etapa.</p>
           </div>
         </div>
 
         <div class="col-md-6 col-lg-3">
-          <div class="feature-card h-100">
-            <div class="p-3 bg-light-success text-success rounded-circle d-inline-block mb-3">
+          <div class="identity-card h-100">
+            <div class="p-3 bg-magenta-pill text-white rounded-circle d-inline-block mb-3">
               <i class="ti ti-award fs-6"></i>
             </div>
-            <h5 class="fw-bold mb-2">Lead Scoring & Qualificação</h5>
-            <p class="text-muted fs-2 mb-0">Pontuação dinâmica de contatos. Avance os leads de Lead para MQL e SQL automaticamente por engajamento.</p>
+            <h5 class="fw-bold text-white mb-2">Lead Scoring & Qualificação</h5>
+            <p class="text-zinc-400 fs-2 mb-0" style="color:#A1A1AA;">Pontuação dinâmica de contatos. Avance os leads automaticamente de acordo com o engajamento.</p>
           </div>
         </div>
 
         <div class="col-md-6 col-lg-3">
-          <div class="feature-card h-100">
-            <div class="p-3 bg-light-warning text-warning rounded-circle d-inline-block mb-3">
+          <div class="identity-card h-100">
+            <div class="p-3 bg-emerald text-dark rounded-circle d-inline-block mb-3">
               <i class="ti ti-webhook fs-6"></i>
             </div>
-            <h5 class="fw-bold mb-2">Formulários & Webhooks</h5>
-            <p class="text-muted fs-2 mb-0">Capture leads instantaneamente via Facebook Ads, Elementor, Google Ads ou formulários HTML customizáveis.</p>
+            <h5 class="fw-bold text-white mb-2">Formulários & Webhooks</h5>
+            <p class="text-zinc-400 fs-2 mb-0" style="color:#A1A1AA;">Capture leads instantaneamente via Facebook Ads, Elementor, Google Ads ou formulários HTML.</p>
           </div>
         </div>
 
         <div class="col-md-6 col-lg-3">
-          <div class="feature-card h-100">
-            <div class="p-3 bg-light-info text-info rounded-circle d-inline-block mb-3">
+          <div class="identity-card h-100">
+            <div class="p-3 bg-magenta-pill text-white rounded-circle d-inline-block mb-3">
               <i class="ti ti-database fs-6"></i>
             </div>
-            <h5 class="fw-bold mb-2">Backend Supabase Cloud</h5>
-            <p class="text-muted fs-2 mb-0">Multi-tenancy com Row Level Security (RLS) no PostgreSQL para garantir isolamento e escalabilidade enterprise.</p>
+            <h5 class="fw-bold text-white mb-2">Backend Supabase Cloud</h5>
+            <p class="text-zinc-400 fs-2 mb-0" style="color:#A1A1AA;">Arquitetura Multi-tenant com PostgreSQL e Row Level Security (RLS) para isolamento total.</p>
           </div>
         </div>
       </div>
@@ -267,52 +414,54 @@
   </section>
 
   <!-- PLANOS E PREÇOS -->
-  <section class="py-5 bg-white" id="planos">
+  <section class="py-5" id="planos" style="background-color: #121214;">
     <div class="container py-4">
       <div class="text-center mb-5">
-        <h2 class="fw-bold display-6 mb-2">Planos Whitelabel Flexíveis</h2>
-        <p class="text-muted fs-4">Escale a gestão de leads da sua empresa ou de toda a sua carteira de clientes.</p>
+        <h2 class="fw-black display-6 text-white mb-2">Planos Whitelabel Flexíveis</h2>
+        <p class="text-zinc-400 fs-4" style="color:#A1A1AA;">Escolha o plano ideal para a sua empresa ou carteira de clientes.</p>
       </div>
 
       <div class="row g-4 justify-content-center">
         <div class="col-lg-5">
-          <div class="card p-4 border shadow-sm h-100">
-            <div class="card-body">
-              <span class="badge bg-light-primary text-primary mb-2">PLANO AGÊNCIA WHITELABEL</span>
-              <h3 class="fw-bold mb-3">R$ 297 <small class="fs-3 text-muted">/mês</small></h3>
-              <p class="text-muted mb-4">Ideal para agências de tráfego, consultores e empresas em crescimento.</p>
-              
-              <ul class="list-unstyled mb-4">
-                <li class="mb-2"><i class="ti ti-check text-success me-2"></i> Até 10 Tenants / Clientes Whitelabel</li>
-                <li class="mb-2"><i class="ti ti-check text-success me-2"></i> Marca e Logo Personalizada</li>
-                <li class="mb-2"><i class="ti ti-check text-success me-2"></i> Leads Ilimitados</li>
-                <li class="mb-2"><i class="ti ti-check text-success me-2"></i> Funil Kanban Interativo</li>
-                <li class="mb-2"><i class="ti ti-check text-success me-2"></i> Webhooks & Forms de Captura</li>
-              </ul>
+          <div class="identity-card h-100 p-4">
+            <span class="badge bg-emerald text-dark fw-bold mb-3 px-3 py-2">PLANO AGÊNCIA WHITELABEL</span>
+            <h3 class="fw-black text-white mb-3">R$ 297 <small class="fs-3 text-zinc-400" style="color:#A1A1AA;">/mês</small></h3>
+            <p class="text-zinc-400 mb-4" style="color:#A1A1AA;">Ideal para agências de tráfego, consultores e empresas em crescimento.</p>
+            
+            <ul class="list-unstyled mb-4 text-zinc-300" style="color:#D4D4D8;">
+              <li class="mb-2"><i class="ti ti-check text-emerald me-2"></i> Até 10 Tenants / Clientes Whitelabel</li>
+              <li class="mb-2"><i class="ti ti-check text-emerald me-2"></i> Marca e Logo Personalizada</li>
+              <li class="mb-2"><i class="ti ti-check text-emerald me-2"></i> Leads Ilimitados</li>
+              <li class="mb-2"><i class="ti ti-check text-emerald me-2"></i> Funil Kanban Interativo</li>
+              <li class="mb-2"><i class="ti ti-check text-emerald me-2"></i> Webhooks & Forms de Captura</li>
+            </ul>
 
-              <a href="https://wa.me/5548910570005?text=Ol%C3%A1%21+Tenho+interesse+no+Plano+Ag%C3%AAncia+Whitelabel+e+gostaria+de+contratar." target="_blank" rel="noopener" class="btn btn-primary w-100 py-2 fw-bold"><i class="ti ti-brand-whatsapp me-2"></i>Quero Contratar via WhatsApp</a>
-            </div>
+            <a href="https://wa.me/5548910570005?text=Ol%C3%A1%21+Tenho+interesse+no+Plano+Ag%C3%AAncia+Whitelabel+e+gostaria+de+contratar." target="_blank" rel="noopener" class="btn btn-emerald-lg w-100 py-3 fw-bold d-inline-flex align-items-center justify-content-center gap-2">
+              <i class="ti ti-brand-whatsapp fs-5"></i>
+              <span>Quero Contratar via WhatsApp</span>
+            </a>
           </div>
         </div>
 
         <div class="col-lg-5">
-          <div class="card p-4 border border-primary shadow h-100 position-relative">
-            <span class="position-absolute top-0 end-0 bg-primary text-white fs-1 fw-bold px-3 py-1 rounded-bl">RECOMENDADO</span>
-            <div class="card-body">
-              <span class="badge bg-light-success text-success mb-2">PLANO ENTERPRISE</span>
-              <h3 class="fw-bold mb-3">R$ 597 <small class="fs-3 text-muted">/mês</small></h3>
-              <p class="text-muted mb-4">Para operações de grande escala com domínios próprios e Supabase dedicado.</p>
+          <div class="identity-card h-100 p-4 position-relative" style="border-color: #22C55E !important;">
+            <span class="position-absolute top-0 end-0 bg-magenta-pill text-white fs-1 fw-bold px-3 py-1 rounded-bl">RECOMENDADO</span>
+            <span class="badge bg-magenta-pill text-white mb-3 px-3 py-2">PLANO ENTERPRISE</span>
+            <h3 class="fw-black text-white mb-3">R$ 597 <small class="fs-3 text-zinc-400" style="color:#A1A1AA;">/mês</small></h3>
+            <p class="text-zinc-400 mb-4" style="color:#A1A1AA;">Para operações de grande escala com domínios próprios e Supabase dedicado.</p>
 
-              <ul class="list-unstyled mb-4">
-                <li class="mb-2"><i class="ti ti-check text-success me-2"></i> Tenants Ilimitados</li>
-                <li class="mb-2"><i class="ti ti-check text-success me-2"></i> CNAME Domínio Próprio (crm.suaempresa.com)</li>
-                <li class="mb-2"><i class="ti ti-check text-success me-2"></i> Supabase Dedicated Database</li>
-                <li class="mb-2"><i class="ti ti-check text-success me-2"></i> Automações & Lead Scoring Avançado</li>
-                <li class="mb-2"><i class="ti ti-check text-success me-2"></i> Suporte Prioritário VIP</li>
-              </ul>
+            <ul class="list-unstyled mb-4 text-zinc-300" style="color:#D4D4D8;">
+              <li class="mb-2"><i class="ti ti-check text-emerald me-2"></i> Tenants Ilimitados</li>
+              <li class="mb-2"><i class="ti ti-check text-emerald me-2"></i> CNAME Domínio Próprio (crm.suaempresa.com)</li>
+              <li class="mb-2"><i class="ti ti-check text-emerald me-2"></i> Supabase Dedicated Database</li>
+              <li class="mb-2"><i class="ti ti-check text-emerald me-2"></i> Automações & Lead Scoring Avançado</li>
+              <li class="mb-2"><i class="ti ti-check text-emerald me-2"></i> Suporte Prioritário VIP</li>
+            </ul>
 
-              <a href="https://wa.me/5548910570005?text=Ol%C3%A1%21+Tenho+interesse+no+Plano+Enterprise+e+gostaria+de+contratar." target="_blank" rel="noopener" class="btn btn-primary w-100 py-2 fw-bold"><i class="ti ti-brand-whatsapp me-2"></i>Contratar Enterprise via WhatsApp</a>
-            </div>
+            <a href="https://wa.me/5548910570005?text=Ol%C3%A1%21+Tenho+interesse+no+Plano+Enterprise+e+gostaria+de+contratar." target="_blank" rel="noopener" class="btn btn-emerald-lg w-100 py-3 fw-bold d-inline-flex align-items-center justify-content-center gap-2">
+              <i class="ti ti-brand-whatsapp fs-5"></i>
+              <span>Contratar Enterprise via WhatsApp</span>
+            </a>
           </div>
         </div>
       </div>
@@ -320,27 +469,31 @@
   </section>
 
   <!-- FOOTER -->
-  <footer class="bg-dark text-light py-5 border-top border-dark">
+  <footer class="py-5 border-top" style="background-color: #0E0E10; border-color: #27272A !important;">
     <div class="container">
-      <div class="row g-4">
+      <div class="row g-4 align-items-center">
         <div class="col-md-6">
-          <img src="./src/assets/images/logos/metrifiquese.svg" height="32" alt="Logo" class="mb-3">
-          <p class="text-muted mb-0">Metrifique-se CRM Whitelabel — A solução definitiva para gestão de Leads, Funil Kanban e Automações.</p>
+          <div class="d-flex align-items-center gap-2 mb-2">
+            <div class="brand-circle-icon icon-dark-green" style="width: 32px; height: 32px; font-size: 16px;">M</div>
+            <span class="font-alfa text-emerald fs-4">Metrifique</span><span class="fw-black text-white fs-4">se</span>
+          </div>
+          <p class="text-zinc-400 mb-0 fs-2" style="color:#A1A1AA;">Metrifique-se CRM Whitelabel — A solução definitiva para gestão de Leads, Funil Kanban e Automações.</p>
         </div>
         <div class="col-md-6 text-md-end">
-          <a href="./src/html/login.html" class="btn btn-outline-light me-2">Fazer Login</a>
-          <a href="https://wa.me/5548910570005?text=Ol%C3%A1%21+Gostaria+de+saber+mais+sobre+o+Metrifique-se+CRM." target="_blank" rel="noopener" class="btn btn-success" style="background: #25D366; border-color: #25D366;"><i class="ti ti-brand-whatsapp me-1"></i>WhatsApp</a>
+          <a href="./src/html/login.html" class="btn btn-outline-brand px-4 me-2">Fazer Login</a>
+          <a href="https://wa.me/5548910570005?text=Ol%C3%A1%21+Gostaria+de+saber+mais+sobre+o+Metrifique-se+CRM." target="_blank" rel="noopener" class="btn btn-emerald-lg px-4" style="background: #25D366 !important; color: #FFF !important;">
+            <i class="ti ti-brand-whatsapp me-1"></i> WhatsApp
+          </a>
         </div>
       </div>
-      <hr class="my-4 border-secondary">
-      <div class="text-center text-muted fs-2">
+      <hr class="my-4" style="border-color: #27272A;">
+      <div class="text-center text-zinc-500 fs-2" style="color:#71717A;">
         © 2026 Metrifique-se. Todos os direitos reservados.
       </div>
     </div>
   </footer>
 
   <script src="./src/assets/libs/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-
 </body>
 
 </html>
