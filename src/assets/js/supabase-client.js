@@ -196,6 +196,7 @@ class LocalCRMStore {
   async ensureDefaultCloudData() {
     if (!supabaseClient) return;
     try {
+      const data = this.getData();
       const masterTenant = INITIAL_DEMO_DATA.tenants[0];
       await supabaseClient.from('tenants').upsert([masterTenant]);
 
@@ -206,9 +207,34 @@ class LocalCRMStore {
         full_name: masterUser.full_name,
         email: masterUser.email,
         role: masterUser.role,
+        crm_role: 'admin',
+        password: masterUser.password || '12345678',
         avatar_url: masterUser.avatar_url
       };
       await supabaseClient.from('profiles').upsert([profilePayload]);
+
+      // Sync default pipelines and stages to prevent FK errors when deals are created
+      const pipelines = (data.pipelines || INITIAL_DEMO_DATA.pipelines || []).map(p => ({
+        id: p.id,
+        tenant_id: p.tenant_id,
+        name: p.name,
+        is_default: p.is_default !== false
+      }));
+      if (pipelines.length > 0) {
+        await supabaseClient.from('pipelines').upsert(pipelines);
+      }
+
+      const stages = (data.stages || INITIAL_DEMO_DATA.stages || []).map(s => ({
+        id: s.id,
+        pipeline_id: s.pipeline_id,
+        tenant_id: s.tenant_id,
+        name: s.name,
+        display_order: s.display_order || 1,
+        color: s.color || '#5D87FF'
+      }));
+      if (stages.length > 0) {
+        await supabaseClient.from('pipeline_stages').upsert(stages);
+      }
     } catch (e) {
       console.warn('[Supabase Cloud Auto-seed]', e);
     }
