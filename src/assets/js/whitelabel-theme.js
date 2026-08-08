@@ -85,16 +85,63 @@ class WhitelabelThemeEngine {
     const user = window.crmStore.getUser();
 
     this.updateUserHeaderUI(user);
+    this.applyRoleBasedUI();
 
     if (typeof window !== 'undefined' && !window._profileSyncedListenerAttached) {
       window._profileSyncedListenerAttached = true;
       window.addEventListener('profile-synced', () => {
         if (window.crmStore) {
           this.updateUserHeaderUI(window.crmStore.getUser());
+          this.applyRoleBasedUI();
         }
       });
     }
   }
+
+  applyRoleBasedUI() {
+    if (!window.crmStore) return;
+    const isAdmin = window.crmStore.isAdmin();
+    const isSuperAdmin = window.crmStore.isSuperAdmin();
+
+    // Hide admin-tenants from non super admins
+    document.querySelectorAll('a[href*="admin-tenants.html"]').forEach(link => {
+      const sidebarItem = link.closest('.sidebar-item');
+      const li = link.closest('li');
+      const show = isSuperAdmin;
+      if (sidebarItem) sidebarItem.style.display = show ? '' : 'none';
+      if (li) li.style.display = show ? '' : 'none';
+    });
+
+    // Hide whitelabel config from non admins
+    if (!isAdmin) {
+      document.querySelectorAll('a[href*="configuracoes-whitelabel.html"]').forEach(link => {
+        const sidebarItem = link.closest('.sidebar-item');
+        if (sidebarItem) sidebarItem.style.display = 'none';
+        const li = link.closest('li');
+        if (li && li.closest('.dropdown-menu')) li.style.display = 'none';
+      });
+    }
+
+    // If vendedor tries to access admin-only pages, redirect
+    if (!isSuperAdmin && window.location.pathname.includes('admin-tenants.html')) {
+      alert('Acesso negado: Esta área é restrita ao administrador master da plataforma.');
+      window.location.href = './dashboard.html';
+    }
+
+    if (!isAdmin && window.location.pathname.includes('configuracoes-whitelabel.html')) {
+      alert('Acesso negado: Configurações whitelabel são restritas a administradores.');
+      window.location.href = './dashboard.html';
+    }
+
+    // Show inspection banner for super admin viewing tenant
+    if (isSuperAdmin) {
+      const activeTenantId = window.crmStore.getActiveTenantId();
+      if (activeTenantId !== 'tenant-demo-001' && !window.location.pathname.includes('admin-tenants.html')) {
+        this.injectInspectionBanner();
+      }
+    }
+  }
+
 
   updateUserHeaderUI(user) {
     if (!user) return;

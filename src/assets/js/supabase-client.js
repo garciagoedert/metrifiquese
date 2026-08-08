@@ -654,7 +654,91 @@ class LocalCRMStore {
     this.saveData(data);
   }
 
-  // --- AUTHENTICATION & LOGIN ---
+  // --- PERMISSIONS & ROLES (admin / vendedor) ---
+
+  /**
+   * Returns the CRM role of the current user within their tenant.
+   * Roles: 'super_admin' | 'admin' | 'vendedor'
+   */
+  getUserCrmRole() {
+    const user = this.getUser();
+    if (!user) return 'vendedor';
+    if (user.is_super_admin) return 'super_admin';
+    if (user.crm_role) return user.crm_role;
+    // Legacy role strings mapping
+    const role = (user.role || '').toLowerCase();
+    if (role.includes('admin') || role.includes('dono') || role.includes('diret') || role.includes('proprietário')) return 'admin';
+    return 'vendedor';
+  }
+
+  isAdmin() {
+    const r = this.getUserCrmRole();
+    return r === 'admin' || r === 'super_admin';
+  }
+
+  isSuperAdmin() {
+    return this.getUserCrmRole() === 'super_admin';
+  }
+
+  /**
+   * Check if the current user can access a specific feature.
+   * Features: 'delete_lead' | 'delete_deal' | 'whitelabel_config' | 'reports' | 'admin_panel' | 'invite_users'
+   */
+  canAccess(feature) {
+    const role = this.getUserCrmRole();
+    const adminFeatures = ['delete_lead', 'delete_deal', 'whitelabel_config', 'admin_panel', 'invite_users'];
+    const allFeatures   = ['leads', 'kanban', 'reports', 'automations'];
+
+    if (role === 'super_admin') return true;
+    if (role === 'admin') return true; // admin can do everything within tenant
+    // vendedor restricted
+    if (adminFeatures.includes(feature)) return false;
+    return true;
+  }
+
+  /**
+   * Invite a new team member to the current tenant.
+   * crm_role: 'admin' | 'vendedor'
+   */
+  inviteTeamMember({ fullName, email, crmRole = 'vendedor' }) {
+    const tenantId = this.getActiveTenantId();
+    const data = this.getData();
+
+    // Check for duplicate email
+    if ((data.users || []).some(u => u.email.toLowerCase() === email.toLowerCase())) {
+      throw new Error('Este e-mail já está cadastrado.');
+    }
+
+    const newUser = {
+      id: 'user-' + Date.now(),
+      tenant_id: tenantId,
+      full_name: fullName,
+      email: email,
+      password: 'senha123',
+      phone: '',
+      role: crmRole === 'admin' ? 'Administrador' : 'Vendedor',
+      crm_role: crmRole,
+      is_super_admin: false,
+      avatar_url: '/src/assets/images/profile/user-1.jpg',
+      invited_at: new Date().toISOString()
+    };
+
+    if (!data.users) data.users = [];
+    data.users.push(newUser);
+    this.saveData(data);
+    return newUser;
+  }
+
+  updateUserRole(userId, newCrmRole) {
+    const data = this.getData();
+    const user = (data.users || []).find(u => u.id === userId);
+    if (user) {
+      user.crm_role = newCrmRole;
+      user.role = newCrmRole === 'admin' ? 'Administrador' : 'Vendedor';
+      this.saveData(data);
+    }
+  }
+
 
   async loginWithEmail(email, password) {
     const data = this.getData();

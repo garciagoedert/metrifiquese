@@ -199,6 +199,80 @@
           </div>
         </div>
       </div>
+
+      <!-- Team Members Section (visible to admins only) -->
+      <div class="row mt-4" id="team-members-section" style="display:none;">
+        <div class="col-12">
+          <div class="card shadow-sm border-0">
+            <div class="card-body p-4">
+              <div class="d-flex align-items-center justify-content-between mb-4">
+                <div>
+                  <h5 class="fw-bold mb-1"><i class="ti ti-users text-primary me-2"></i>Membros da Equipe</h5>
+                  <p class="text-muted fs-2 mb-0">Gerencie quem tem acesso ao CRM da sua empresa</p>
+                </div>
+                <button class="btn btn-primary d-inline-flex align-items-center gap-2 fw-bold" data-bs-toggle="modal" data-bs-target="#inviteUserModal" id="invite-user-btn" style="display:none!important;">
+                  <i class="ti ti-user-plus"></i> Convidar Usuário
+                </button>
+              </div>
+              <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                  <thead class="bg-light">
+                    <tr>
+                      <th style="width:35%">Usuário</th>
+                      <th style="width:25%">E-mail</th>
+                      <th style="width:20%">Permissão</th>
+                      <th style="width:20%" class="text-end">Ações</th>
+                    </tr>
+                  </thead>
+                  <tbody id="team-members-table-body">
+                    <tr><td colspan="4" class="text-center text-muted py-4">Carregando...</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Modal Convidar Usuário -->
+  <div class="modal fade" id="inviteUserModal" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title fw-bold"><i class="ti ti-user-plus text-primary me-2"></i> Convidar Usuário</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <form id="invite-user-form">
+          <div class="modal-body">
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Nome Completo *</label>
+              <input type="text" id="invite-name-input" class="form-control" placeholder="Ex: João Vendedor" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-semibold">E-mail *</label>
+              <input type="email" id="invite-email-input" class="form-control" placeholder="joao@empresa.com" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Nível de Acesso *</label>
+              <select id="invite-role-select" class="form-select">
+                <option value="vendedor">🔵 Vendedor — acessa leads e kanban</option>
+                <option value="admin">🔴 Administrador — acesso total ao tenant</option>
+              </select>
+            </div>
+            <div class="alert alert-light border fs-2">
+              <i class="ti ti-info-circle me-1 text-primary"></i>
+              A senha padrão criada será <strong>senha123</strong>. O usuário deverá alterá-la no primeiro acesso em Meu Perfil.
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
+            <button type="submit" class="btn btn-primary">Convidar Usuário</button>
+          </div>
+        </form>
+      </div>
     </div>
   </div>
 
@@ -311,6 +385,104 @@
         alert('Perfil e foto atualizados com sucesso!');
         location.reload();
       });
+
+      // ── TEAM MEMBERS SECTION ──────────────────────────────────────────
+      function renderTeamMembers() {
+        const isAdmin = window.crmStore && window.crmStore.isAdmin();
+        const teamSection = document.getElementById('team-members-section');
+        const inviteBtn = document.getElementById('invite-user-btn');
+
+        if (isAdmin && teamSection) {
+          teamSection.style.display = 'block';
+          if (inviteBtn) inviteBtn.style.removeProperty('display');
+        }
+
+        const tbody = document.getElementById('team-members-table-body');
+        if (!tbody || !window.crmStore) return;
+
+        const tenantId = window.crmStore.getActiveTenantId();
+        const members  = window.crmStore.getUsersByTenant(tenantId);
+        const currentUser = window.crmStore.getUser();
+
+        if (members.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="4" class="text-center text-muted py-4">Nenhum membro neste tenant.</td></tr>`;
+          return;
+        }
+
+        const roleBadge = (u) => {
+          if (u.is_super_admin) return '<span class="badge bg-danger text-white">Super Admin</span>';
+          const r = u.crm_role || (u.role && u.role.toLowerCase().includes('admin') ? 'admin' : 'vendedor');
+          return r === 'admin'
+            ? '<span class="badge bg-warning-subtle text-warning border border-warning">Admin</span>'
+            : '<span class="badge bg-info-subtle text-info border border-info">Vendedor</span>';
+        };
+
+        tbody.innerHTML = members.map(member => `
+          <tr>
+            <td>
+              <div class="d-flex align-items-center gap-2">
+                <img src="${member.avatar_url || '../assets/images/profile/user-1.jpg'}" width="36" height="36" class="rounded-circle object-fit-cover border" onerror="this.src='../assets/images/profile/user-1.jpg'">
+                <div>
+                  <div class="fw-semibold text-dark">${member.full_name}</div>
+                  <small class="text-muted">${member.phone || ''}</small>
+                </div>
+              </div>
+            </td>
+            <td><small class="text-muted">${member.email}</small></td>
+            <td>${roleBadge(member)}</td>
+            <td class="text-end">
+              ${isAdmin && !member.is_super_admin && member.id !== (currentUser && currentUser.id) ? `
+                <div class="d-inline-flex gap-1">
+                  <select class="form-select form-select-sm" style="width:130px;" onchange="changeRole('${member.id}', this.value)">
+                    <option value="vendedor" ${(!member.crm_role || member.crm_role === 'vendedor') ? 'selected' : ''}>Vendedor</option>
+                    <option value="admin" ${member.crm_role === 'admin' ? 'selected' : ''}>Admin</option>
+                  </select>
+                  <button class="btn btn-sm btn-outline-danger" onclick="removeMember('${member.id}')" title="Remover acesso">
+                    <i class="ti ti-trash"></i>
+                  </button>
+                </div>
+              ` : '<span class="text-muted fs-2">—</span>'}
+            </td>
+          </tr>
+        `).join('');
+      }
+
+      function changeRole(userId, newRole) {
+        if (window.crmStore) {
+          window.crmStore.updateUserRole(userId, newRole);
+          renderTeamMembers();
+        }
+      }
+
+      function removeMember(userId) {
+        if (confirm('Remover este usuário do tenant? Ele perderá o acesso ao CRM.')) {
+          window.crmStore.deleteUserFromTenant(userId);
+          renderTeamMembers();
+        }
+      }
+
+      const inviteForm = document.getElementById('invite-user-form');
+      if (inviteForm) {
+        inviteForm.addEventListener('submit', (e) => {
+          e.preventDefault();
+          const fullName = document.getElementById('invite-name-input').value.trim();
+          const email    = document.getElementById('invite-email-input').value.trim();
+          const crmRole  = document.getElementById('invite-role-select').value;
+
+          try {
+            window.crmStore.inviteTeamMember({ fullName, email, crmRole });
+            const modalEl = document.getElementById('inviteUserModal');
+            if (modalEl) { const inst = bootstrap.Modal.getInstance(modalEl); if (inst) inst.hide(); }
+            inviteForm.reset();
+            renderTeamMembers();
+            alert(`✅ Usuário ${fullName} convidado com sucesso!\nE-mail: ${email}\nSenha padrão: senha123`);
+          } catch (err) {
+            alert('❌ ' + err.message);
+          }
+        });
+      }
+
+      renderTeamMembers();
     });
   </script>
 </body>

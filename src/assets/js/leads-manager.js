@@ -372,7 +372,7 @@ class LeadsManager {
       `;
     }
 
-    return activities.map(act => {
+    return activities.map((act, idx) => {
       const iconMap = {
         note: 'ti-message-dots text-primary',
         email: 'ti-mail text-info',
@@ -381,15 +381,33 @@ class LeadsManager {
         meeting: 'ti-calendar text-success'
       };
 
+      const now = new Date();
+      let dueBadge = '';
+      if (act.due_date) {
+        const dt = new Date(act.due_date);
+        const isOverdue = dt < now && !act.done;
+        const fmt = dt.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+        dueBadge = isOverdue
+          ? `<span class="badge bg-danger-subtle text-danger ms-2"><i class="ti ti-clock me-1"></i>${fmt}</span>`
+          : `<span class="badge bg-light text-muted ms-2"><i class="ti ti-calendar me-1"></i>${fmt}</span>`;
+      }
+
+      const doneStyle = act.done ? 'opacity-60' : '';
+      const doneDecor = act.done ? 'text-decoration-line-through text-muted' : 'text-dark';
+
       return `
-        <div class="card mb-3 border shadow-none">
+        <div class="card mb-3 border shadow-none ${doneStyle}">
           <div class="card-body p-3">
             <div class="d-flex align-items-start gap-2">
               <i class="ti ${iconMap[act.type] || 'ti-notes text-primary'} fs-5 mt-1 me-1"></i>
               <div class="flex-grow-1">
-                <div class="d-flex justify-content-between fs-2 text-muted mb-1">
-                  <strong class="text-dark">${act.title || 'Atividade'}</strong>
-                  <span>${act.date || 'Recente'}</span>
+                <div class="d-flex justify-content-between align-items-center fs-2 text-muted mb-1">
+                  <strong class="${doneDecor}">${act.title || 'Atividade'}${dueBadge}</strong>
+                  <div class="d-flex gap-1 align-items-center">
+                    <span>${act.date || 'Recente'}</span>
+                    ${act.type === 'task' && !act.done ? `<button class="btn btn-sm btn-outline-success p-1 ms-2" style="line-height:1" title="Marcar concluída" onclick="window.tasksManager && window.tasksManager.markTaskDone('${lead.id}', ${idx})"><i class="ti ti-check fs-3"></i></button>` : ''}
+                    ${act.done ? '<span class="badge bg-success-subtle text-success ms-1">Concluída</span>' : ''}
+                  </div>
                 </div>
                 <p class="mb-0 fs-2 text-muted">${act.desc}</p>
               </div>
@@ -401,20 +419,10 @@ class LeadsManager {
   }
 
   promptAddActivity(leadId, type) {
-    const title = prompt('Título da atividade / nota:');
-    if (!title) return;
-
-    const desc = prompt('Descrição detalhada:');
-    if (!desc) return;
-
-    const activity = {
-      type,
-      title: title.trim(),
-      desc: desc.trim()
-    };
-
-    window.crmStore.addLeadActivity(leadId, activity);
-    this.openLeadModal(leadId);
+    // Delegate to TasksManager modal (replaces prompt())
+    if (window.tasksManager) {
+      window.tasksManager.openTaskModal(leadId, type);
+    }
   }
 
   editLeadPrompt(leadId) {
@@ -448,6 +456,156 @@ class LeadsManager {
       this.renderLeadsTable();
     }
   }
+
+  // ── CSV EXPORT ────────────────────────────────────────────────────────
+  exportCSV() {
+    const leads = window.crmStore ? window.crmStore.getLeads() : [];
+    if (leads.length === 0) { alert('Nenhum contato para exportar.'); return; }
+
+    const headers = ['nome', 'email', 'telefone', 'empresa', 'cargo', 'origem', 'estagio', 'score'];
+    const rows = leads.map(l => [
+      `"${(l.name || '').replace(/"/g, '""')}"`,
+      `"${(l.email || '').replace(/"/g, '""')}"`,
+      `"${(l.phone || '').replace(/"/g, '""')}"`,
+      `"${(l.company || '').replace(/"/g, '""')}"`,
+      `"${(l.job_title || '').replace(/"/g, '""')}"`,
+      `"${(l.source || '').replace(/"/g, '""')}"`,
+      `"${(l.lifecycle_stage || '').replace(/"/g, '""')}"`,
+      l.score || 0
+    ].join(','));
+
+    const csv = [headers.join(','), ...rows].join('\n');
+    const blob = new Blob(["\uFEFF" + csv], { type: 'text/csv;charset=utf-8;' });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href     = url;
+    a.download = `contatos_crm_${new Date().toISOString().slice(0,10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  // ── CSV DOWNLOAD TEMPLATE ─────────────────────────────────────────────
+  downloadCSVTemplate() {
+    const csv = 'nome,email,telefone,empresa,origem\nJoão Silva,joao@empresa.com,(11) 99999-0000,Empresa XYZ,Google Ads\nMaria Souza,maria@empresa.com,(21) 98888-1111,Tech Corp,Facebook Ads';
+    const blob = new Blob(["\uFEFF" + csv], { type: 'text/csv;charset=utf-8;' });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href     = url;
+    a.download = 'modelo_importacao_contatos.csv';
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  // ── CSV IMPORT ────────────────────────────────────────────────────────
+  initCSVFileInput() {
+    const fileInput = document.getElementById('csv-file-input');
+    if (!fileInput || fileInput.dataset.bound) return;
+    fileInput.dataset.bound = 'true';
+
+    fileInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (ev) => this.parseCSVPreview(ev.target.result);
+      reader.readAsText(file, 'UTF-8');
+    });
+  }
+
+  parseCSVPreview(text) {
+    const lines = text.split(/\r?\n/).filter(l => l.trim());
+    if (lines.length < 2) { alert('Arquivo CSV vazio ou inválido.'); return; }
+
+    // Detect separator
+    const sep = lines[0].includes(';') ? ';' : ',';
+
+    // Parse rows, skip header
+    const rows = lines.slice(1).map(line => {
+      const cols = line.split(sep).map(c => c.trim().replace(/^"(.*)"$/, '$1'));
+      return {
+        name:    cols[0] || '',
+        email:   cols[1] || '',
+        phone:   cols[2] || '',
+        company: cols[3] || '',
+        source:  cols[4] || 'CSV Import'
+      };
+    }).filter(r => r.name && r.email);
+
+    if (rows.length === 0) { alert('Nenhum contato válido encontrado. Verifique se nome e email estão preenchidos.'); return; }
+
+    window._csvImportRows = rows;
+
+    // Show preview
+    document.getElementById('csv-step-upload').style.display = 'none';
+    document.getElementById('csv-step-preview').style.display = 'block';
+    document.getElementById('csv-preview-count').innerText = rows.length + ' contato' + (rows.length > 1 ? 's' : '') + ' encontrado' + (rows.length > 1 ? 's' : '');
+    document.getElementById('csv-import-confirm-btn').classList.remove('d-none');
+
+    const tbody = document.getElementById('csv-preview-body');
+    if (tbody) {
+      tbody.innerHTML = rows.slice(0, 20).map(r => `
+        <tr>
+          <td>${r.name}</td>
+          <td>${r.email}</td>
+          <td>${r.phone}</td>
+          <td>${r.company}</td>
+          <td>${r.source}</td>
+        </tr>
+      `).join('') + (rows.length > 20 ? `<tr><td colspan="5" class="text-center text-muted">… e mais ${rows.length - 20} contatos</td></tr>` : '');
+    }
+  }
+
+  resetCSVImport() {
+    window._csvImportRows = [];
+    document.getElementById('csv-step-upload').style.display = 'block';
+    document.getElementById('csv-step-preview').style.display = 'none';
+    document.getElementById('csv-import-confirm-btn').classList.add('d-none');
+    const fileInput = document.getElementById('csv-file-input');
+    if (fileInput) fileInput.value = '';
+  }
+
+  confirmCSVImport() {
+    const rows = window._csvImportRows || [];
+    if (rows.length === 0) { alert('Nenhum contato para importar.'); return; }
+
+    const skipDuplicates = document.getElementById('csv-skip-duplicates')?.checked !== false;
+    const existingEmails = (window.crmStore ? window.crmStore.getLeads() : []).map(l => (l.email || '').toLowerCase());
+
+    let imported = 0;
+    const toImport = rows.filter(r => !skipDuplicates || !existingEmails.includes(r.email.toLowerCase()));
+
+    toImport.forEach(r => {
+      window.crmStore.saveLead({
+        name:            r.name,
+        email:           r.email,
+        phone:           r.phone,
+        company:         r.company,
+        lifecycle_stage: 'lead',
+        score:           10,
+        source:          r.source || 'CSV Import',
+        tags:            ['Importado CSV']
+      });
+      imported++;
+    });
+
+    // Close modal
+    const modalEl = document.getElementById('importCSVModal');
+    if (modalEl) { const inst = bootstrap.Modal.getInstance(modalEl); if (inst) inst.hide(); }
+
+    this.resetCSVImport();
+    this.renderLeadsTable();
+
+    alert(`✅ ${imported} contato${imported > 1 ? 's' : ''} importado${imported > 1 ? 's' : ''} com sucesso!${skipDuplicates && rows.length > imported ? `\n⚠️ ${rows.length - imported} ignorado${rows.length - imported > 1 ? 's' : ''} (e-mails já existentes).` : ''}`);
+  }
 }
 
 window.leadsManager = new LeadsManager();
+
+// Init CSV file input whenever the import modal is opened
+document.addEventListener('DOMContentLoaded', () => {
+  const importModal = document.getElementById('importCSVModal');
+  if (importModal) {
+    importModal.addEventListener('show.bs.modal', () => {
+      if (window.leadsManager) window.leadsManager.initCSVFileInput();
+    });
+  }
+});
