@@ -263,9 +263,19 @@ class LocalCRMStore {
         const { data: dbDeals, error } = await supabaseClient.from('deals').select('*');
         if (!error && dbDeals) {
           const storeData = this.getData();
-          const hasChanged = JSON.stringify(storeData.deals || []) !== JSON.stringify(dbDeals);
+          const localDeals = storeData.deals || [];
+
+          // Merge local deals that might be pending sync
+          const mergedDeals = [...dbDeals];
+          localDeals.forEach(ld => {
+            if (!mergedDeals.some(rd => rd.id === ld.id)) {
+              mergedDeals.push(ld);
+            }
+          });
+
+          const hasChanged = JSON.stringify(storeData.deals || []) !== JSON.stringify(mergedDeals);
           if (hasChanged) {
-            storeData.deals = dbDeals;
+            storeData.deals = mergedDeals;
             this.saveData(storeData);
             if (typeof window !== 'undefined') {
               window.dispatchEvent(new CustomEvent('deals-synced', { detail: storeData.deals }));
@@ -1177,9 +1187,15 @@ class LocalCRMStore {
   saveDeal(deal) {
     const data = this.getData();
     const tenantId = this.getActiveTenantId();
+
+    // Ensure tenant's default pipeline & stages are initialized and persisted
+    const stages = this.getStages();
+    const tenantPipeId = 'pipe-' + tenantId;
+
     if (!deal.id) {
       deal.id = 'deal-' + Date.now();
       deal.tenant_id = tenantId;
+      deal.pipeline_id = tenantPipeId;
       deal.created_at = new Date().toISOString();
       if (!data.deals) data.deals = [];
       data.deals.unshift(deal);
@@ -1189,6 +1205,7 @@ class LocalCRMStore {
         message: `${deal.title} no valor de R$ ${parseFloat(deal.value).toLocaleString('pt-BR')} foi criada.`
       });
     } else {
+      deal.pipeline_id = deal.pipeline_id || tenantPipeId;
       const idx = data.deals.findIndex(d => d.id === deal.id);
       if (idx !== -1) data.deals[idx] = { ...data.deals[idx], ...deal };
     }
@@ -1196,17 +1213,31 @@ class LocalCRMStore {
 
     if (supabaseClient) {
       try {
-        const payload = {
-          id: deal.id,
-          tenant_id: deal.tenant_id || tenantId,
-          lead_id: deal.lead_id,
-          pipeline_id: deal.pipeline_id || ('pipe-' + (deal.tenant_id || tenantId)),
-          stage_id: deal.stage_id,
-          title: deal.title,
-          value: parseFloat(deal.value) || 0,
-          status: deal.status || 'open'
+        const tenantPipe = (data.pipelines || []).find(p => p.tenant_id === tenantId) || {
+          id: tenantPipeId, tenant_id: tenantId, name: 'Funil de Vendas Inbound', is_default: true
         };
-        supabaseClient.from('deals').upsert([payload]).then();
+
+        // Guarantee parent pipeline and stages exist in Supabase BEFORE inserting deal
+        supabaseClient.from('pipelines').upsert([tenantPipe]).then(() => {
+          if (stages && stages.length > 0) {
+            supabaseClient.from('pipeline_stages').upsert(stages).then(() => {
+              const payload = {
+                id: deal.id,
+                tenant_id: deal.tenant_id || tenantId,
+                lead_id: deal.lead_id || null,
+                pipeline_id: deal.pipeline_id || tenantPipeId,
+                stage_id: deal.stage_id,
+                title: deal.title,
+                value: parseFloat(deal.value) || 0,
+                status: deal.status || 'open'
+              };
+              supabaseClient.from('deals').upsert([payload]).then(({ error }) => {
+                if (error) console.warn('[Supabase Sync Deal Error]', error);
+                else console.log('[Supabase Sync Deal Success]', deal.id);
+              });
+            });
+          }
+        });
       } catch (e) {
         console.warn('[Supabase Sync] Falha ao salvar oportunidade:', e);
       }
@@ -1250,16 +1281,36 @@ class LocalCRMStore {
 
   getStages() {
     const tenantId = this.getActiveTenantId();
-    const allStages = this.getData().stages || [];
-    const tenantStages = allStages.filter(s => s.tenant_id === tenantId);
+    const data = this.getData();
+    const allStages = data.stages || [];
+    let tenantStages = allStages.filter(s => s.tenant_id === tenantId);
 
     if (tenantStages.length === 0) {
-      return [
-        { id: 'stage-def-1', tenant_id: tenantId, pipeline_id: 'pipe-1', name: 'Novo Lead', display_order: 1, color: '#5D87FF' },
-        { id: 'stage-def-2', tenant_id: tenantId, pipeline_id: 'pipe-1', name: 'Em Atendimento', display_order: 2, color: '#FFAE1F' },
-        { id: 'stage-def-3', tenant_id: tenantId, pipeline_id: 'pipe-1', name: 'Proposta Enviada', display_order: 3, color: '#FA896B' },
-        { id: 'stage-def-4', tenant_id: tenantId, pipeline_id: 'pipe-1', name: 'Fechado/Ganho', display_order: 4, color: '#13DEB9' }
+      const pipelineId = 'pipe-' + tenantId;
+
+      if (!data.pipelines) data.pipelines = [];
+      let tenantPipe = data.pipelines.find(p => p.tenant_id === tenantId);
+      if (!tenantPipe) {
+        tenantPipe = { id: pipelineId, tenant_id: tenantId, name: 'Funil de Vendas Inbound', is_default: true };
+        data.pipelines.push(tenantPipe);
+      }
+
+      tenantStages = [
+        { id: 'stage-' + tenantId + '-1', tenant_id: tenantId, pipeline_id: pipelineId, name: 'Novo Lead', display_order: 1, color: '#5D87FF' },
+        { id: 'stage-' + tenantId + '-2', tenant_id: tenantId, pipeline_id: pipelineId, name: 'Em Atendimento', display_order: 2, color: '#FFAE1F' },
+        { id: 'stage-' + tenantId + '-3', tenant_id: tenantId, pipeline_id: pipelineId, name: 'Proposta Enviada', display_order: 3, color: '#FA896B' },
+        { id: 'stage-' + tenantId + '-4', tenant_id: tenantId, pipeline_id: pipelineId, name: 'Fechado/Ganho', display_order: 4, color: '#13DEB9' }
       ];
+
+      if (!data.stages) data.stages = [];
+      data.stages.push(...tenantStages);
+      this.saveData(data);
+
+      if (supabaseClient) {
+        supabaseClient.from('pipelines').upsert([tenantPipe]).then(() => {
+          supabaseClient.from('pipeline_stages').upsert(tenantStages).then();
+        });
+      }
     }
     return tenantStages;
   }
