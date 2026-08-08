@@ -5,128 +5,247 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Login & Autenticação | Metrifique-se CRM Whitelabel</title>
-  <link rel="shortcut icon" type="image/png" href="../assets/images/logos/favicon.svg" />
+  <link rel="shortcut icon" type="image/png" href="../assets/images/logos/icon.png" />
   <link rel="stylesheet" href="../assets/css/styles.min.css" />
   <link rel="stylesheet" href="../assets/css/metrifiquese-theme.css" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
   
+  <!-- Google Fonts: Alfa Slab One & Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="../assets/js/supabase-client.js"></script>
   <script src="../assets/js/whitelabel-theme.js"></script>
   
   <style>
-    .login-wrapper {
-      min-height: 100vh;
-      background-color: #F8FAFC;
+    :root {
+      --brand-green: #22C55E;
+      --brand-green-hover: #16A34A;
+      --brand-dark-green: #143E2B;
+      --brand-magenta: #800A40;
+      --brand-dark-bg: #121214;
+      --brand-card-bg: #18181B;
+      --brand-border: #27272A;
     }
-    
-    .login-banner {
-      background: linear-gradient(135deg, #0F172A 0%, #1E293B 100%);
+
+    body {
+      background-color: var(--brand-dark-bg) !important;
+      color: #F4F4F5 !important;
+      font-family: 'Plus Jakarta Sans', sans-serif !important;
+    }
+
+    .font-alfa {
+      font-family: 'Alfa Slab One', serif, cursive !important;
+      letter-spacing: 0.02em;
+    }
+
+    .text-emerald {
+      color: var(--brand-green) !important;
+    }
+
+    .bg-emerald {
+      background-color: var(--brand-green) !important;
+      color: #000000 !important;
+    }
+
+    .bg-magenta-pill {
+      background-color: var(--brand-magenta) !important;
+      color: #FFFFFF !important;
+    }
+
+    .login-banner-dark {
+      background: radial-gradient(circle at 50% 0%, #1F2923 0%, #121214 85%);
       color: #FFFFFF;
       padding: 60px;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
+      border-right: 1px solid var(--brand-border);
+    }
+
+    .login-card-dark {
+      background: var(--brand-card-bg);
+      border: 1px solid var(--brand-border);
+      border-radius: 24px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+    }
+
+    .form-control-dark {
+      background-color: #121214 !important;
+      border: 1px solid #27272A !important;
+      color: #FFFFFF !important;
+      border-radius: 12px;
+      padding: 12px 16px;
+    }
+
+    .form-control-dark:focus {
+      border-color: var(--brand-green) !important;
+      box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.15) !important;
+    }
+
+    .input-group-text-dark {
+      background-color: #121214 !important;
+      border: 1px solid #27272A !important;
+      color: #A1A1AA !important;
+    }
+
+    .btn-emerald-lg {
+      background-color: var(--brand-green) !important;
+      color: #000000 !important;
+      font-weight: 800 !important;
+      border-radius: 50px !important;
+      padding: 14px 32px !important;
+      transition: all 0.3s ease !important;
+      border: none !important;
+    }
+
+    .btn-emerald-lg:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px rgba(34, 197, 94, 0.4) !important;
+      background-color: #26E06A !important;
+    }
+
+    .auth-tab-btn {
+      border-radius: 10px;
+      padding: 8px 16px;
+      font-weight: 700;
+      transition: all 0.2s ease;
+    }
+
+    .auth-tab-btn.active {
+      background-color: #27272A !important;
+      color: var(--brand-green) !important;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+    }
+
+    .auth-tab-btn.inactive {
+      background-color: transparent !important;
+      color: #A1A1AA !important;
     }
   </style>
 </head>
 
 <body>
-  <div class="login-wrapper d-flex align-items-stretch">
+  <div class="login-wrapper d-flex align-items-stretch min-vh-100">
     <div class="container-fluid p-0">
       <div class="row g-0 min-vh-100">
-        <div class="col-lg-6 d-none d-lg-flex login-banner">
+        
+        <!-- PAINEL LATERAL ESQUERDO DA MARCA -->
+        <div class="col-lg-6 d-none d-lg-flex login-banner-dark">
           <div>
-            <a href="../../index.html">
-              <img src="../assets/images/logos/metrifiquese.svg" height="36" alt="Logo" class="hs-brand-logo mb-5">
+            <a href="../../index.html" class="d-inline-block mb-5 text-decoration-none">
+              <img src="../assets/images/logos/logowhite.png" height="42" alt="Metrifique-se Logo">
             </a>
-            <span class="badge bg-primary px-3 py-2 fs-2 mb-3"><i class="ti ti-lock me-1"></i> SUPABASE AUTH INTEGRATED</span>
-            <h1 class="display-5 fw-extrabold text-white mb-3">Gerencie Leads e Vendas com Autonomia Total</h1>
-            <p class="text-slate-300 fs-4 mb-4" style="color: #94A3B8;">
+            
+            <div class="mb-4">
+              <span class="badge bg-magenta-pill px-3 py-2 fs-2 mb-3">
+                <i class="ti ti-shield-check me-1 text-emerald"></i> AUTENTICAÇÃO SEGURA SUPABASE
+              </span>
+            </div>
+
+            <h1 class="display-5 fw-black text-white mb-3 lh-sm">
+              Gerencie Leads e Vendas com <span class="font-alfa text-emerald d-block mt-2">Autonomia Total</span>
+            </h1>
+
+            <p class="fs-4 text-zinc-400 mb-4" style="color: #A1A1AA; line-height: 1.6;">
               Acesse sua conta para visualizar seu funil de negócios Kanban comercial, automações de qualificação e métricas em tempo real.
             </p>
           </div>
-          <div class="p-4 rounded-3 border border-slate-700" style="background: rgba(255, 255, 255, 0.05);">
+
+          <!-- TESTEMUNHO COM ÍCONE DA MARCA -->
+          <div class="p-4 rounded-4 border" style="background: rgba(39, 39, 42, 0.6); border-color: #27272A !important;">
             <div class="d-flex align-items-center mb-3">
-              <div class="avatar-md rounded-circle bg-primary text-white fw-bold d-flex align-items-center justify-content-center me-3" style="width: 48px; height: 48px;">
-                GG
-              </div>
+              <img src="../assets/images/logos/icon.png" width="44" height="44" alt="Icon Badge" class="me-3 rounded-circle border border-emerald">
               <div>
                 <h6 class="fw-bold mb-0 text-white">Guilherme Garcia</h6>
-                <small style="color: #94A3B8;">Proprietário do Tenant (Whitelabel Owner)</small>
+                <small style="color: #A1A1AA;">Proprietário do Tenant (Whitelabel Owner)</small>
               </div>
             </div>
-            <p class="mb-0 fs-2" style="color: #CBD5E1;">
+            <p class="mb-0 fs-2" style="color: #D4D4D8;">
               "O Metrifique-se me permitiu entregar um CRM completo com a minha marca e autenticação Supabase para todos os meus clientes de tráfego pago."
             </p>
           </div>
         </div>
 
-        <div class="col-lg-6 d-flex align-items-center justify-content-center p-4">
+        <!-- FORMULÁRIO DE LOGIN DIREITO -->
+        <div class="col-lg-6 d-flex align-items-center justify-content-center p-4" style="background-color: #121214;">
           <div class="w-100" style="max-width: 440px;">
-            <div class="card p-4 shadow-sm border-0">
+            
+            <!-- HEADER MOBILE COM LOGO -->
+            <div class="text-center mb-4 d-lg-none">
+              <a href="../../index.html" class="d-inline-block text-decoration-none">
+                <img src="../assets/images/logos/logowhite.png" height="38" alt="Logo">
+              </a>
+            </div>
+
+            <div class="login-card-dark p-4">
               <div class="card-body p-2">
                 
                 <!-- TOGGLE ENTRAR / CRIAR CONTA -->
-                <div class="d-flex bg-light p-1 rounded mb-4" id="auth-mode-toggle">
-                  <button type="button" class="btn btn-sm btn-white text-dark fw-bold w-50 shadow-sm" id="btn-tab-signin">
+                <div class="d-flex p-1 rounded-3 mb-4" style="background: #121214; border: 1px solid #27272A;" id="auth-mode-toggle">
+                  <button type="button" class="btn auth-tab-btn active w-50" id="btn-tab-signin">
                     Fazer Login
                   </button>
-                  <button type="button" class="btn btn-sm btn-transparent text-muted fw-semibold w-50" id="btn-tab-signup">
+                  <button type="button" class="btn auth-tab-btn inactive w-50" id="btn-tab-signup">
                     Criar Conta
                   </button>
                 </div>
 
-                <div class="mb-3 text-center">
-                  <h4 class="fw-bold text-dark mb-1" id="auth-title">Acessar CRM Whitelabel</h4>
-                  <p class="text-muted fs-2 mb-0" id="auth-subtitle">Entre com suas credenciais do Supabase Auth</p>
+                <div class="mb-4 text-center">
+                  <div class="d-inline-flex align-items-center justify-content-center mb-2">
+                    <img src="../assets/images/logos/icon.png" width="36" height="36" alt="Icon Badge">
+                  </div>
+                  <h4 class="fw-bold text-white mb-1" id="auth-title">Acessar CRM Whitelabel</h4>
+                  <p class="text-zinc-400 fs-2 mb-0" id="auth-subtitle" style="color: #A1A1AA;">Entre com suas credenciais salvas na nuvem</p>
                 </div>
 
-                <div id="auth-alert" class="alert alert-danger d-none py-2 fs-2"></div>
-                <div id="auth-success" class="alert alert-success d-none py-2 fs-2"></div>
+                <div id="auth-alert" class="alert alert-danger d-none py-2 fs-2 border-0 bg-danger bg-opacity-20 text-white"></div>
+                <div id="auth-success" class="alert alert-success d-none py-2 fs-2 border-0 bg-success bg-opacity-20 text-white"></div>
 
                 <form id="login-form">
                   <div class="mb-3 d-none" id="fullname-group">
-                    <label class="form-label fw-semibold">Nome Completo</label>
+                    <label class="form-label fw-semibold text-white">Nome Completo</label>
                     <div class="input-group">
-                      <span class="input-group-text bg-light border-end-0"><i class="ti ti-user text-muted"></i></span>
-                      <input type="text" id="login-name" class="form-control border-start-0" placeholder="Seu Nome Completo">
+                      <span class="input-group-text input-group-text-dark border-end-0"><i class="ti ti-user text-emerald"></i></span>
+                      <input type="text" id="login-name" class="form-control form-control-dark border-start-0" placeholder="Seu Nome Completo">
                     </div>
                   </div>
 
                   <div class="mb-3">
-                    <label class="form-label fw-semibold">E-mail de Acesso</label>
+                    <label class="form-label fw-semibold text-white">E-mail de Acesso</label>
                     <div class="input-group">
-                      <span class="input-group-text bg-light border-end-0"><i class="ti ti-mail text-muted"></i></span>
-                      <input type="email" id="login-email" class="form-control border-start-0" placeholder="seu@email.com.br" required>
+                      <span class="input-group-text input-group-text-dark border-end-0"><i class="ti ti-mail text-emerald"></i></span>
+                      <input type="email" id="login-email" class="form-control form-control-dark border-start-0" placeholder="seu@email.com.br" required>
                     </div>
                   </div>
 
                   <div class="mb-3">
                     <div class="d-flex justify-content-between align-items-center mb-1">
-                      <label class="form-label fw-semibold mb-0">Senha</label>
-                      <a href="#" class="fs-2 text-primary">Esqueceu a senha?</a>
+                      <label class="form-label fw-semibold text-white mb-0">Senha</label>
+                      <a href="#" class="fs-2 text-emerald text-decoration-none">Esqueceu a senha?</a>
                     </div>
                     <div class="input-group">
-                      <span class="input-group-text bg-light border-end-0"><i class="ti ti-lock text-muted"></i></span>
-                      <input type="password" id="login-password" class="form-control border-start-0" placeholder="••••••••" required>
+                      <span class="input-group-text input-group-text-dark border-end-0"><i class="ti ti-lock text-emerald"></i></span>
+                      <input type="password" id="login-password" class="form-control form-control-dark border-start-0" placeholder="••••••••" required>
                     </div>
                   </div>
 
                   <div class="form-check mb-4">
-                    <input class="form-check-input" type="checkbox" id="rememberMe" checked>
-                    <label class="form-check-label fs-2 text-muted" for="rememberMe">
+                    <input class="form-check-input bg-dark border-secondary" type="checkbox" id="rememberMe" checked>
+                    <label class="form-check-label fs-2 text-zinc-400" for="rememberMe" style="color: #A1A1AA;">
                       Lembrar meu acesso neste dispositivo
                     </label>
                   </div>
 
-                  <button type="submit" id="btn-auth-submit" class="btn btn-primary w-100 py-3 fw-bold mb-3 d-flex align-items-center justify-content-center gap-2">
+                  <button type="submit" id="btn-auth-submit" class="btn btn-emerald-lg w-100 py-3 mb-3 d-flex align-items-center justify-content-center gap-2">
                     <i class="ti ti-login fs-5"></i>
                     <span id="btn-submit-text">Entrar no CRM</span>
                   </button>
 
                   <div class="text-center">
-                    <small class="text-muted d-block mb-1">Autenticação alimentada por <strong class="text-dark">Supabase Auth Cloud</strong></small>
+                    <small class="text-zinc-400 d-block" style="color: #A1A1AA;">Autenticação alimentada por <strong class="text-white">Supabase Cloud</strong></small>
                   </div>
                 </form>
 
@@ -155,18 +274,18 @@
 
       tabSignIn.addEventListener('click', () => {
         isSignUpMode = false;
-        tabSignIn.className = 'btn btn-sm btn-white text-dark fw-bold w-50 shadow-sm';
-        tabSignUp.className = 'btn btn-sm btn-transparent text-muted fw-semibold w-50';
+        tabSignIn.className = 'btn auth-tab-btn active w-50';
+        tabSignUp.className = 'btn auth-tab-btn inactive w-50';
         nameGroup.classList.add('d-none');
         authTitle.innerText = 'Acessar CRM Whitelabel';
-        authSubtitle.innerText = 'Entre com suas credenciais do Supabase Auth';
+        authSubtitle.innerText = 'Entre com suas credenciais salvas na nuvem';
         submitBtnText.innerText = 'Entrar no CRM';
       });
 
       tabSignUp.addEventListener('click', () => {
         isSignUpMode = true;
-        tabSignUp.className = 'btn btn-sm btn-white text-dark fw-bold w-50 shadow-sm';
-        tabSignIn.className = 'btn btn-sm btn-transparent text-muted fw-semibold w-50';
+        tabSignUp.className = 'btn auth-tab-btn active w-50';
+        tabSignIn.className = 'btn auth-tab-btn inactive w-50';
         nameGroup.classList.remove('d-none');
         authTitle.innerText = 'Criar Nova Conta';
         authSubtitle.innerText = 'Cadastre-se na plataforma com Supabase Auth';
