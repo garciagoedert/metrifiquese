@@ -272,6 +272,13 @@
       const alertBox = document.getElementById('auth-alert');
       const successBox = document.getElementById('auth-success');
 
+      // Check if redirected due to account suspension
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get('reason') === 'suspended') {
+        alertBox.innerText = 'Sua empresa está temporariamente suspensa por pendência financeira. Entre em contato com o suporte ou setor financeiro para reativar seu acesso.';
+        alertBox.classList.remove('d-none');
+      }
+
       tabSignIn.addEventListener('click', () => {
         isSignUpMode = false;
         tabSignIn.className = 'btn auth-tab-btn active w-50';

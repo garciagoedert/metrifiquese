@@ -514,8 +514,25 @@ class LocalCRMStore {
       const isLandingPage = path === '/' || path === '/index.html' || (path.endsWith('index.html') && !path.includes('/src/html/'));
       const isAuthPage = path.includes('login') || path.includes('authentication');
       
-      if (!isLandingPage && !isAuthPage && !this.isAuthenticated()) {
-        window.location.href = '/src/html/login.html';
+      if (!isLandingPage && !isAuthPage) {
+        if (!this.isAuthenticated()) {
+          window.location.href = '/src/html/login.html';
+          return;
+        }
+
+        // Verify if tenant is suspended (except for Master Super Admin)
+        const user = this.getUser();
+        const tenantId = this.getActiveTenantId();
+        const isSuperAdmin = user && (user.is_super_admin || user.email === 'paulo@southsea.com.br');
+
+        if (!isSuperAdmin) {
+          const tenants = this.getTenants();
+          const tenant = tenants.find(t => t.id === tenantId);
+          if (tenant && tenant.status === 'suspended') {
+            this.logout();
+            window.location.href = '/src/html/login.html?reason=suspended';
+          }
+        }
       }
     }
   }
@@ -588,10 +605,11 @@ class LocalCRMStore {
     return data.tenants || INITIAL_DEMO_DATA.tenants;
   }
 
-  async createTenantWithAdmin({ name, domain, plan, monthlyPrice, primaryColor, logoUrl, adminName, adminEmail, adminPassword }) {
+  async createTenantWithAdmin({ name, domain, plan, monthlyPrice, primaryColor, logoUrl, adminName, adminEmail, adminPassword, nextBillingDate, billingPhone }) {
     const data = this.getData();
     const tenantId = 'tenant-' + Date.now();
     const slug = name.toLowerCase().replace(/[^a-z0-9]/g, '-');
+    const defaultNextMonth = new Date(Date.now() + 30 * 86400000).toISOString().split('T')[0];
 
     const newTenant = {
       id: tenantId,
@@ -604,6 +622,8 @@ class LocalCRMStore {
       plan: plan || 'Plano Agência Whitelabel',
       monthly_price: parseFloat(monthlyPrice) || 297.00,
       status: 'active',
+      next_billing_date: nextBillingDate || defaultNextMonth,
+      billing_phone: billingPhone || '',
       created_at: new Date().toISOString()
     };
 
@@ -889,6 +909,14 @@ class LocalCRMStore {
         throw new Error('Senha incorreta. Verifique suas credenciais.');
       }
 
+      // Check tenant status before allowing login
+      const tenant = (data.tenants || INITIAL_DEMO_DATA.tenants).find(t => t.id === matchedUser.tenant_id);
+      const isSuperAdmin = matchedUser.is_super_admin || cleanEmail === 'paulo@southsea.com.br';
+
+      if (tenant && tenant.status === 'suspended' && !isSuperAdmin) {
+        throw new Error(`Acesso suspenso: A conta da empresa "${tenant.name}" encontra-se temporariamente suspensa por pendência financeira. Entre em contato com o suporte ou financeiro.`);
+      }
+
       data.session = {
         user: matchedUser,
         active_tenant_id: matchedUser.tenant_id,
@@ -899,7 +927,6 @@ class LocalCRMStore {
     }
 
     // 2. Fallback: Buscar no Supabase profiles
-    //    (usuários convidados acessando de outro dispositivo)
     if (supabaseClient) {
       try {
         const { data: profileRows, error: profileErr } = await supabaseClient
@@ -911,20 +938,24 @@ class LocalCRMStore {
         if (!profileErr && profileRows && profileRows.length > 0) {
           const p = profileRows[0];
 
-          // Validate password against the stored profile password
           if (p.password && p.password !== password) {
             throw new Error('Senha incorreta. A senha padrão de novos convidados é: senha123');
           }
 
-          // Ensure the tenant exists locally, fetching from Supabase if needed
-          const tenantExists = (data.tenants || []).some(t => t.id === p.tenant_id);
-          if (!tenantExists && p.tenant_id) {
+          let tenant = (data.tenants || []).find(t => t.id === p.tenant_id);
+          if (!tenant && p.tenant_id) {
             const { data: tenantRows } = await supabaseClient
               .from('tenants').select('*').eq('id', p.tenant_id).limit(1);
             if (tenantRows && tenantRows.length > 0) {
+              tenant = tenantRows[0];
               if (!data.tenants) data.tenants = [];
-              data.tenants.push(tenantRows[0]);
+              data.tenants.push(tenant);
             }
+          }
+
+          const isSuperAdmin = cleanEmail === 'paulo@southsea.com.br';
+          if (tenant && tenant.status === 'suspended' && !isSuperAdmin) {
+            throw new Error(`Acesso suspenso: A conta da empresa "${tenant.name}" encontra-se temporariamente suspensa por pendência financeira. Entre em contato com o suporte ou financeiro.`);
           }
 
           const localUser = {
@@ -935,11 +966,10 @@ class LocalCRMStore {
             password: password,
             crm_role: p.crm_role || 'vendedor',
             role: p.role || 'Vendedor',
-            is_super_admin: false,
+            is_super_admin: isSuperAdmin,
             avatar_url: p.avatar_url || '/src/assets/images/profile/user-1.jpg'
           };
 
-          // Save locally so future logins are instant
           if (!data.users) data.users = [];
           const existingIdx = data.users.findIndex(u => u.email.toLowerCase() === cleanEmail);
           if (existingIdx >= 0) {
@@ -954,15 +984,11 @@ class LocalCRMStore {
             is_authenticated: true
           };
           this.saveData(data);
-          console.log('[Login] Usuário autenticado via Supabase profiles:', cleanEmail);
           return { user: localUser, session: null };
         }
-      } catch (profileErr) {
-        // Re-throw password errors
-        if (profileErr.message && (profileErr.message.includes('Senha incorreta') || profileErr.message.includes('senha123'))) {
-          throw profileErr;
-        }
-        console.warn('[Login Fallback] Erro ao buscar no Supabase profiles:', profileErr);
+      } catch (err) {
+        if (err.message && (err.message.includes('Acesso suspenso') || err.message.includes('Senha incorreta'))) throw err;
+        console.warn('[Supabase Sync Auth Fallback Warning]', err);
       }
     }
 

@@ -135,31 +135,30 @@
 
         <!-- SaaS KPI Cards -->
         <div class="row">
-          <div class="col-sm-6 col-xl-4 mb-4">
-            <div class="card bg-white shadow-sm border-0">
+          <div class="col-sm-6 col-xl-3 mb-4">
+            <div class="card bg-white shadow-sm border-0 h-100">
               <div class="card-body p-4">
                 <div class="d-flex align-items-center justify-content-between mb-3">
-                  <span class="fw-semibold text-muted">Empresas / Tenants Ativos</span>
+                  <span class="fw-semibold text-muted">Empresas Clientes</span>
                   <div class="p-2 bg-light-primary text-primary rounded-circle">
                     <i class="ti ti-building-store fs-6"></i>
                   </div>
                 </div>
                 <h2 class="fw-bold mb-1" id="kpi-total-tenants">0</h2>
                 <div class="d-flex align-items-center gap-1 flex-wrap">
-                  <span class="text-success fs-2 fw-semibold"><i class="ti ti-circle-check me-1"></i>Isolamento RLS Ativo</span>
-                  <span id="supabase-status-badge" class="badge bg-light-warning text-warning ms-1 fs-2">
-                    <i class="ti ti-cloud-download me-1"></i> Verificando Supabase DB...
+                  <span id="supabase-status-badge" class="badge bg-light-success text-success fs-2">
+                    <i class="ti ti-cloud-check me-1"></i> Supabase Connected
                   </span>
                 </div>
               </div>
             </div>
           </div>
 
-          <div class="col-sm-6 col-xl-4 mb-4">
-            <div class="card bg-white shadow-sm border-0">
+          <div class="col-sm-6 col-xl-3 mb-4">
+            <div class="card bg-white shadow-sm border-0 h-100">
               <div class="card-body p-4">
                 <div class="d-flex align-items-center justify-content-between mb-3">
-                  <span class="fw-semibold text-muted">Receita Recorrente Mensal (MRR)</span>
+                  <span class="fw-semibold text-muted">Receita Mensal (MRR)</span>
                   <div class="p-2 bg-light-success text-success rounded-circle">
                     <i class="ti ti-currency-dollar fs-6"></i>
                   </div>
@@ -170,17 +169,32 @@
             </div>
           </div>
 
-          <div class="col-sm-6 col-xl-4 mb-4">
-            <div class="card bg-white shadow-sm border-0">
+          <div class="col-sm-6 col-xl-3 mb-4">
+            <div class="card bg-white shadow-sm border-0 h-100 border-start border-4 border-warning">
               <div class="card-body p-4">
                 <div class="d-flex align-items-center justify-content-between mb-3">
-                  <span class="fw-semibold text-muted">Total de Contatos no SaaS</span>
-                  <div class="p-2 bg-light-info text-info rounded-circle">
-                    <i class="ti ti-users fs-6"></i>
+                  <span class="fw-semibold text-warning">A Vencer (7 Dias)</span>
+                  <div class="p-2 bg-light-warning text-warning rounded-circle">
+                    <i class="ti ti-clock-filled fs-6"></i>
                   </div>
                 </div>
-                <h2 class="fw-bold mb-1" id="kpi-total-saas-leads">0</h2>
-                <span class="text-muted fs-2">Processados em todas as empresas</span>
+                <h2 class="fw-bold mb-1 text-dark" id="kpi-due-soon-count">0</h2>
+                <span class="text-muted fs-2">Cobrança Antecipada Disponível</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-sm-6 col-xl-3 mb-4">
+            <div class="card bg-white shadow-sm border-0 h-100 border-start border-4 border-danger">
+              <div class="card-body p-4">
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                  <span class="fw-semibold text-danger">Suspensos / Em Atraso</span>
+                  <div class="p-2 bg-light-danger text-danger rounded-circle">
+                    <i class="ti ti-alert-circle fs-6"></i>
+                  </div>
+                </div>
+                <h2 class="fw-bold mb-1 text-danger" id="kpi-overdue-count">0</h2>
+                <span class="text-muted fs-2">Acesso bloqueado na plataforma</span>
               </div>
             </div>
           </div>
@@ -188,22 +202,24 @@
 
         <!-- Tenants List Table Card -->
         <div class="card shadow-sm border-0">
-          <div class="card-header bg-white py-3 border-bottom d-flex align-items-center justify-content-between">
-            <h5 class="fw-bold mb-0 text-dark"><i class="ti ti-building text-primary me-2"></i> Empresas Cadastradas na Plataforma</h5>
-            <span class="badge bg-light-primary text-primary px-3 py-1 fs-2">SaaS Control Engine</span>
+          <div class="card-header bg-white py-3 border-bottom d-flex align-items-center justify-content-between flex-wrap gap-2">
+            <div>
+              <h5 class="fw-bold mb-0 text-dark"><i class="ti ti-building text-primary me-2"></i> Gestão Financeira & Acesso das Empresas</h5>
+              <small class="text-muted">Acompanhe vencimentos com antecedência, gerencie o status de acesso e cobre via WhatsApp em 1 clique.</small>
+            </div>
+            <span class="badge bg-light-primary text-primary px-3 py-1 fs-2"><i class="ti ti-shield-lock me-1"></i>SaaS Billing Engine</span>
           </div>
           <div class="card-body p-0">
             <div class="table-responsive">
               <table class="table table-hover align-middle mb-0">
                 <thead class="bg-light">
                   <tr>
-                    <th class="ps-4" style="width: 20%;">Empresa Cliente</th>
-                    <th style="width: 16%;">Domínio / CNAME</th>
-                    <th style="width: 14%;">Plano Contratado</th>
-                    <th style="width: 12%;">Mensalidade (MRR)</th>
-                    <th style="width: 10%;">Equipe</th>
-                    <th style="width: 8%;">Status</th>
-                    <th class="text-end pe-4" style="width: 20%;">Ações do Super Admin</th>
+                    <th class="ps-4" style="width: 22%;">Empresa Cliente</th>
+                    <th style="width: 14%;">Domínio / CNAME</th>
+                    <th style="width: 13%;">Plano & MRR</th>
+                    <th style="width: 18%;">Próximo Vencimento</th>
+                    <th style="width: 11%;">Status Acesso</th>
+                    <th class="text-end pe-4" style="width: 22%;">Ações do Super Admin</th>
                   </tr>
                 </thead>
                 <tbody id="tenants-table-body">
@@ -268,6 +284,17 @@
               </div>
             </div>
 
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label fw-semibold">Próximo Vencimento da Fatura</label>
+                <input type="date" id="tenant-billing-date-input" class="form-control">
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label fw-semibold">WhatsApp para Cobrança (com DDD)</label>
+                <input type="text" id="tenant-billing-phone-input" class="form-control" placeholder="(11) 99887-6655">
+              </div>
+            </div>
+
             <h6 class="fw-bold text-primary mt-4 mb-3 border-bottom pb-2">2. Dados do Primeiro Usuário Administrador</h6>
 
             <div class="row">
@@ -302,7 +329,7 @@
     <div class="modal-dialog modal-lg">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title fw-bold"><i class="ti ti-edit text-primary me-2"></i> Editar Dados da Empresa Cliente</h5>
+          <h5 class="modal-title fw-bold"><i class="ti ti-edit text-primary me-2"></i> Editar Dados & Cobrança da Empresa</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
         </div>
         <form id="edit-tenant-form">
@@ -342,8 +369,20 @@
                 <label class="form-label fw-semibold">Status do Acesso *</label>
                 <select id="edit-tenant-status" class="form-select" required>
                   <option value="active">Ativo (Acesso Liberado)</option>
-                  <option value="suspended">Suspenso (Bloqueado por Inadimplência)</option>
+                  <option value="suspended">Suspenso (Acesso Bloqueado)</option>
                 </select>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label fw-semibold">Próximo Vencimento da Fatura</label>
+                <input type="date" id="edit-tenant-billing-date" class="form-control">
+              </div>
+
+              <div class="col-md-6 mb-3">
+                <label class="form-label fw-semibold">WhatsApp para Cobrança</label>
+                <input type="text" id="edit-tenant-billing-phone" class="form-control" placeholder="(11) 99887-6655">
               </div>
             </div>
 
@@ -528,11 +567,11 @@
         const statusBadge = document.getElementById('supabase-status-badge');
         if (statusBadge && window.crmStore) {
           if (window.crmStore.isSupabaseConnected()) {
-            statusBadge.className = 'badge bg-light-success text-success ms-1 fs-2';
+            statusBadge.className = 'badge bg-light-success text-success fs-2';
             statusBadge.innerHTML = '<i class="ti ti-cloud-check me-1"></i> Supabase DB Conectado';
           } else {
-            statusBadge.className = 'badge bg-light-danger text-danger ms-1 fs-2';
-            statusBadge.innerHTML = '<i class="ti ti-alert-triangle me-1"></i> Modo Offline (Chave Supabase Ausente)';
+            statusBadge.className = 'badge bg-light-danger text-danger fs-2';
+            statusBadge.innerHTML = '<i class="ti ti-alert-triangle me-1"></i> Modo Offline';
           }
         }
 
@@ -547,18 +586,34 @@
           );
         }
 
-        // Calc KPIs
+        // Calc Financial & Status KPIs
         const allTenants = window.crmStore.getTenants();
-        document.getElementById('kpi-total-tenants').innerText = allTenants.length;
-        
         let totalMrr = 0;
+        let activeCount = 0;
+        let dueSoonCount = 0;
+        let overdueCount = 0;
+        const now = new Date();
+
         allTenants.forEach(t => {
-          if (t.status !== 'suspended') {
+          if (t.status === 'suspended') {
+            overdueCount++;
+          } else {
+            activeCount++;
             totalMrr += t.monthly_price !== undefined ? parseFloat(t.monthly_price) : (t.plan.includes('Enterprise') ? 597 : 297);
+
+            if (t.next_billing_date) {
+              const dueDate = new Date(t.next_billing_date + 'T23:59:59');
+              const diffDays = Math.ceil((dueDate - now) / (1000 * 60 * 60 * 24));
+              if (diffDays < 0) overdueCount++;
+              else if (diffDays <= 7) dueSoonCount++;
+            }
           }
         });
+
+        document.getElementById('kpi-total-tenants').innerText = `${activeCount} Ativas / ${allTenants.length}`;
         document.getElementById('kpi-mrr-value').innerText = `R$ ${totalMrr.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
-        document.getElementById('kpi-total-saas-leads').innerText = (data.leads || []).length;
+        document.getElementById('kpi-due-soon-count').innerText = dueSoonCount;
+        document.getElementById('kpi-overdue-count').innerText = overdueCount;
 
         container.innerHTML = tenants.map(t => {
           const isCurrentActive = window.crmStore.getActiveTenantId() === t.id;
@@ -566,6 +621,30 @@
           const tenantUsers = window.crmStore.getUsersByTenant(t.id);
           const isSuspended = t.status === 'suspended';
           const priceDisplay = (t.monthly_price !== undefined ? parseFloat(t.monthly_price) : (t.plan.includes('Enterprise') ? 597 : 297));
+
+          // Calculate Next Billing Alert
+          let billingBadge = '';
+          let dueDateFormatted = 'Não definida';
+
+          if (t.next_billing_date) {
+            const dueDate = new Date(t.next_billing_date + 'T12:00:00');
+            dueDateFormatted = dueDate.toLocaleDateString('pt-BR');
+            const diffDays = Math.ceil((dueDate - now) / (1000 * 60 * 60 * 24));
+
+            if (isSuspended) {
+              billingBadge = `<span class="badge bg-light-danger text-danger px-2.5 py-1 fs-1 fw-bold"><i class="ti ti-lock me-1"></i>Bloqueado</span>`;
+            } else if (diffDays < 0) {
+              billingBadge = `<span class="badge bg-danger text-white px-2.5 py-1 fs-1 fw-bold"><i class="ti ti-alert-triangle me-1"></i>Vencido há ${Math.abs(diffDays)} dia(s)</span>`;
+            } else if (diffDays <= 7) {
+              billingBadge = `<span class="badge bg-warning text-dark px-2.5 py-1 fs-1 fw-bold"><i class="ti ti-clock-filled me-1"></i>Vence em ${diffDays} dia(s)</span>`;
+            } else {
+              billingBadge = `<span class="badge bg-light-success text-success px-2.5 py-1 fs-1 fw-bold"><i class="ti ti-circle-check me-1"></i>Em dia</span>`;
+            }
+          } else {
+            billingBadge = isSuspended ? 
+              '<span class="badge bg-light-danger text-danger px-2.5 py-1 fs-1 fw-bold">Bloqueado</span>' : 
+              '<span class="badge bg-light-success text-success px-2.5 py-1 fs-1 fw-bold">Em dia</span>';
+          }
 
           return `
             <tr class="${isCurrentActive ? 'table-warning' : (isSuspended ? 'table-light text-muted' : '')}">
@@ -581,37 +660,39 @@
                 </div>
               </td>
               <td>
-                <span class="fw-semibold text-dark">${t.custom_domain || `${t.slug}.metrifiquese.com.br`}</span>
-              </td>
-              <td>
-                <span class="badge ${planBadge} px-3 py-1-5 fw-semibold">${t.plan || 'Agência Whitelabel'}</span>
+                <span class="fw-semibold text-dark fs-2">${t.custom_domain || `${t.slug}.metrifiquese.com.br`}</span>
               </td>
               <td>
                 <strong class="text-dark fs-2">R$ ${priceDisplay.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</strong>
-                <small class="text-muted d-block">/mês</small>
+                <span class="badge ${planBadge} px-2 py-0-5 fs-1 fw-semibold ms-1 d-block mt-1">${t.plan || 'Plano Agência'}</span>
               </td>
               <td>
-                <button class="btn btn-sm btn-light-info text-info px-2.5 py-1 fw-bold rounded-pill" onclick="window.adminTenantsManager.openUsersModal('${t.id}')">
-                  <i class="ti ti-users me-1"></i> ${tenantUsers.length} membro(s)
-                </button>
+                <div class="d-flex flex-column gap-1">
+                  <span class="fw-bold text-dark fs-2"><i class="ti ti-calendar me-1 text-muted"></i>${dueDateFormatted}</span>
+                  <div>${billingBadge}</div>
+                </div>
               </td>
               <td>
                 ${isSuspended ? 
-                  '<span class="badge bg-light-danger text-danger px-3 py-1-5 fw-semibold">Suspenso</span>' : 
-                  '<span class="badge bg-light-success text-success px-3 py-1-5 fw-semibold">Ativo</span>'}
+                  '<span class="badge bg-light-danger text-danger px-3 py-1-5 fw-bold"><i class="ti ti-ban me-1"></i>Suspenso</span>' : 
+                  '<span class="badge bg-light-success text-success px-3 py-1-5 fw-bold"><i class="ti ti-check me-1"></i>Ativo</span>'}
               </td>
               <td class="text-end text-nowrap pe-4">
-                <div class="d-inline-flex align-items-center justify-content-end" style="gap: 12px !important;">
-                  <button class="btn btn-sm btn-primary text-nowrap fw-semibold px-3 d-inline-flex align-items-center justify-content-center gap-1 shadow-sm" style="height: 34px;" onclick="window.adminTenantsManager.inspectTenant('${t.id}')" title="Acessar CRM como esta empresa">
+                <div class="d-inline-flex align-items-center justify-content-end" style="gap: 8px !important;">
+                  <button class="btn btn-sm btn-primary text-nowrap fw-semibold px-2.5 d-inline-flex align-items-center justify-content-center gap-1 shadow-sm" style="height: 32px;" onclick="window.adminTenantsManager.inspectTenant('${t.id}')" title="Acessar CRM como esta empresa">
                     <i class="ti ti-eye fs-4"></i>
                     <span>Acessar</span>
                   </button>
-                  <button class="btn btn-sm btn-light-primary text-primary px-3 fw-semibold d-inline-flex align-items-center justify-content-center gap-1" style="height: 34px;" onclick="window.adminTenantsManager.openEditModal('${t.id}')" title="Editar Empresa">
+                  <button class="btn btn-sm btn-light-primary text-primary px-2.5 fw-semibold d-inline-flex align-items-center justify-content-center gap-1" style="height: 32px;" onclick="window.adminTenantsManager.openEditModal('${t.id}')" title="Editar Empresa & Cobrança">
                     <i class="ti ti-edit fs-4"></i>
                     <span>Editar</span>
                   </button>
+                  <button class="btn btn-sm text-white px-2.5 fw-semibold d-inline-flex align-items-center justify-content-center gap-1 shadow-sm" style="height: 32px; background-color: #25D366; border-color: #25D366;" onclick="window.adminTenantsManager.openWhatsAppBilling('${t.id}')" title="Cobrar Mensalidade via WhatsApp">
+                    <i class="ti ti-brand-whatsapp fs-4"></i>
+                    <span>Cobrar</span>
+                  </button>
                   ${t.id !== 'tenant-demo-001' ? `
-                    <button class="btn btn-sm btn-light-danger text-danger rounded-circle p-0 d-inline-flex align-items-center justify-content-center" style="width: 34px; height: 34px;" onclick="window.adminTenantsManager.deleteTenant('${t.id}')" title="Excluir Empresa">
+                    <button class="btn btn-sm btn-light-danger text-danger rounded-circle p-0 d-inline-flex align-items-center justify-content-center ms-1" style="width: 32px; height: 32px;" onclick="window.adminTenantsManager.deleteTenant('${t.id}')" title="Excluir Empresa">
                       <i class="ti ti-trash fs-4"></i>
                     </button>
                   ` : ''}
@@ -628,12 +709,15 @@
         const plan = document.getElementById('tenant-plan-select').value;
         const monthlyPrice = document.getElementById('tenant-price-input').value;
         const primaryColor = document.getElementById('tenant-color-picker').value;
+        const nextBillingDate = document.getElementById('tenant-billing-date-input').value;
+        const billingPhone = document.getElementById('tenant-billing-phone-input').value;
+
         const adminName = document.getElementById('tenant-admin-name').value;
         const adminEmail = document.getElementById('tenant-admin-email').value;
         const adminPassword = document.getElementById('tenant-admin-password').value;
 
         window.crmStore.createTenantWithAdmin({
-          name, domain, plan, monthlyPrice, primaryColor, adminName, adminEmail, adminPassword
+          name, domain, plan, monthlyPrice, primaryColor, adminName, adminEmail, adminPassword, nextBillingDate, billingPhone
         });
 
         const modalEl = document.getElementById('addTenantModal');
@@ -660,6 +744,8 @@
         document.getElementById('edit-tenant-plan').value = tenant.plan || 'Plano Agência Whitelabel';
         document.getElementById('edit-tenant-price').value = currentPrice;
         document.getElementById('edit-tenant-status').value = tenant.status || 'active';
+        document.getElementById('edit-tenant-billing-date').value = tenant.next_billing_date || '';
+        document.getElementById('edit-tenant-billing-phone').value = tenant.billing_phone || '';
         document.getElementById('edit-tenant-color-picker').value = tenant.primary_color || '#FF7A59';
         document.getElementById('edit-tenant-color-hex').value = tenant.primary_color || '#FF7A59';
 
@@ -677,10 +763,12 @@
         const plan = document.getElementById('edit-tenant-plan').value;
         const monthly_price = document.getElementById('edit-tenant-price').value;
         const status = document.getElementById('edit-tenant-status').value;
+        const next_billing_date = document.getElementById('edit-tenant-billing-date').value;
+        const billing_phone = document.getElementById('edit-tenant-billing-phone').value;
         const primary_color = document.getElementById('edit-tenant-color-picker').value;
 
         window.crmStore.updateTenantDetails(tenantId, {
-          name, custom_domain, plan, monthly_price, status, primary_color
+          name, custom_domain, plan, monthly_price, status, next_billing_date, billing_phone, primary_color
         });
 
         const modalEl = document.getElementById('editTenantModal');
@@ -690,7 +778,34 @@
         }
 
         this.renderTenantsTable();
-        alert(`Empresa "${name}" e valor mensal (R$ ${parseFloat(monthly_price).toLocaleString('pt-BR')}) atualizados com sucesso!`);
+        alert(`Empresa "${name}" e dados de cobrança atualizados com sucesso!`);
+      }
+
+      openWhatsAppBilling(tenantId) {
+        const tenants = window.crmStore.getTenants();
+        const tenant = tenants.find(t => t.id === tenantId);
+        if (!tenant) return;
+
+        const phone = (tenant.billing_phone || '').replace(/[^0-9]/g, '');
+        const price = (tenant.monthly_price !== undefined ? parseFloat(tenant.monthly_price) : 297).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+        
+        let dueDateText = 'no vencimento';
+        if (tenant.next_billing_date) {
+          const d = new Date(tenant.next_billing_date + 'T12:00:00');
+          dueDateText = `em ${d.toLocaleDateString('pt-BR')}`;
+        }
+
+        const message = `Olá! Tudo bem? Passando do setor financeiro do *Metrifique-se CRM* para lembrar sobre a renovação da mensalidade da empresa *${tenant.name}*.\n\n` +
+                        `💰 *Valor:* R$ ${price}/mês\n` +
+                        `📅 *Vencimento:* ${dueDateText}\n\n` +
+                        `Qualquer dúvida ou se precisar da chave Pix / link de pagamento, fico à disposição!`;
+
+        const cleanPhone = phone ? (phone.startsWith('55') ? phone : '55' + phone) : '';
+        const waUrl = cleanPhone 
+          ? `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`
+          : `https://wa.me/?text=${encodeURIComponent(message)}`;
+
+        window.open(waUrl, '_blank');
       }
 
       openUsersModal(tenantId) {
