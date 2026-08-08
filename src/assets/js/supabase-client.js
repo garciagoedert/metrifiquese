@@ -44,32 +44,6 @@ const INITIAL_DEMO_DATA = {
       monthly_price: 0,
       status: 'active',
       created_at: new Date(Date.now() - 86400000 * 30).toISOString()
-    },
-    {
-      id: 'tenant-002',
-      name: 'Agência Scale Marketing',
-      slug: 'scale-marketing',
-      logo_url: '/src/assets/images/logos/logoblack.png',
-      primary_color: '#00A4BD',
-      secondary_color: '#FF7A59',
-      custom_domain: 'crm.scalemarketing.com.br',
-      plan: 'Plano Agência Whitelabel',
-      monthly_price: 297.00,
-      status: 'active',
-      created_at: new Date(Date.now() - 86400000 * 15).toISOString()
-    },
-    {
-      id: 'tenant-003',
-      name: 'Tech Solutions Corp',
-      slug: 'tech-solutions',
-      logo_url: '/src/assets/images/logos/logoblack.png',
-      primary_color: '#7D52F4',
-      secondary_color: '#00A4BD',
-      custom_domain: 'crm.techsolutions.com',
-      plan: 'Plano Enterprise',
-      monthly_price: 597.00,
-      status: 'active',
-      created_at: new Date(Date.now() - 86400000 * 7).toISOString()
     }
   ],
   users: [
@@ -81,30 +55,9 @@ const INITIAL_DEMO_DATA = {
       password: '12345678',
       phone: '(11) 99887-6655',
       role: 'Super Admin Plataforma',
+      crm_role: 'admin',
       is_super_admin: true,
       avatar_url: 'https://instagram.ffln1-1.fna.fbcdn.net/v/t51.82787-19/658968988_17956763901106219_4353182039587841370_n.jpg?stp=dst-jpg_s640x640_tt6&efg=eyJ2ZW5jb2RlX3RhZyI6InByb2ZpbGVfcGljLmRqYW5nby4xMDgwLmMyIn0&_nc_ht=instagram.ffln1-1.fna.fbcdn.net&_nc_cat=107&_nc_oc=Q6cZ2gHQ7zmgXpwEmvIUUSDkCUd6C0alcKSp971qs39wUvaAXRPpJ7ZZ-8D-PVC9rAzxHr1fNlaD1pe1iR2PdpYlCCxi&_nc_ohc=D_qV0EMM3bAQ7kNvwEhm8-2&_nc_gid=3q7MmEdXmEkyWixry7GE7g&edm=AAZTMJEBAAAA&ccb=7-5&oh=00_AQEsTlniOhUeINunzYKRs8jcV-xr0pMOKFeckOynLzUZSw&oe=6A73BCD6&_nc_sid=49cb7f'
-    },
-    {
-      id: 'user-002',
-      tenant_id: 'tenant-002',
-      full_name: 'Lucas Scale',
-      email: 'lucas@scalemarketing.com.br',
-      password: '12345678',
-      phone: '(11) 97777-1111',
-      role: 'Dono da Agência',
-      is_super_admin: false,
-      avatar_url: '/src/assets/images/profile/user-1.jpg'
-    },
-    {
-      id: 'user-003',
-      tenant_id: 'tenant-003',
-      full_name: 'Ana Paula Tech',
-      email: 'ana@techcorp.com.br',
-      password: '12345678',
-      phone: '(21) 98888-2222',
-      role: 'Diretora Comercial',
-      is_super_admin: false,
-      avatar_url: '/src/assets/images/profile/user-1.jpg'
     }
   ],
   session: {
@@ -128,37 +81,17 @@ const INITIAL_DEMO_DATA = {
       message: 'Contrato R$ 25.000,00 com Logística Express marcado como GANHO!',
       time: 'Há 2 horas',
       is_read: false
-    },
-    {
-      id: 'notif-3',
-      tenant_id: 'tenant-002',
-      title: 'Nova Empresa Cliente',
-      message: 'Agência Scale Marketing iniciou teste de 14 dias.',
-      time: 'Ontem',
-      is_read: true
     }
   ],
   pipelines: [
-    { id: 'pipe-1', tenant_id: 'tenant-demo-001', name: 'Funil de Vendas Inbound', is_default: true },
-    { id: 'pipe-2', tenant_id: 'tenant-002', name: 'Funil Agência Scale', is_default: true },
-    { id: 'pipe-3', tenant_id: 'tenant-003', name: 'Pipeline Enterprise', is_default: true }
+    { id: 'pipe-1', tenant_id: 'tenant-demo-001', name: 'Funil de Vendas Inbound', is_default: true }
   ],
   stages: [
     { id: 'stage-1', tenant_id: 'tenant-demo-001', pipeline_id: 'pipe-1', name: 'Novo Lead', display_order: 1, color: '#5D87FF' },
     { id: 'stage-2', tenant_id: 'tenant-demo-001', pipeline_id: 'pipe-1', name: 'Contato Realizado', display_order: 2, color: '#49BEFF' },
     { id: 'stage-3', tenant_id: 'tenant-demo-001', pipeline_id: 'pipe-1', name: 'Proposta Enviada', display_order: 3, color: '#FFAE1F' },
     { id: 'stage-4', tenant_id: 'tenant-demo-001', pipeline_id: 'pipe-1', name: 'Em Negociação', display_order: 4, color: '#FA896B' },
-    { id: 'stage-5', tenant_id: 'tenant-demo-001', pipeline_id: 'pipe-1', name: 'Fechado/Ganho', display_order: 5, color: '#13DEB9' },
-
-    // Stages Tenant 2
-    { id: 'stage-201', tenant_id: 'tenant-002', pipeline_id: 'pipe-2', name: 'Leads de Tráfego', display_order: 1, color: '#00A4BD' },
-    { id: 'stage-202', tenant_id: 'tenant-002', pipeline_id: 'pipe-2', name: 'Agendamento Feito', display_order: 2, color: '#FF7A59' },
-    { id: 'stage-203', tenant_id: 'tenant-002', pipeline_id: 'pipe-2', name: 'Contrato Assinado', display_order: 3, color: '#13DEB9' },
-
-    // Stages Tenant 3
-    { id: 'stage-301', tenant_id: 'tenant-003', pipeline_id: 'pipe-3', name: 'Leads B2B Enterprise', display_order: 1, color: '#7D52F4' },
-    { id: 'stage-302', tenant_id: 'tenant-003', pipeline_id: 'pipe-3', name: 'Demonstração Técnica', display_order: 2, color: '#FFAE1F' },
-    { id: 'stage-303', tenant_id: 'tenant-003', pipeline_id: 'pipe-3', name: 'Fechado / Contrato', display_order: 3, color: '#13DEB9' }
+    { id: 'stage-5', tenant_id: 'tenant-demo-001', pipeline_id: 'pipe-1', name: 'Fechado/Ganho', display_order: 5, color: '#13DEB9' }
   ],
   leads: [],
   deals: [],
@@ -235,6 +168,14 @@ class LocalCRMStore {
       if (stages.length > 0) {
         await supabaseClient.from('pipeline_stages').upsert(stages);
       }
+
+      // Purge legacy demo tenants from cloud database
+      await supabaseClient.from('profiles').delete().in('tenant_id', ['tenant-002', 'tenant-003']);
+      await supabaseClient.from('leads').delete().in('tenant_id', ['tenant-002', 'tenant-003']);
+      await supabaseClient.from('deals').delete().in('tenant_id', ['tenant-002', 'tenant-003']);
+      await supabaseClient.from('pipeline_stages').delete().in('tenant_id', ['tenant-002', 'tenant-003']);
+      await supabaseClient.from('pipelines').delete().in('tenant_id', ['tenant-002', 'tenant-003']);
+      await supabaseClient.from('tenants').delete().in('id', ['tenant-002', 'tenant-003']);
     } catch (e) {
       console.warn('[Supabase Cloud Auto-seed]', e);
     }
@@ -515,6 +456,28 @@ class LocalCRMStore {
         if (!data.tenants) {
           data.tenants = INITIAL_DEMO_DATA.tenants;
           updated = true;
+        }
+
+        // Clean out legacy demo tenants (tenant-002, tenant-003)
+        if (data.tenants) {
+          const countBefore = data.tenants.length;
+          data.tenants = data.tenants.filter(t => t.id !== 'tenant-002' && t.id !== 'tenant-003');
+          if (data.tenants.length !== countBefore) updated = true;
+        }
+        if (data.users) {
+          const countBefore = data.users.length;
+          data.users = data.users.filter(u => u.tenant_id !== 'tenant-002' && u.tenant_id !== 'tenant-003');
+          if (data.users.length !== countBefore) updated = true;
+        }
+        if (data.pipelines) {
+          const countBefore = data.pipelines.length;
+          data.pipelines = data.pipelines.filter(p => p.tenant_id !== 'tenant-002' && p.tenant_id !== 'tenant-003');
+          if (data.pipelines.length !== countBefore) updated = true;
+        }
+        if (data.stages) {
+          const countBefore = data.stages.length;
+          data.stages = data.stages.filter(s => s.tenant_id !== 'tenant-002' && s.tenant_id !== 'tenant-003');
+          if (data.stages.length !== countBefore) updated = true;
         }
 
         if (updated) {
