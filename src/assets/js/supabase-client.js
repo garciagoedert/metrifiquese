@@ -726,6 +726,24 @@ class LocalCRMStore {
     if (!data.users) data.users = [];
     data.users.push(newUser);
     this.saveData(data);
+
+    // Sync to Supabase profiles so the invited user can login from any device
+    if (supabaseClient) {
+      supabaseClient.from('profiles').upsert([{
+        id: newUser.id,
+        tenant_id: tenantId,
+        full_name: fullName,
+        email: email,
+        role: newUser.role,
+        crm_role: crmRole,
+        password: 'senha123',
+        avatar_url: newUser.avatar_url
+      }]).then(({ error }) => {
+        if (error) console.warn('[Supabase Sync] Falha ao sincronizar usuário convidado:', error);
+        else console.log('[Supabase Sync] Usuário convidado sincronizado com sucesso:', email);
+      });
+    }
+
     return newUser;
   }
 
@@ -744,7 +762,7 @@ class LocalCRMStore {
     const data = this.getData();
     const cleanEmail = email.trim().toLowerCase();
 
-    // 1. Procurar o usuário cadastrado no banco local pelo e-mail exato
+    // 1. Procurar o usuário no banco local (localStorage)
     const matchedUser = (data.users || INITIAL_DEMO_DATA.users).find(u => u.email.toLowerCase() === cleanEmail);
 
     if (matchedUser) {
@@ -761,13 +779,75 @@ class LocalCRMStore {
       return { user: matchedUser, session: null };
     }
 
-    // 2. Se for uma tentativa de login Supabase Cloud
+    // 2. Fallback: Buscar no Supabase profiles
+    //    (usuários convidados acessando de outro dispositivo)
     if (supabaseClient) {
-      const { data: sbData, error } = await supabaseClient.auth.signInWithPassword({ email, password });
-      if (error) throw new Error(error.message);
+      try {
+        const { data: profileRows, error: profileErr } = await supabaseClient
+          .from('profiles')
+          .select('*')
+          .ilike('email', cleanEmail)
+          .limit(1);
+
+        if (!profileErr && profileRows && profileRows.length > 0) {
+          const p = profileRows[0];
+
+          // Validate password against the stored profile password
+          if (p.password && p.password !== password) {
+            throw new Error('Senha incorreta. A senha padrão de novos convidados é: senha123');
+          }
+
+          // Ensure the tenant exists locally, fetching from Supabase if needed
+          const tenantExists = (data.tenants || []).some(t => t.id === p.tenant_id);
+          if (!tenantExists && p.tenant_id) {
+            const { data: tenantRows } = await supabaseClient
+              .from('tenants').select('*').eq('id', p.tenant_id).limit(1);
+            if (tenantRows && tenantRows.length > 0) {
+              if (!data.tenants) data.tenants = [];
+              data.tenants.push(tenantRows[0]);
+            }
+          }
+
+          const localUser = {
+            id: p.id,
+            tenant_id: p.tenant_id,
+            full_name: p.full_name,
+            email: p.email,
+            password: password,
+            crm_role: p.crm_role || 'vendedor',
+            role: p.role || 'Vendedor',
+            is_super_admin: false,
+            avatar_url: p.avatar_url || '/src/assets/images/profile/user-1.jpg'
+          };
+
+          // Save locally so future logins are instant
+          if (!data.users) data.users = [];
+          const existingIdx = data.users.findIndex(u => u.email.toLowerCase() === cleanEmail);
+          if (existingIdx >= 0) {
+            data.users[existingIdx] = localUser;
+          } else {
+            data.users.push(localUser);
+          }
+
+          data.session = {
+            user: localUser,
+            active_tenant_id: localUser.tenant_id,
+            is_authenticated: true
+          };
+          this.saveData(data);
+          console.log('[Login] Usuário autenticado via Supabase profiles:', cleanEmail);
+          return { user: localUser, session: null };
+        }
+      } catch (profileErr) {
+        // Re-throw password errors
+        if (profileErr.message && (profileErr.message.includes('Senha incorreta') || profileErr.message.includes('senha123'))) {
+          throw profileErr;
+        }
+        console.warn('[Login Fallback] Erro ao buscar no Supabase profiles:', profileErr);
+      }
     }
 
-    // 3. Fallback: Se for o email do Paulo Garcia (Super Admin Master)
+    // 3. Fallback especial: Paulo Garcia (Super Admin Master)
     if (cleanEmail === 'paulo@southsea.com.br' || cleanEmail.includes('paulo') || cleanEmail.includes('southsea')) {
       const masterUser = (data.users || []).find(u => u.is_super_admin) || INITIAL_DEMO_DATA.users[0];
       masterUser.email = 'paulo@southsea.com.br';
@@ -780,45 +860,19 @@ class LocalCRMStore {
       return { user: masterUser, session: null };
     }
 
-    // 4. Se for um novo usuário de teste cadastrando no login: cria tenant isolado
-    const newTenantId = 'tenant-' + Date.now();
-    const newTenantObj = {
-      id: newTenantId,
-      name: cleanEmail.split('@')[0].toUpperCase(),
-      slug: cleanEmail.split('@')[0],
-      logo_url: '/src/assets/images/logos/metrifiquese.svg',
-      primary_color: '#FF7A59',
-      custom_domain: `${cleanEmail.split('@')[0]}.metrifiquese.com.br`,
-      plan: 'Plano Agência Whitelabel',
-      monthly_price: 297.00,
-      status: 'active',
-      created_at: new Date().toISOString()
-    };
+    // 4. Tentar login via Supabase Auth (usuários cadastrados pelo Supabase Auth)
+    if (supabaseClient) {
+      try {
+        const { data: sbData, error: sbErr } = await supabaseClient.auth.signInWithPassword({ email, password });
+        if (!sbErr && sbData && sbData.user) {
+          return { user: sbData.user, session: sbData.session };
+        }
+      } catch (sbAuthErr) {
+        // ignore, fall through
+      }
+    }
 
-    const newUserObj = {
-      id: 'user-' + Date.now(),
-      tenant_id: newTenantId,
-      email: email,
-      password: password,
-      full_name: email.split('@')[0],
-      role: 'Proprietário da Empresa',
-      is_super_admin: false,
-      avatar_url: '/src/assets/images/profile/user-1.jpg'
-    };
-
-    if (!data.tenants) data.tenants = [];
-    if (!data.users) data.users = [];
-    data.tenants.push(newTenantObj);
-    data.users.push(newUserObj);
-
-    data.session = {
-      user: newUserObj,
-      active_tenant_id: newTenantId,
-      is_authenticated: true
-    };
-
-    this.saveData(data);
-    return { user: newUserObj, session: null };
+    throw new Error('E-mail não encontrado. Verifique suas credenciais ou entre em contato com o administrador da sua conta.');
   }
 
   async signUpWithEmail(email, password, fullName) {
