@@ -283,15 +283,45 @@ class LocalCRMStore {
     }
   }
 
+  async syncLocalUsersToCloud() {
+    if (!supabaseClient) return;
+    try {
+      const data = this.getData();
+      const usersToSync = (data.users || []).map(u => ({
+        id: u.id,
+        tenant_id: u.tenant_id,
+        full_name: u.full_name,
+        email: u.email,
+        role: u.role || 'Membro da Equipe',
+        crm_role: u.crm_role || (u.role && u.role.toLowerCase().includes('admin') ? 'admin' : 'vendedor'),
+        password: u.password || '12345678',
+        avatar_url: u.avatar_url || '/src/assets/images/profile/user-1.jpg'
+      }));
+
+      if (usersToSync.length > 0) {
+        const { error } = await supabaseClient.from('profiles').upsert(usersToSync);
+        if (error) console.warn('[Supabase Sync Users]', error);
+        else console.log('[Supabase Sync Users] Sincronizados', usersToSync.length, 'usuários para o Supabase');
+      }
+    } catch (err) {
+      console.warn('[Supabase Sync Users Warning]', err);
+    }
+  }
+
   async fetchRemoteProfiles() {
     if (supabaseClient) {
       try {
+        // 1. Push any local users (e.g. Caue or newly created team members) to Supabase Cloud
+        await this.syncLocalUsersToCloud();
+
+        // 2. Fetch profiles from Supabase Cloud
         const { data: dbProfiles, error } = await supabaseClient.from('profiles').select('*');
         if (!error && dbProfiles && dbProfiles.length > 0) {
           const storeData = this.getData();
           let updated = false;
+
           dbProfiles.forEach(p => {
-            const u = (storeData.users || []).find(user => 
+            let u = (storeData.users || []).find(user => 
               user.id === p.id || 
               (user.email && p.email && user.email.toLowerCase() === p.email.toLowerCase()) || 
               (user.is_super_admin && p.email === 'paulo@southsea.com.br')
@@ -299,7 +329,26 @@ class LocalCRMStore {
             if (u) {
               if (p.avatar_url !== undefined && u.avatar_url !== p.avatar_url) { u.avatar_url = p.avatar_url; updated = true; }
               if (p.full_name && u.full_name !== p.full_name) { u.full_name = p.full_name; updated = true; }
+              if (p.password && u.password !== p.password) { u.password = p.password; updated = true; }
+              if (p.crm_role && u.crm_role !== p.crm_role) { u.crm_role = p.crm_role; updated = true; }
+            } else {
+              // New remote profile found, add to local store
+              const newUser = {
+                id: p.id,
+                tenant_id: p.tenant_id,
+                full_name: p.full_name,
+                email: p.email,
+                password: p.password || '12345678',
+                role: p.role || 'Membro da Equipe',
+                crm_role: p.crm_role || 'vendedor',
+                is_super_admin: p.email === 'paulo@southsea.com.br',
+                avatar_url: p.avatar_url || '/src/assets/images/profile/user-1.jpg'
+              };
+              if (!storeData.users) storeData.users = [];
+              storeData.users.push(newUser);
+              updated = true;
             }
+
             if (storeData.session && storeData.session.user && (
               storeData.session.user.id === p.id || 
               (storeData.session.user.email && p.email && storeData.session.user.email.toLowerCase() === p.email.toLowerCase()) ||
@@ -309,6 +358,7 @@ class LocalCRMStore {
               if (p.full_name && storeData.session.user.full_name !== p.full_name) { storeData.session.user.full_name = p.full_name; updated = true; }
             }
           });
+
           if (updated) {
             this.saveData(storeData);
             if (typeof window !== 'undefined') {
@@ -556,8 +606,18 @@ class LocalCRMStore {
     if (supabaseClient) {
       try {
         await supabaseClient.from('tenants').insert([newTenant]);
+        await supabaseClient.from('profiles').upsert([{
+          id: newAdminUser.id,
+          tenant_id: newAdminUser.tenant_id,
+          full_name: newAdminUser.full_name,
+          email: newAdminUser.email,
+          role: newAdminUser.role,
+          crm_role: 'admin',
+          password: newAdminUser.password,
+          avatar_url: newAdminUser.avatar_url
+        }]);
       } catch (err) {
-        console.warn('[Supabase Sync Warning] Falha ao sincronizar tenant:', err);
+        console.warn('[Supabase Sync Warning] Falha ao sincronizar tenant ou admin user:', err);
       }
     }
 
@@ -638,6 +698,7 @@ class LocalCRMStore {
       password: password || '12345678',
       phone: phone || '(11) 98000-0000',
       role: role || 'Membro da Equipe',
+      crm_role: (role && (role.toLowerCase().includes('admin') || role.toLowerCase().includes('dono') || role.toLowerCase().includes('proprietário'))) ? 'admin' : 'vendedor',
       is_super_admin: false,
       avatar_url: avatarUrl || '/src/assets/images/profile/user-1.jpg'
     };
@@ -645,13 +706,37 @@ class LocalCRMStore {
     if (!data.users) data.users = [];
     data.users.push(newUser);
     this.saveData(data);
+
+    // Sync to Supabase profiles so the user can log in from any device
+    if (supabaseClient) {
+      supabaseClient.from('profiles').upsert([{
+        id: newUser.id,
+        tenant_id: newUser.tenant_id,
+        full_name: newUser.full_name,
+        email: newUser.email,
+        role: newUser.role,
+        crm_role: newUser.crm_role,
+        password: newUser.password,
+        avatar_url: newUser.avatar_url
+      }]).then(({ error }) => {
+        if (error) console.warn('[Supabase Sync] Falha ao sincronizar usuário criado:', error);
+        else console.log('[Supabase Sync] Usuário criado sincronizado com sucesso:', email);
+      });
+    }
+
     return newUser;
   }
 
   deleteUserFromTenant(userId) {
     const data = this.getData();
-    data.users = data.users.filter(u => u.id !== userId);
+    data.users = (data.users || []).filter(u => u.id !== userId);
     this.saveData(data);
+
+    if (supabaseClient) {
+      supabaseClient.from('profiles').delete().eq('id', userId).then(({ error }) => {
+        if (error) console.warn('[Supabase Sync] Falha ao excluir perfil do Supabase:', error);
+      });
+    }
   }
 
   // --- PERMISSIONS & ROLES (admin / vendedor) ---
