@@ -123,6 +123,48 @@
       border-radius: 50px;
       display: inline-block;
     }
+
+    /* RESPONSIVE MOBILE ADJUSTMENTS */
+    .navbar {
+      padding-top: 12px !important;
+      padding-bottom: 12px !important;
+      min-height: 64px;
+    }
+
+    .navbar-brand {
+      padding: 0 !important;
+      margin: 0 !important;
+      display: flex;
+      align-items: center;
+    }
+
+    .navbar-brand img, .hs-brand-logo {
+      max-height: 32px !important;
+      width: auto !important;
+      object-fit: contain;
+    }
+
+    @media (max-width: 991.98px) {
+      .navbar {
+        padding-top: 10px !important;
+        padding-bottom: 10px !important;
+        min-height: 58px !important;
+      }
+
+      .navbar-brand img, .hs-brand-logo {
+        max-height: 26px !important;
+      }
+
+      .hero-section-dark {
+        padding-top: 135px !important;
+        padding-bottom: 50px !important;
+      }
+
+      .hero-section-dark h1.display-3 {
+        font-size: 2.1rem !important;
+        line-height: 1.25 !important;
+      }
+    }
   </style>
 </head>
 
