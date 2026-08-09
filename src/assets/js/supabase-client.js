@@ -1611,9 +1611,11 @@ class LocalCRMStore {
     const tenantId = this.getActiveTenantId();
     const data = this.getData();
     if (!data.forms) data.forms = [];
+    if (!data.forms_initialized) data.forms_initialized = {};
+
     let tenantForms = data.forms.filter(f => f.tenant_id === tenantId);
 
-    if (tenantForms.length === 0) {
+    if (tenantForms.length === 0 && !data.forms_initialized[tenantId]) {
       const defaultForm = {
         id: 'form-' + tenantId + '-default',
         tenant_id: tenantId,
@@ -1636,6 +1638,7 @@ class LocalCRMStore {
         created_at: new Date().toISOString()
       };
       data.forms.push(defaultForm);
+      data.forms_initialized[tenantId] = true;
       this.saveData(data);
       tenantForms = [defaultForm];
     }
@@ -1650,13 +1653,16 @@ class LocalCRMStore {
   saveForm(formData) {
     const data = this.getData();
     if (!data.forms) data.forms = [];
-    const tenantId = this.getActiveTenantId();
+    if (!data.forms_initialized) data.forms_initialized = {};
+
+    const tenantId = formData.tenant_id || this.getActiveTenantId();
+    data.forms_initialized[tenantId] = true;
 
     let existingIndex = data.forms.findIndex(f => f.id === formData.id);
 
     const formObj = {
       ...formData,
-      tenant_id: formData.tenant_id || tenantId,
+      tenant_id: tenantId,
       updated_at: new Date().toISOString()
     };
 
@@ -1672,7 +1678,28 @@ class LocalCRMStore {
     this.saveData(data);
 
     if (supabaseClient) {
-      supabaseClient.from('tenant_forms').upsert([formObj]).then();
+      try {
+        const payload = {
+          id: formObj.id,
+          tenant_id: formObj.tenant_id,
+          title: formObj.title,
+          description: formObj.description,
+          button_text: formObj.button_text,
+          button_color: formObj.button_color,
+          theme_mode: formObj.theme_mode,
+          source: formObj.source,
+          redirect_url: formObj.redirect_url || '',
+          success_message: formObj.success_message || '',
+          fields: formObj.fields,
+          submissions_count: formObj.submissions_count || 0
+        };
+        supabaseClient.from('tenant_forms').upsert([payload]).then(({ error }) => {
+          if (error) console.warn('[Supabase Sync Save Form Error]', error);
+          else console.log('[Supabase Sync Save Form Success]', formObj.id);
+        });
+      } catch (e) {
+        console.warn('[Supabase Sync Save Form Exception]', e);
+      }
     }
 
     if (typeof window !== 'undefined') {
@@ -1686,14 +1713,56 @@ class LocalCRMStore {
     const data = this.getData();
     if (!data.forms) data.forms = [];
     data.forms = data.forms.filter(f => f.id !== formId);
+
+    if (!data.forms_initialized) data.forms_initialized = {};
+    const tenantId = this.getActiveTenantId();
+    data.forms_initialized[tenantId] = true;
+
     this.saveData(data);
 
     if (supabaseClient) {
-      supabaseClient.from('tenant_forms').delete().eq('id', formId).then();
+      try {
+        supabaseClient.from('tenant_forms').delete().eq('id', formId).then();
+      } catch(e) {
+        console.warn('[Supabase Delete Form Error]', e);
+      }
     }
 
     if (typeof window !== 'undefined') {
       window.dispatchEvent(new CustomEvent('forms-synced'));
+    }
+  }
+
+  async fetchRemoteForms() {
+    if (supabaseClient) {
+      try {
+        const { data: dbForms, error } = await supabaseClient.from('tenant_forms').select('*');
+        if (!error && dbForms && dbForms.length > 0) {
+          const storeData = this.getData();
+          const localForms = storeData.forms || [];
+          let updated = false;
+
+          dbForms.forEach(rf => {
+            const idx = localForms.findIndex(lf => lf.id === rf.id);
+            if (idx >= 0) {
+              localForms[idx] = { ...localForms[idx], ...rf };
+            } else {
+              localForms.push(rf);
+              updated = true;
+            }
+          });
+
+          if (updated) {
+            storeData.forms = localForms;
+            this.saveData(storeData);
+            if (typeof window !== 'undefined') {
+              window.dispatchEvent(new CustomEvent('forms-synced'));
+            }
+          }
+        }
+      } catch (err) {
+        console.warn('[Supabase Sync Forms Error]', err);
+      }
     }
   }
 
