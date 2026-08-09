@@ -21,13 +21,18 @@ class FormsManager {
     return window.crmStore ? window.crmStore.getForms() : [];
   }
 
+  getProductionBaseUrl() {
+    const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    return isLocalhost ? 'https://metrifiquese.vercel.app' : window.location.origin;
+  }
+
   renderFormsList() {
     const container = document.getElementById('forms-list-container');
     if (!container) return;
 
     const forms = this.getForms();
     const tenantId = window.crmStore ? window.crmStore.getActiveTenantId() : 'tenant-demo';
-    const baseUrl = window.location.origin + window.location.pathname.replace('/capturas.html', '/form.html');
+    const baseUrl = this.getProductionBaseUrl() + '/src/html/form.html';
 
     if (forms.length === 0) {
       container.innerHTML = `
@@ -263,8 +268,7 @@ class FormsManager {
     if (!form) return;
 
     const tenantId = form.tenant_id || (window.crmStore ? window.crmStore.getActiveTenantId() : 'tenant-demo');
-    const pageUrl = window.location.origin + window.location.pathname.replace('/capturas.html', '/form.html');
-    const publicLink = `${pageUrl}?tenant=${tenantId}&form=${form.id}`;
+    const publicLink = `${this.getProductionBaseUrl()}/src/html/form.html?tenant=${tenantId}&form=${form.id}`;
 
     const embedHtmlCode = `<!-- Metrifique-se CRM Form Embed Code -->
 <iframe src="${publicLink}" 
@@ -277,7 +281,7 @@ class FormsManager {
 
     const htmlScriptCode = `<!-- Metrifique-se CRM Native Form Script -->
 <div id="metrifiquese-form-container"></div>
-<script src="${window.location.origin}/src/assets/js/form-embed-widget.js" 
+<script src="${this.getProductionBaseUrl()}/src/assets/js/form-embed-widget.js" 
         data-tenant="${tenantId}" 
         data-form="${form.id}">
 </script>`;
