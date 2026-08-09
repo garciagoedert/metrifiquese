@@ -119,6 +119,35 @@
 
     <div class="body-wrapper">
       <div class="container-fluid pt-3">
+        
+        <!-- HEADER CONTROL BAR -->
+        <div class="card shadow-sm border-0 mb-4 bg-white">
+          <div class="card-body p-4">
+            <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+              <div>
+                <h4 class="fw-bold mb-1 text-dark"><i class="ti ti-forms text-primary me-2"></i> Formulários & Webhooks de Captura</h4>
+                <p class="text-muted mb-0">Crie formulários personalizados para seu site ou landing page e capture leads diretamente na sua base de CRM.</p>
+              </div>
+              <button class="btn btn-primary fw-bold" onclick="window.formsManager.openFormModal()">
+                <i class="ti ti-plus me-1"></i> Criar Novo Formulário
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- FORMULÁRIOS DA EMPRESA -->
+        <div class="mb-4">
+          <div class="d-flex align-items-center justify-content-between mb-3">
+            <h5 class="fw-bold mb-0 text-dark"><i class="ti ti-layout-grid me-2 text-primary"></i> Formulários Ativos</h5>
+            <small class="text-muted">Todos os leads preenchidos nestes formulários serão direcionados automaticamente para a sua conta.</small>
+          </div>
+
+          <div class="row" id="forms-list-container">
+            <!-- Renderizado via forms-manager.js -->
+          </div>
+        </div>
+
+        <!-- SEÇÃO DE WEBHOOKS & INTEGRAÇÕES -->
         <div class="row">
           <div class="col-lg-6 mb-4">
             <div class="card shadow-sm border-0 h-100">
@@ -129,15 +158,15 @@
                   </div>
                   <div>
                     <h5 class="fw-bold mb-0 text-dark">URL de Webhook Inbound</h5>
-                    <small class="text-muted">Integração com Facebook Ads, Elementor ou Typeform</small>
+                    <small class="text-muted">Integração com Facebook Ads, Elementor, Typeform ou Make</small>
                   </div>
                 </div>
 
                 <div class="mb-3">
                   <label class="form-label fw-semibold">Endpoint do Webhook (POST JSON)</label>
                   <div class="input-group">
-                    <input type="text" class="form-control bg-light" readonly value="http://localhost:7000/api/v1/leads/webhook?token=wh_tenant_demo_8823">
-                    <button class="btn btn-outline-primary" onclick="alert('URL copiada!')">
+                    <input type="text" id="webhook-endpoint-input" class="form-control bg-light" readonly value="https://metrifiquese.vercel.app/api/v1/leads/webhook?token=wh_tenant_demo_8823">
+                    <button class="btn btn-outline-primary" onclick="window.formsManager.copyToClipboard('webhook-endpoint-input', 'URL do Webhook copiada!')">
                       <i class="ti ti-copy"></i> Copiar
                     </button>
                   </div>
@@ -165,29 +194,221 @@
                     <i class="ti ti-code fs-6"></i>
                   </div>
                   <div>
-                    <h5 class="fw-bold mb-0 text-dark">Formulário HTML Embutível</h5>
-                    <small class="text-muted">Copie e cole na sua Landing Page</small>
+                    <h5 class="fw-bold mb-0 text-dark">Roteamento Multi-tenant Seguro</h5>
+                    <small class="text-muted">Garantia de isolamento dos leads por empresa</small>
                   </div>
                 </div>
 
-                <div class="mb-3">
-                  <label class="form-label fw-semibold">HTML Embed Code</label>
-                  <textarea class="form-control bg-light font-monospace fs-2" rows="6" readonly>
-<form action="http://localhost:7000/api/v1/leads/capture" method="POST">
-  <input type="hidden" name="tenant_id" value="tenant-demo-001">
-  <input type="text" name="name" placeholder="Seu Nome Completo" required>
-  <input type="email" name="email" placeholder="Seu E-mail" required>
-  <input type="text" name="company" placeholder="Sua Empresa">
-  <button type="submit" style="background-color: #FF7A59; color: white;">Receber Demonstração</button>
-</form></textarea>
-                </div>
+                <p class="fs-2 text-muted mb-3">
+                  Cada formulário gerado possui a identificação única da sua empresa (<code>tenant_id</code>). Isso garante que, independentemente de onde o formulário for instalado na web, os contatos preenchidos cairão com 100% de segurança exclusivamente na sua plataforma.
+                </p>
 
-                <button class="btn btn-success w-100" onclick="alert('Código HTML copiado!')">
-                  <i class="ti ti-copy me-1"></i> Copiar Código Embed
-                </button>
+                <div class="p-3 bg-light-primary border border-primary rounded-3 text-primary">
+                  <strong class="d-block mb-1"><i class="ti ti-sparkles me-1"></i> Lead Scoring Automático (+25 Pts)</strong>
+                  <small>Sempre que um novo lead preenche um formulário de captura, a pontuação do contato é elevada automaticamente em +25 pontos no CRM.</small>
+                </div>
               </div>
             </div>
           </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL CONSTRUTOR VISUAL DE FORMULÁRIO -->
+  <div class="modal fade" id="formBuilderModal" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+      <div class="modal-content">
+        <div class="modal-header border-bottom">
+          <div>
+            <h5 class="modal-title fw-bold text-dark"><i class="ti ti-edit text-primary me-2"></i> Construtor Visual de Formulário</h5>
+            <small class="text-muted">Personalize campos, cores e textos com visualização em tempo real</small>
+          </div>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body p-4">
+          <input type="hidden" id="form-id-input">
+
+          <div class="row g-4">
+            <!-- Coluna de Configuração -->
+            <div class="col-lg-6">
+              <div class="accordion" id="formConfigAccordion">
+                
+                <!-- Card 1: Textos & Estilo -->
+                <div class="card border mb-3">
+                  <div class="card-header bg-light cursor-pointer" data-bs-toggle="collapse" data-bs-target="#collapseTexts">
+                    <strong class="text-dark"><i class="ti ti-typography text-primary me-2"></i> Textos & Estilo Visual</strong>
+                  </div>
+                  <div id="collapseTexts" class="collapse show p-3">
+                    <div class="mb-3">
+                      <label class="form-label fw-semibold">Título do Formulário *</label>
+                      <input type="text" id="form-title-input" class="form-control" placeholder="Ex: Solicitar Orçamento Comercial">
+                    </div>
+                    <div class="mb-3">
+                      <label class="form-label fw-semibold">Subtítulo / Instrução</label>
+                      <input type="text" id="form-desc-input" class="form-control" placeholder="Ex: Preencha os dados abaixo e entraremos em contato.">
+                    </div>
+                    <div class="row">
+                      <div class="col-md-7 mb-3">
+                        <label class="form-label fw-semibold">Texto do Botão *</label>
+                        <input type="text" id="form-button-text-input" class="form-control" placeholder="Quero Receber Proposta">
+                      </div>
+                      <div class="col-md-5 mb-3">
+                        <label class="form-label fw-semibold">Cor do Botão</label>
+                        <input type="color" id="form-button-color-input" class="form-control form-control-color w-100" value="#FF7A59">
+                      </div>
+                    </div>
+                    <div class="mb-3">
+                      <label class="form-label fw-semibold">Tema de Cores do Card</label>
+                      <select id="form-theme-select" class="form-select">
+                        <option value="light">☀️ Claro (Fundo Branco)</option>
+                        <option value="dark">🌙 Escuro (Dark Mode)</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Card 2: Campos Ativos -->
+                <div class="card border mb-3">
+                  <div class="card-header bg-light cursor-pointer" data-bs-toggle="collapse" data-bs-target="#collapseFields">
+                    <strong class="text-dark"><i class="ti ti-list-check text-primary me-2"></i> Campos do Formulário</strong>
+                  </div>
+                  <div id="collapseFields" class="collapse show p-3">
+                    <div class="form-check form-switch mb-2">
+                      <input class="form-check-input" type="checkbox" id="field-name-chk" checked>
+                      <label class="form-check-input-label fw-semibold" for="field-name-chk">Nome Completo</label>
+                    </div>
+                    <div class="form-check form-switch mb-2">
+                      <input class="form-check-input" type="checkbox" id="field-email-chk" checked>
+                      <label class="form-check-input-label fw-semibold" for="field-email-chk">E-mail Comercial</label>
+                    </div>
+                    <div class="form-check form-switch mb-2">
+                      <input class="form-check-input" type="checkbox" id="field-phone-chk" checked>
+                      <label class="form-check-input-label fw-semibold" for="field-phone-chk">WhatsApp / Telefone</label>
+                    </div>
+                    <div class="form-check form-switch mb-2">
+                      <input class="form-check-input" type="checkbox" id="field-company-chk" checked>
+                      <label class="form-check-input-label fw-semibold" for="field-company-chk">Nome da Empresa</label>
+                    </div>
+                    <div class="form-check form-switch mb-2">
+                      <input class="form-check-input" type="checkbox" id="field-notes-chk">
+                      <label class="form-check-input-label fw-semibold" for="field-notes-chk">Campo de Mensagem / Observações</label>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Card 3: Origem & Pós-Envio -->
+                <div class="card border">
+                  <div class="card-header bg-light cursor-pointer" data-bs-toggle="collapse" data-bs-target="#collapseSettings">
+                    <strong class="text-dark"><i class="ti ti-settings text-primary me-2"></i> Origem & Ação Pós-Envio</strong>
+                  </div>
+                  <div id="collapseSettings" class="collapse p-3">
+                    <div class="mb-3">
+                      <label class="form-label fw-semibold">Origem do Lead (Source no CRM)</label>
+                      <input type="text" id="form-source-input" class="form-control" placeholder="Ex: Formulário do Site, Landing Page Ebook">
+                    </div>
+                    <div class="mb-3">
+                      <label class="form-label fw-semibold">Mensagem de Sucesso</label>
+                      <input type="text" id="form-success-msg-input" class="form-control" placeholder="Obrigado! Entraremos em contato em breve.">
+                    </div>
+                    <div class="mb-3">
+                      <label class="form-label fw-semibold">Redirecionar para URL (Opcional)</label>
+                      <input type="url" id="form-redirect-url-input" class="form-control" placeholder="https://suaempresa.com.br/obrigado">
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
+            <!-- Coluna de Live Preview -->
+            <div class="col-lg-6">
+              <div class="bg-light p-4 rounded-4 h-100 border text-center d-flex flex-column justify-content-center">
+                <div class="d-flex align-items-center justify-content-between mb-3 px-2">
+                  <span class="badge bg-primary text-white fw-bold fs-2"><i class="ti ti-eye me-1"></i> Live Preview em Tempo Real</span>
+                  <small class="text-muted">Assim o lead verá no site</small>
+                </div>
+
+                <div id="live-form-preview">
+                  <!-- Atualizado via JS -->
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
+          <button type="button" class="btn btn-primary fw-bold px-4" onclick="window.formsManager.saveFormFromModal()">
+            <i class="ti ti-check me-1"></i> Salvar e Gerar Código Embed
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL CÓDIGO EMBED E LINK PÚBLICO -->
+  <div class="modal fade" id="embedCodeModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header bg-light-primary border-bottom">
+          <div>
+            <h5 class="modal-title fw-bold text-primary"><i class="ti ti-code me-2"></i> Código Embed & Link do Formulário</h5>
+            <small class="text-muted" id="embed-form-title">Formulário de Captura</small>
+          </div>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body p-4">
+          
+          <ul class="nav nav-pills mb-3 border-bottom pb-2" role="tablist">
+            <li class="nav-item">
+              <button class="nav-link active fw-bold" data-bs-toggle="pill" data-bs-target="#tab-public-link">
+                <i class="ti ti-link me-1"></i> Link Público Direto
+              </button>
+            </li>
+            <li class="nav-item">
+              <button class="nav-link fw-bold" data-bs-toggle="pill" data-bs-target="#tab-iframe-embed">
+                <i class="ti ti-code me-1"></i> Código IFrame (Elementor / WordPress / Wix)
+              </button>
+            </li>
+            <li class="nav-item">
+              <button class="nav-link fw-bold" data-bs-toggle="pill" data-bs-target="#tab-script-embed">
+                <i class="ti ti-brand-javascript me-1"></i> Script HTML Nativo
+              </button>
+            </li>
+          </ul>
+
+          <div class="tab-content pt-2">
+            <!-- TAB 1: Link Público -->
+            <div class="tab-pane fade show active" id="tab-public-link">
+              <p class="fs-2 text-muted mb-2">Use este link direto para divulgar na bio do Instagram, grupos do WhatsApp ou e-mail marketing:</p>
+              <div class="input-group mb-3">
+                <input type="text" id="embed-public-link" class="form-control bg-light" readonly>
+                <button class="btn btn-primary fw-bold" onclick="window.formsManager.copyToClipboard('embed-public-link', 'Link Público copiado!')">
+                  <i class="ti ti-copy me-1"></i> Copiar Link
+                </button>
+              </div>
+            </div>
+
+            <!-- TAB 2: Código IFrame -->
+            <div class="tab-pane fade" id="tab-iframe-embed">
+              <p class="fs-2 text-muted mb-2">Copie e cole este código dentro do bloco de HTML/Custom Code no Elementor, WordPress, Wix ou Webflow:</p>
+              <textarea id="embed-html-iframe" class="form-control bg-dark text-light font-monospace fs-2 mb-3" rows="6" readonly></textarea>
+              <button class="btn btn-primary fw-bold" onclick="window.formsManager.copyToClipboard('embed-html-iframe', 'Código IFrame copiado!')">
+                <i class="ti ti-copy me-1"></i> Copiar Código IFrame
+              </button>
+            </div>
+
+            <!-- TAB 3: Script HTML -->
+            <div class="tab-pane fade" id="tab-script-embed">
+              <p class="fs-2 text-muted mb-2">Script nativo para incorporar o formulário diretamente na estrutura da página:</p>
+              <textarea id="embed-html-script" class="form-control bg-dark text-light font-monospace fs-2 mb-3" rows="6" readonly></textarea>
+              <button class="btn btn-primary fw-bold" onclick="window.formsManager.copyToClipboard('embed-html-script', 'Script HTML copiado!')">
+                <i class="ti ti-copy me-1"></i> Copiar Script HTML
+              </button>
+            </div>
+          </div>
+
         </div>
       </div>
     </div>
@@ -197,6 +418,7 @@
   <script src="../assets/libs/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
   <script src="../assets/js/sidebarmenu.js"></script>
   <script src="../assets/js/app.min.js"></script>
+  <script src="../assets/js/forms-manager.js"></script>
 
   <script>
     document.addEventListener('DOMContentLoaded', () => {
@@ -208,5 +430,7 @@
     });
   </script>
 </body>
+
+</html>
 
 </html>

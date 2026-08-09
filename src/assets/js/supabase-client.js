@@ -1591,6 +1591,105 @@ class LocalCRMStore {
     this.saveData(data);
     return rule;
   }
+
+  getForms() {
+    const tenantId = this.getActiveTenantId();
+    const data = this.getData();
+    if (!data.forms) data.forms = [];
+    let tenantForms = data.forms.filter(f => f.tenant_id === tenantId);
+
+    if (tenantForms.length === 0) {
+      const defaultForm = {
+        id: 'form-' + tenantId + '-default',
+        tenant_id: tenantId,
+        title: 'Solicitar Demonstração / Orçamento',
+        description: 'Preencha os campos abaixo para que nossa equipe entre em contato.',
+        button_text: 'Receber Apresentação Comercial',
+        button_color: '#FF7A59',
+        theme_mode: 'light',
+        source: 'Formulário do Site',
+        redirect_url: '',
+        success_message: 'Obrigado! Recebemos sua solicitação e entraremos em contato em instantes.',
+        fields: {
+          name: true,
+          email: true,
+          phone: true,
+          company: true,
+          notes: false
+        },
+        submissions_count: 5,
+        created_at: new Date().toISOString()
+      };
+      data.forms.push(defaultForm);
+      this.saveData(data);
+      tenantForms = [defaultForm];
+    }
+    return tenantForms;
+  }
+
+  getFormById(formId) {
+    const data = this.getData();
+    return (data.forms || []).find(f => f.id === formId);
+  }
+
+  saveForm(formData) {
+    const data = this.getData();
+    if (!data.forms) data.forms = [];
+    const tenantId = this.getActiveTenantId();
+
+    let existingIndex = data.forms.findIndex(f => f.id === formData.id);
+
+    const formObj = {
+      ...formData,
+      tenant_id: formData.tenant_id || tenantId,
+      updated_at: new Date().toISOString()
+    };
+
+    if (existingIndex >= 0) {
+      data.forms[existingIndex] = { ...data.forms[existingIndex], ...formObj };
+    } else {
+      if (!formObj.id) formObj.id = 'form-' + tenantId + '-' + Date.now();
+      if (!formObj.created_at) formObj.created_at = new Date().toISOString();
+      if (typeof formObj.submissions_count === 'undefined') formObj.submissions_count = 0;
+      data.forms.push(formObj);
+    }
+
+    this.saveData(data);
+
+    if (supabaseClient) {
+      supabaseClient.from('tenant_forms').upsert([formObj]).then();
+    }
+
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('forms-synced'));
+    }
+
+    return formObj;
+  }
+
+  deleteForm(formId) {
+    const data = this.getData();
+    if (!data.forms) data.forms = [];
+    data.forms = data.forms.filter(f => f.id !== formId);
+    this.saveData(data);
+
+    if (supabaseClient) {
+      supabaseClient.from('tenant_forms').delete().eq('id', formId).then();
+    }
+
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('forms-synced'));
+    }
+  }
+
+  incrementFormSubmissions(formId) {
+    const data = this.getData();
+    const form = (data.forms || []).find(f => f.id === formId);
+    if (form) {
+      form.submissions_count = (form.submissions_count || 0) + 1;
+      this.saveData(data);
+    }
+  }
 }
 
 window.crmStore = new LocalCRMStore();
