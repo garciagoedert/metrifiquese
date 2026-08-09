@@ -46,6 +46,14 @@
     .form-card.dark-mode input::placeholder, .form-card.dark-mode textarea::placeholder {
       color: #94A3B8;
     }
+    .pulse-animation {
+      animation: pulseScale 1.8s infinite ease-in-out;
+    }
+    @keyframes pulseScale {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.08); }
+      100% { transform: scale(1); }
+    }
   </style>
 </head>
 
@@ -56,49 +64,74 @@
       <img src="../assets/images/logos/logoblack.png" height="32" alt="Logo" id="tenant-logo-img">
     </div>
 
-    <h4 class="fw-bold mb-1 text-center" id="form-title">Solicitar Demonstração</h4>
-    <p class="text-muted fs-2 mb-4 text-center" id="form-desc">Preencha seus dados para receber o contato de nossa equipe.</p>
+    <!-- FORMULÁRIO DE CAPTURA -->
+    <div id="form-content-wrapper">
+      <h4 class="fw-bold mb-1 text-center" id="form-title">Solicitar Demonstração</h4>
+      <p class="text-muted fs-2 mb-4 text-center" id="form-desc">Preencha seus dados para receber o contato de nossa equipe.</p>
 
-    <form id="public-capture-form">
-      <div id="form-fields-container">
-        <!-- Campos iniciais pré-renderizados estaticamente -->
-        <div class="mb-3" id="field-box-name">
-          <label class="form-label fs-2 fw-semibold">Nome Completo *</label>
-          <input type="text" id="lead-name-input" class="form-control py-2.5" placeholder="Seu nome completo" required>
+      <form id="public-capture-form">
+        <div id="form-fields-container">
+          <!-- Campos iniciais pré-renderizados estaticamente -->
+          <div class="mb-3" id="field-box-name">
+            <label class="form-label fs-2 fw-semibold">Nome Completo *</label>
+            <input type="text" id="lead-name-input" class="form-control py-2.5" placeholder="Seu nome completo" required>
+          </div>
+
+          <div class="mb-3" id="field-box-email">
+            <label class="form-label fs-2 fw-semibold">E-mail Comercial *</label>
+            <input type="email" id="lead-email-input" class="form-control py-2.5" placeholder="seu@email.com" required>
+          </div>
+
+          <div class="mb-3" id="field-box-phone">
+            <label class="form-label fs-2 fw-semibold">WhatsApp / Telefone *</label>
+            <input type="tel" id="lead-phone-input" class="form-control py-2.5" placeholder="(00) 90000-0000" required>
+          </div>
+
+          <div class="mb-3" id="field-box-company">
+            <label class="form-label fs-2 fw-semibold">Nome da Empresa</label>
+            <input type="text" id="lead-company-input" class="form-control py-2.5" placeholder="Sua empresa">
+          </div>
+
+          <div class="mb-3 d-none" id="field-box-notes">
+            <label class="form-label fs-2 fw-semibold">Mensagem / Observação</label>
+            <textarea id="lead-notes-input" class="form-control" rows="3" placeholder="Como podemos te ajudar?"></textarea>
+          </div>
         </div>
 
-        <div class="mb-3" id="field-box-email">
-          <label class="form-label fs-2 fw-semibold">E-mail Comercial *</label>
-          <input type="email" id="lead-email-input" class="form-control py-2.5" placeholder="seu@email.com" required>
-        </div>
+        <button type="submit" class="btn fw-bold w-100 py-3 mt-3 shadow-sm" id="form-submit-btn" style="background-color: #FF7A59; color: #FFF; font-size: 1rem; border-radius: 10px; border: none;">
+          Enviar Solicitação
+        </button>
+      </form>
+    </div>
 
-        <div class="mb-3" id="field-box-phone">
-          <label class="form-label fs-2 fw-semibold">WhatsApp / Telefone *</label>
-          <input type="tel" id="lead-phone-input" class="form-control py-2.5" placeholder="(00) 90000-0000" required>
+    <!-- PÁGINA DE OBRIGADO PADRÃO DE ALTA QUALIDADE -->
+    <div id="form-success-box" class="d-none text-center py-2">
+      <div class="mb-3">
+        <div class="p-3 bg-success bg-opacity-10 text-success rounded-circle d-inline-flex pulse-animation">
+          <i class="ti ti-circle-check-filled fs-10"></i>
         </div>
+      </div>
+      
+      <h4 class="fw-bold text-dark mb-2" id="success-title-text">Solicitação Enviada!</h4>
+      <p class="text-muted fs-3 mb-4" id="success-msg-text">Obrigado por seu interesse. Nossa equipe já recebeu seus dados e entrará em contato em breve.</p>
 
-        <div class="mb-3" id="field-box-company">
-          <label class="form-label fs-2 fw-semibold">Nome da Empresa</label>
-          <input type="text" id="lead-company-input" class="form-control py-2.5" placeholder="Sua empresa">
+      <div class="bg-light p-3 rounded-3 text-start mb-4 border">
+        <small class="text-muted d-block uppercase fw-bold mb-2 fs-1"><i class="ti ti-info-circle me-1"></i> Resumo da Solicitação</small>
+        <div class="d-flex align-items-center justify-content-between mb-1">
+          <span class="text-muted fs-2">Lead:</span>
+          <strong class="fs-2 text-dark" id="summary-lead-name">-</strong>
         </div>
-
-        <div class="mb-3 d-none" id="field-box-notes">
-          <label class="form-label fs-2 fw-semibold">Mensagem / Observação</label>
-          <textarea id="lead-notes-input" class="form-control" rows="3" placeholder="Como podemos te ajudar?"></textarea>
+        <div class="d-flex align-items-center justify-content-between">
+          <span class="text-muted fs-2">E-mail:</span>
+          <strong class="fs-2 text-dark" id="summary-lead-email">-</strong>
         </div>
       </div>
 
-      <button type="submit" class="btn fw-bold w-100 py-3 mt-3 shadow-sm" id="form-submit-btn" style="background-color: #FF7A59; color: #FFF; font-size: 1rem; border-radius: 10px; border: none;">
-        Enviar Solicitação
+      <button type="button" class="btn btn-outline-secondary fw-bold w-100 py-2.5 mb-3" onclick="location.reload();">
+        <i class="ti ti-reload me-1"></i> Enviar Nova Solicitação
       </button>
-    </form>
 
-    <div id="form-success-box" class="d-none text-center py-4">
-      <div class="p-3 bg-success bg-opacity-10 text-success rounded-circle d-inline-flex mb-3">
-        <i class="ti ti-circle-check fs-8"></i>
-      </div>
-      <h5 class="fw-bold text-dark mb-2">Solicitação Enviada com Sucesso!</h5>
-      <p class="text-muted fs-3 mb-0" id="success-msg-text">Obrigado! Entraremos em contato em breve.</p>
+      <small class="text-muted fs-1 d-block"><i class="ti ti-shield-check me-1 text-success"></i> Form Captura Powered by Metrifique-se CRM</small>
     </div>
   </div>
 
@@ -218,8 +251,16 @@
 
           // Save locally
           if (window.crmStore) {
-            window.crmStore.addLead(leadData);
-            if (formId) window.crmStore.incrementFormSubmissions(formId);
+            try {
+              if (typeof window.crmStore.addLead === 'function') {
+                window.crmStore.addLead(leadData);
+              } else if (typeof window.crmStore.saveLead === 'function') {
+                window.crmStore.saveLead(leadData);
+              }
+              if (formId) window.crmStore.incrementFormSubmissions(formId);
+            } catch(err) {
+              console.warn('[Local Save Lead Exception]', err);
+            }
           }
 
           // Save to Supabase Cloud
@@ -243,16 +284,24 @@
             }
           }
 
-          // Handle Success / Redirect
-          if (form && form.redirect_url && form.redirect_url.startsWith('http')) {
-            window.location.href = form.redirect_url;
+          // Handle Custom Redirect URL or Show Default Thank You Screen
+          if (form && form.redirect_url && form.redirect_url.trim().startsWith('http')) {
+            window.location.href = form.redirect_url.trim();
           } else {
-            formEl.classList.add('d-none');
+            const formContent = document.getElementById('form-content-wrapper');
             const successBox = document.getElementById('form-success-box');
             const successMsg = document.getElementById('success-msg-text');
+            const summaryName = document.getElementById('summary-lead-name');
+            const summaryEmail = document.getElementById('summary-lead-email');
+
+            if (summaryName) summaryName.innerText = leadData.name;
+            if (summaryEmail) summaryEmail.innerText = leadData.email;
+
             if (form && form.success_message && successMsg) {
               successMsg.innerText = form.success_message;
             }
+
+            if (formContent) formContent.classList.add('d-none');
             if (successBox) successBox.classList.remove('d-none');
           }
         });
