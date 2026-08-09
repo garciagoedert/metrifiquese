@@ -136,6 +136,96 @@
           </div>
         </div>
 
+        <!-- Widget de Onboarding Guiado Setup (0-100%) -->
+        <div id="onboarding-guide-widget" class="card shadow-sm border-0 mb-4 bg-white overflow-hidden">
+          <div class="card-body p-4">
+            <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+              <div class="d-flex align-items-center gap-2">
+                <div class="p-2 bg-light-primary text-primary rounded-circle">
+                  <i class="ti ti-rocket fs-5"></i>
+                </div>
+                <div>
+                  <h5 class="fw-bold mb-0 text-dark">Guia de Inicialização Rápida (Setup 5 Minutos)</h5>
+                  <small class="text-muted">Siga o passo a passo para colocar seu CRM operando com autonomia total sem consultor</small>
+                </div>
+              </div>
+              <div class="d-flex align-items-center gap-3">
+                <div class="d-flex align-items-center gap-2">
+                  <strong class="text-primary fs-3" id="onboarding-pct-text">60% Concluído</strong>
+                  <div class="progress rounded-pill bg-light" style="width: 130px; height: 10px;">
+                    <div class="progress-bar bg-primary rounded-pill" id="onboarding-bar-fill" style="width: 60%;"></div>
+                  </div>
+                </div>
+                <button class="btn btn-sm btn-light text-muted p-1 rounded-circle" onclick="document.getElementById('onboarding-guide-widget').classList.add('d-none')" title="Ocultar Guia">
+                  <i class="ti ti-x fs-4"></i>
+                </button>
+              </div>
+            </div>
+
+            <div class="row g-2 pt-2 border-top" id="onboarding-steps-list">
+              
+              <div class="col-md-4 col-lg">
+                <div class="p-2-5 border rounded bg-light-success border-success text-success d-flex align-items-center gap-2">
+                  <i class="ti ti-circle-check-filled fs-5"></i>
+                  <div class="overflow-hidden">
+                    <strong class="fs-2 d-block text-dark lh-sm">1. Marca & Logo</strong>
+                    <small class="text-success fw-bold">Concluído</small>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-md-4 col-lg">
+                <a href="./kanban.html" class="text-decoration-none">
+                  <div class="p-2-5 border rounded bg-white hover-shadow d-flex align-items-center gap-2">
+                    <i class="ti ti-layout-grid text-primary fs-5"></i>
+                    <div class="overflow-hidden">
+                      <strong class="fs-2 d-block text-dark lh-sm">2. Funil de Segmento</strong>
+                      <small class="text-primary fw-bold">Escolher Modelo -></small>
+                    </div>
+                  </div>
+                </a>
+              </div>
+
+              <div class="col-md-4 col-lg">
+                <a href="./leads.html" class="text-decoration-none">
+                  <div class="p-2-5 border rounded bg-white hover-shadow d-flex align-items-center gap-2">
+                    <i class="ti ti-users text-primary fs-5"></i>
+                    <div class="overflow-hidden">
+                      <strong class="fs-2 d-block text-dark lh-sm">3. Importar Leads</strong>
+                      <small class="text-primary fw-bold">Base de Contatos -></small>
+                    </div>
+                  </div>
+                </a>
+              </div>
+
+              <div class="col-md-4 col-lg">
+                <a href="./kanban.html" class="text-decoration-none">
+                  <div class="p-2-5 border rounded bg-white hover-shadow d-flex align-items-center gap-2">
+                    <i class="ti ti-cash text-primary fs-5"></i>
+                    <div class="overflow-hidden">
+                      <strong class="fs-2 d-block text-dark lh-sm">4. Criar Negócio</strong>
+                      <small class="text-primary fw-bold">Novo Card -></small>
+                    </div>
+                  </div>
+                </a>
+              </div>
+
+              <div class="col-md-4 col-lg">
+                <a href="./automacoes.html" class="text-decoration-none">
+                  <div class="p-2-5 border rounded bg-white hover-shadow d-flex align-items-center gap-2">
+                    <i class="ti ti-robot text-primary fs-5"></i>
+                    <div class="overflow-hidden">
+                      <strong class="fs-2 d-block text-dark lh-sm">5. Automações</strong>
+                      <small class="text-primary fw-bold">Lead Scoring -></small>
+                    </div>
+                  </div>
+                </a>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
         <!-- KPI Cards Row -->
         <div class="row">
           <div class="col-sm-6 col-xl-3">

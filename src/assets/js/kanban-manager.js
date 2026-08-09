@@ -220,16 +220,21 @@ class KanbanManager {
               
               <div class="d-flex align-items-center justify-content-between pt-2 border-top">
                 <small class="text-muted fs-1"><i class="ti ti-calendar me-1"></i> ${new Date(deal.created_at).toLocaleDateString('pt-BR')}</small>
-                <div class="dropdown">
-                  <button class="btn btn-sm btn-light p-1 rounded-circle" data-bs-toggle="dropdown">
-                    <i class="ti ti-dots-vertical fs-3"></i>
+                <div class="d-flex align-items-center">
+                  <button class="btn btn-sm btn-light-success text-success p-1 rounded-circle me-1" onclick="window.kanbanManager.openWhatsAppModal('${deal.id}', '${deal.lead_id}')" title="Enviar WhatsApp Rápido">
+                    <i class="ti ti-brand-whatsapp fs-4"></i>
                   </button>
-                  <ul class="dropdown-menu dropdown-menu-end shadow-sm fs-2">
-                    <li><a class="dropdown-item text-success" href="#" onclick="window.kanbanManager.markDealStatus('${deal.id}', 'stage-5')"><i class="ti ti-trophy me-2"></i>Marcar Ganho</a></li>
-                    <li><a class="dropdown-item text-warning" href="#" onclick="window.kanbanManager.markDealStatus('${deal.id}', 'stage-lost')"><i class="ti ti-x me-2"></i>Marcar Perdido</a></li>
-                    <li><hr class="dropdown-divider"></li>
-                    <li><a class="dropdown-item text-danger" href="#" onclick="window.kanbanManager.deleteDealPrompt('${deal.id}')"><i class="ti ti-trash me-2"></i>Excluir Oportunidade</a></li>
-                  </ul>
+                  <div class="dropdown">
+                    <button class="btn btn-sm btn-light p-1 rounded-circle" data-bs-toggle="dropdown">
+                      <i class="ti ti-dots-vertical fs-3"></i>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end shadow-sm fs-2">
+                      <li><a class="dropdown-item text-success" href="#" onclick="window.kanbanManager.markDealStatus('${deal.id}', 'stage-5')"><i class="ti ti-trophy me-2"></i>Marcar Ganho</a></li>
+                      <li><a class="dropdown-item text-warning" href="#" onclick="window.kanbanManager.markDealStatus('${deal.id}', 'stage-lost')"><i class="ti ti-x me-2"></i>Marcar Perdido</a></li>
+                      <li><hr class="dropdown-divider"></li>
+                      <li><a class="dropdown-item text-danger" href="#" onclick="window.kanbanManager.deleteDealPrompt('${deal.id}')"><i class="ti ti-trash me-2"></i>Excluir Oportunidade</a></li>
+                    </ul>
+                  </div>
                 </div>
               </div>
             </div>
@@ -388,6 +393,99 @@ class KanbanManager {
     if (confirm('Tem certeza que deseja excluir esta oportunidade comercial permanentemente?')) {
       window.crmStore.deleteDeal(dealId);
       this.renderKanbanBoard();
+    }
+  }
+
+  openWhatsAppModal(dealId, leadId) {
+    const deals = window.crmStore ? window.crmStore.getDeals() : [];
+    const leads = window.crmStore ? window.crmStore.getLeads() : [];
+
+    const deal = deals.find(d => d.id === dealId);
+    const lead = leads.find(l => l.id === (leadId || (deal ? deal.lead_id : '')));
+
+    const recipientInput = document.getElementById('wa-recipient-name');
+    const phoneInput = document.getElementById('wa-lead-phone');
+    const dealIdInput = document.getElementById('wa-deal-id');
+    const templateSelect = document.getElementById('wa-template-select');
+    const msgText = document.getElementById('wa-message-text');
+
+    if (dealIdInput) dealIdInput.value = dealId;
+    if (phoneInput) phoneInput.value = lead ? (lead.phone || '') : '';
+    if (recipientInput) recipientInput.value = lead ? `${lead.name} (${lead.company || lead.phone || 'Sem Telefone'})` : 'Contato Desconhecido';
+    if (templateSelect) templateSelect.value = 'custom';
+    if (msgText) msgText.value = '';
+
+    const modalEl = document.getElementById('quickWhatsAppModal');
+    if (modalEl && window.bootstrap) {
+      const modal = new bootstrap.Modal(modalEl);
+      modal.show();
+    }
+  }
+
+  onWhatsAppTemplateChange() {
+    const select = document.getElementById('wa-template-select');
+    const msgText = document.getElementById('wa-message-text');
+    const dealId = document.getElementById('wa-deal-id').value;
+
+    const deals = window.crmStore ? window.crmStore.getDeals() : [];
+    const leads = window.crmStore ? window.crmStore.getLeads() : [];
+
+    const deal = deals.find(d => d.id === dealId) || { title: 'Negócio', value: 0 };
+    const lead = leads.find(l => l.id === deal.lead_id) || { name: 'Cliente', company: 'Empresa' };
+
+    const name = lead.name || 'Cliente';
+    const company = lead.company || 'sua empresa';
+    const val = parseFloat(deal.value || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+
+    const templates = {
+      welcome: `Olá ${name}, tudo bem? Vi seu interesse no Metrifique-se CRM para a ${company}. Como posso te ajudar a alavancar suas vendas hoje?`,
+      proposal: `Olá ${name}, tudo bem? Acabei de preparar a proposta comercial para a ${company} no valor de R$ ${val}. Consegue dar uma olhada agora?`,
+      meeting: `Olá ${name}! Confirmando nossa reunião agendada para conversarmos sobre a ${company}. Qualquer dúvida estou por aqui!`,
+      reactivation: `Olá ${name}, tudo bem? Como estão as coisas por aí na ${company}? Passando para saber se faz sentido retomarmos nossa conversa.`,
+      post_sale: `Olá ${name}! Seja muito bem-vindo ao Metrifique-se CRM! Segue o link de acesso da ${company} e os primeiros passos de configuração.`
+    };
+
+    if (select && msgText && templates[select.value]) {
+      msgText.value = templates[select.value];
+    }
+  }
+
+  sendWhatsAppMessage() {
+    const phoneInput = document.getElementById('wa-lead-phone');
+    const msgText = document.getElementById('wa-message-text');
+
+    const rawPhone = (phoneInput ? phoneInput.value : '').replace(/[^0-9]/g, '');
+    const text = msgText ? msgText.value : '';
+
+    if (!text.trim()) {
+      alert('Por favor, selecione um modelo de mensagem ou digite um texto para enviar.');
+      return;
+    }
+
+    const cleanPhone = rawPhone ? (rawPhone.startsWith('55') ? rawPhone : '55' + rawPhone) : '';
+    const url = cleanPhone 
+      ? `https://wa.me/${cleanPhone}?text=${encodeURIComponent(text)}`
+      : `https://wa.me/?text=${encodeURIComponent(text)}`;
+
+    window.open(url, '_blank');
+
+    const modalEl = document.getElementById('quickWhatsAppModal');
+    if (modalEl && window.bootstrap) {
+      const modal = bootstrap.Modal.getInstance(modalEl);
+      if (modal) modal.hide();
+    }
+  }
+
+  applyTemplatePrompt(segmentKey) {
+    if (confirm('Atenção: As colunas do seu Kanban serão atualizadas para a estrutura do segmento selecionado. Deseja aplicar o novo modelo?')) {
+      if (window.crmStore && window.crmStore.applySegmentTemplate(segmentKey)) {
+        const modalEl = document.getElementById('segmentTemplateModal');
+        if (modalEl && window.bootstrap) {
+          const modal = bootstrap.Modal.getInstance(modalEl);
+          if (modal) modal.hide();
+        }
+        this.renderKanbanBoard();
+      }
     }
   }
 }

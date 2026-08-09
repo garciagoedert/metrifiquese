@@ -1363,6 +1363,71 @@ class LocalCRMStore {
     return tenantStages;
   }
 
+  applySegmentTemplate(segmentKey) {
+    const tenantId = this.getActiveTenantId();
+    const data = this.getData();
+    const pipelineId = 'pipe-' + tenantId;
+
+    const templates = {
+      imobiliaria: [
+        { id: 'stage-' + tenantId + '-imo-1', tenant_id: tenantId, pipeline_id: pipelineId, name: 'Captação & Lead Inbound', display_order: 1, color: '#5D87FF' },
+        { id: 'stage-' + tenantId + '-imo-2', tenant_id: tenantId, pipeline_id: pipelineId, name: 'Perfil & Vistoria Mapeada', display_order: 2, color: '#FFAE1F' },
+        { id: 'stage-' + tenantId + '-imo-3', tenant_id: tenantId, pipeline_id: pipelineId, name: 'Visita Agendada / Realizada', display_order: 3, color: '#7460EE' },
+        { id: 'stage-' + tenantId + '-imo-4', tenant_id: tenantId, pipeline_id: pipelineId, name: 'Proposta & Análise Crédito', display_order: 4, color: '#FA896B' },
+        { id: 'stage-' + tenantId + '-imo-5', tenant_id: tenantId, pipeline_id: pipelineId, name: 'Contrato Fechado', display_order: 5, color: '#13DEB9' }
+      ],
+      clinica: [
+        { id: 'stage-' + tenantId + '-cli-1', tenant_id: tenantId, pipeline_id: pipelineId, name: 'Contato Inicial / Dúvida', display_order: 1, color: '#5D87FF' },
+        { id: 'stage-' + tenantId + '-cli-2', tenant_id: tenantId, pipeline_id: pipelineId, name: 'Avaliação / Consulta Agendada', display_order: 2, color: '#FFAE1F' },
+        { id: 'stage-' + tenantId + '-cli-3', tenant_id: tenantId, pipeline_id: pipelineId, name: 'Compareceu à Consulta', display_order: 3, color: '#7460EE' },
+        { id: 'stage-' + tenantId + '-cli-4', tenant_id: tenantId, pipeline_id: pipelineId, name: 'Orçamento Apresentado', display_order: 4, color: '#FA896B' },
+        { id: 'stage-' + tenantId + '-cli-5', tenant_id: tenantId, pipeline_id: pipelineId, name: 'Tratamento Fechado', display_order: 5, color: '#13DEB9' }
+      ],
+      ecommerce: [
+        { id: 'stage-' + tenantId + '-eco-1', tenant_id: tenantId, pipeline_id: pipelineId, name: 'Dúvida / Carrinho Abandonado', display_order: 1, color: '#5D87FF' },
+        { id: 'stage-' + tenantId + '-eco-2', tenant_id: tenantId, pipeline_id: pipelineId, name: 'Atendimento WhatsApp', display_order: 2, color: '#FFAE1F' },
+        { id: 'stage-' + tenantId + '-eco-3', tenant_id: tenantId, pipeline_id: pipelineId, name: 'Cupom / Oferta Enviada', display_order: 3, color: '#FA896B' },
+        { id: 'stage-' + tenantId + '-eco-4', tenant_id: tenantId, pipeline_id: pipelineId, name: 'Pedido Concluído', display_order: 4, color: '#13DEB9' }
+      ],
+      b2b: [
+        { id: 'stage-' + tenantId + '-b2b-1', tenant_id: tenantId, pipeline_id: pipelineId, name: 'Lead Qualificado (MQL)', display_order: 1, color: '#5D87FF' },
+        { id: 'stage-' + tenantId + '-b2b-2', tenant_id: tenantId, pipeline_id: pipelineId, name: 'Reunião de Diagnóstico', display_order: 2, color: '#FFAE1F' },
+        { id: 'stage-' + tenantId + '-b2b-3', tenant_id: tenantId, pipeline_id: pipelineId, name: 'Proposta Comercial', display_order: 3, color: '#FA896B' },
+        { id: 'stage-' + tenantId + '-b2b-4', tenant_id: tenantId, pipeline_id: pipelineId, name: 'Em Negociação', display_order: 4, color: '#7460EE' },
+        { id: 'stage-' + tenantId + '-b2b-5', tenant_id: tenantId, pipeline_id: pipelineId, name: 'Contrato Assinado', display_order: 5, color: '#13DEB9' }
+      ],
+      infoprodutos: [
+        { id: 'stage-' + tenantId + '-inf-1', tenant_id: tenantId, pipeline_id: pipelineId, name: 'Inscrição / Lead Inbound', display_order: 1, color: '#5D87FF' },
+        { id: 'stage-' + tenantId + '-inf-2', tenant_id: tenantId, pipeline_id: pipelineId, name: 'Qualificação SDR', display_order: 2, color: '#FFAE1F' },
+        { id: 'stage-' + tenantId + '-inf-3', tenant_id: tenantId, pipeline_id: pipelineId, name: 'Reunião de Aplicação', display_order: 3, color: '#FA896B' },
+        { id: 'stage-' + tenantId + '-inf-4', tenant_id: tenantId, pipeline_id: pipelineId, name: 'Mentoria Vendida', display_order: 4, color: '#13DEB9' }
+      ]
+    };
+
+    const newStages = templates[segmentKey];
+    if (!newStages) return false;
+
+    // Replace existing stages for this tenant
+    data.stages = (data.stages || []).filter(s => s.tenant_id !== tenantId);
+    data.stages.push(...newStages);
+    this.saveData(data);
+
+    if (supabaseClient) {
+      const tenantPipe = (data.pipelines || []).find(p => p.tenant_id === tenantId) || {
+        id: pipelineId, tenant_id: tenantId, name: 'Funil ' + segmentKey.toUpperCase(), is_default: true
+      };
+      supabaseClient.from('pipelines').upsert([tenantPipe]).then(() => {
+        supabaseClient.from('pipeline_stages').upsert(newStages).then();
+      });
+    }
+
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('deals-synced'));
+    }
+
+    return true;
+  }
+
   saveStage(stage) {
     const data = this.getData();
     const tenantId = this.getActiveTenantId();

@@ -22,6 +22,132 @@ class AnalyticsManager {
     this.renderFunnelChart();
     this.renderSourcesChart();
     this.renderRevenueChart();
+    this.renderInsightsSection();
+  }
+
+  generateBusinessInsights() {
+    const stats = this.getCRMStats();
+    const leads = window.crmStore ? window.crmStore.getLeads() : [];
+    const deals = window.crmStore ? window.crmStore.getDeals() : [];
+    const stages = window.crmStore ? window.crmStore.getStages() : [];
+
+    const insights = [];
+
+    // 1. Bottleneck check
+    const stageValues = {};
+    deals.forEach(d => {
+      stageValues[d.stage_id] = (stageValues[d.stage_id] || 0) + (parseFloat(d.value) || 0);
+    });
+
+    let bottleneckStage = null;
+    let maxStageValue = 0;
+    Object.keys(stageValues).forEach(stId => {
+      if (stageValues[stId] > maxStageValue) {
+        maxStageValue = stageValues[stId];
+        bottleneckStage = stages.find(s => s.id === stId);
+      }
+    });
+
+    if (bottleneckStage && maxStageValue > 0) {
+      insights.push({
+        type: 'warning',
+        icon: 'ti-alert-triangle',
+        title: 'Alerta de Gargalo no Funil',
+        description: `A etapa <strong>"${bottleneckStage.name}"</strong> acumula R$ ${maxStageValue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} em oportunidades paradas. Dispare um follow-up rápido via WhatsApp para acelerar os fechamentos.`
+      });
+    }
+
+    // 2. Conversion trend check
+    const conversionPct = parseFloat(stats.conversionRate);
+    if (conversionPct >= 20) {
+      insights.push({
+        type: 'success',
+        icon: 'ti-trending-up',
+        title: 'Excelente Desempenho Comercial',
+        description: `Sua taxa de conversão em vendas está em <strong>${conversionPct}%</strong>, superando a média do mercado (15%). Mantenha o ritmo de atendimento!`
+      });
+    } else if (stats.totalLeads > 5 && conversionPct < 10) {
+      insights.push({
+        type: 'warning',
+        icon: 'ti-activity',
+        title: 'Oportunidade de Ajuste em Qualificação',
+        description: `Sua taxa de conversão atual é de <strong>${conversionPct}%</strong>. Recomendamos ativar regras de Lead Scoring para focar seus vendedores nos contatos mais quentes.`
+      });
+    }
+
+    // 3. Best Lead Source
+    const sourceValues = {};
+    deals.forEach(d => {
+      const lead = leads.find(l => l.id === d.lead_id);
+      const src = (lead && lead.source) ? lead.source : 'Outros';
+      sourceValues[src] = (sourceValues[src] || 0) + (parseFloat(d.value) || 0);
+    });
+
+    let topSource = null;
+    let topSourceVal = 0;
+    Object.keys(sourceValues).forEach(src => {
+      if (sourceValues[src] > topSourceVal) {
+        topSourceVal = sourceValues[src];
+        topSource = src;
+      }
+    });
+
+    if (topSource && topSourceVal > 0) {
+      insights.push({
+        type: 'info',
+        icon: 'ti-target-arrow',
+        title: 'Canal de Maior Retorno (ROI)',
+        description: `A origem <strong>"${topSource}"</strong> gerou R$ ${topSourceVal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} em volume comercial. Reforce os investimentos de tráfego neste canal.`
+      });
+    }
+
+    // Default welcome insight
+    if (insights.length === 0) {
+      insights.push({
+        type: 'info',
+        icon: 'ti-sparkles',
+        title: 'Diagnóstico Inteligente Metrifiquese',
+        description: 'Cadastre suas primeiras oportunidades no Kanban para que o motor de inteligência calcule automaticamente gargalos, taxas de conversão e estratégias de aceleração comercial.'
+      });
+    }
+
+    return insights;
+  }
+
+  renderInsightsSection() {
+    const container = document.getElementById('business-insights-container');
+    if (!container) return;
+
+    const insights = this.generateBusinessInsights();
+    
+    container.innerHTML = insights.map(i => {
+      const bgMap = {
+        warning: 'bg-light-warning border-warning text-warning-emphasis',
+        success: 'bg-light-success border-success text-success-emphasis',
+        info: 'bg-light-primary border-primary text-primary-emphasis'
+      };
+      const iconMap = {
+        warning: 'text-warning bg-warning bg-opacity-10',
+        success: 'text-success bg-success bg-opacity-10',
+        info: 'text-primary bg-primary bg-opacity-10'
+      };
+
+      return `
+        <div class="col-md-6 col-lg-4 mb-3">
+          <div class="card border shadow-sm h-100 p-3 ${bgMap[i.type] || ''}">
+            <div class="d-flex align-items-start gap-3">
+              <div class="p-2 rounded-circle ${iconMap[i.type] || ''}">
+                <i class="ti ${i.icon} fs-6"></i>
+              </div>
+              <div>
+                <h6 class="fw-bold mb-1 text-dark">${i.title}</h6>
+                <p class="fs-2 mb-0 text-muted" style="line-height: 1.5;">${i.description}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }).join('');
   }
 
   getCRMStats() {
