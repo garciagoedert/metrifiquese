@@ -63,6 +63,83 @@ class WhitelabelThemeEngine {
         color: ${primaryColor} !important;
         border-bottom-color: ${primaryColor} !important;
       }
+
+      /* Enhanced Sidebar Aesthetic & Collapsed State */
+      .left-sidebar {
+        background-color: #FFFFFF !important;
+        border-right: 1px solid #E2E8F0 !important;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03) !important;
+        transition: width 0.25s ease, left 0.25s ease !important;
+      }
+      .sidebar-nav ul .sidebar-item {
+        margin-bottom: 4px;
+      }
+      .sidebar-nav ul .sidebar-link {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 10px 14px;
+        color: #475569 !important;
+        font-weight: 600;
+        font-size: 0.88rem;
+        border-radius: 10px !important;
+        transition: all 0.2s ease;
+        text-decoration: none;
+      }
+      .sidebar-nav ul .sidebar-link i {
+        font-size: 1.25rem;
+        color: #64748B;
+        transition: transform 0.2s ease, color 0.2s ease;
+      }
+      .sidebar-nav ul .sidebar-link:hover {
+        background-color: #F1F5F9 !important;
+        color: #0F172A !important;
+      }
+      .sidebar-nav ul .sidebar-link:hover i {
+        color: ${primaryColor} !important;
+        transform: translateX(3px);
+      }
+      .sidebar-nav ul .sidebar-item.selected > .sidebar-link {
+        background: linear-gradient(135deg, ${primaryColor} 0%, #FF5252 100%) !important;
+        color: #FFFFFF !important;
+        box-shadow: 0 4px 12px rgba(255, 122, 89, 0.25) !important;
+      }
+      .sidebar-nav ul .sidebar-item.selected > .sidebar-link i {
+        color: #FFFFFF !important;
+      }
+      .nav-small-cap {
+        padding: 16px 14px 6px 14px !important;
+        color: #94A3B8 !important;
+        font-size: 0.68rem !important;
+        font-weight: 800 !important;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+      @media (min-width: 1200px) {
+        #main-wrapper[data-sidebartype="mini-sidebar"] .left-sidebar {
+          width: 80px !important;
+        }
+        #main-wrapper[data-sidebartype="mini-sidebar"] .body-wrapper {
+          margin-left: 80px !important;
+        }
+        #main-wrapper[data-sidebartype="mini-sidebar"] .app-header {
+          width: calc(100% - 80px) !important;
+        }
+        #main-wrapper[data-sidebartype="mini-sidebar"] .sidebar-nav ul .sidebar-link {
+          justify-content: center;
+          padding: 12px 0;
+        }
+        #main-wrapper[data-sidebartype="mini-sidebar"] .sidebar-nav ul .sidebar-link i {
+          font-size: 1.4rem;
+        }
+        #main-wrapper[data-sidebartype="mini-sidebar"] .hide-menu {
+          display: none !important;
+        }
+        #main-wrapper[data-sidebartype="mini-sidebar"] .nav-small-cap {
+          text-align: center;
+          padding: 12px 0 !important;
+        }
+      }
     `;
 
     const logoImgs = document.querySelectorAll('.logo-img img, .brand-logo img, .hs-brand-logo');
