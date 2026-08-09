@@ -111,7 +111,25 @@ CREATE TABLE public.notifications (
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- 8. HABILITAR RLS NAS TABELAS
+-- 8. TABELA DE FORMULÁRIOS MULTI-TENANT (TENANT_FORMS)
+CREATE TABLE public.tenant_forms (
+    id VARCHAR(255) PRIMARY KEY,
+    tenant_id VARCHAR(255) NOT NULL REFERENCES public.tenants(id) ON DELETE CASCADE,
+    title VARCHAR(255) NOT NULL,
+    description TEXT,
+    button_text VARCHAR(255) DEFAULT 'Enviar',
+    button_color VARCHAR(20) DEFAULT '#FF7A59',
+    theme_mode VARCHAR(20) DEFAULT 'light',
+    source VARCHAR(100) DEFAULT 'Formulário do Site',
+    redirect_url TEXT,
+    success_message TEXT,
+    fields JSONB DEFAULT '{"name":true,"email":true,"phone":true,"company":true,"notes":false}'::jsonb,
+    submissions_count INTEGER DEFAULT 0,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- 9. HABILITAR RLS NAS TABELAS
 ALTER TABLE public.tenants ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.leads ENABLE ROW LEVEL SECURITY;
@@ -119,8 +137,9 @@ ALTER TABLE public.pipelines ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.pipeline_stages ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.deals ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.notifications ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.tenant_forms ENABLE ROW LEVEL SECURITY;
 
--- 9. CRIAR POLÍTICAS DE PERMISSÃO ANÔNIMAS LIVRES
+-- 10. CRIAR POLÍTICAS DE PERMISSÃO ANÔNIMAS LIVRES
 CREATE POLICY "Permitir leitura anonima de tenants" ON public.tenants FOR SELECT USING (true);
 CREATE POLICY "Permitir insercao anonima de tenants" ON public.tenants FOR INSERT WITH CHECK (true);
 CREATE POLICY "Permitir atualizacao anonima de tenants" ON public.tenants FOR UPDATE USING (true);
@@ -142,4 +161,7 @@ CREATE POLICY "Permitir leitura anonima de notifications" ON public.notification
 CREATE POLICY "Permitir insercao anonima de notifications" ON public.notifications FOR INSERT WITH CHECK (true);
 CREATE POLICY "Permitir atualizacao anonima de notifications" ON public.notifications FOR UPDATE USING (true);
 CREATE POLICY "Permitir exclusao anonima de notifications" ON public.notifications FOR DELETE USING (true);
+
+CREATE POLICY "Permitir tudo em tenant_forms" ON public.tenant_forms FOR ALL TO public USING (true) WITH CHECK (true);
+
 

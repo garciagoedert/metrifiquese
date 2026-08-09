@@ -25,13 +25,35 @@ class FormsManager {
     return window.location.origin;
   }
 
+  buildFormQueryParams(f) {
+    const queryParams = new URLSearchParams({
+      tenant: f.tenant_id,
+      form: f.id
+    });
+    if (f.title) queryParams.set('title', f.title);
+    if (f.description) queryParams.set('desc', f.description);
+    if (f.button_text) queryParams.set('btn', f.button_text);
+    if (f.button_color) queryParams.set('color', f.button_color);
+    if (f.theme_mode) queryParams.set('theme', f.theme_mode);
+    if (f.source) queryParams.set('src', f.source);
+    if (f.success_message) queryParams.set('success', f.success_message);
+    if (f.redirect_url) queryParams.set('redirect', f.redirect_url);
+    if (f.fields) {
+      if (f.fields.name !== undefined) queryParams.set('fn', f.fields.name ? '1' : '0');
+      if (f.fields.email !== undefined) queryParams.set('fe', f.fields.email ? '1' : '0');
+      if (f.fields.phone !== undefined) queryParams.set('fp', f.fields.phone ? '1' : '0');
+      if (f.fields.company !== undefined) queryParams.set('fc', f.fields.company ? '1' : '0');
+      if (f.fields.notes !== undefined) queryParams.set('fm', f.fields.notes ? '1' : '0');
+    }
+    return queryParams.toString();
+  }
+
   renderFormsList() {
     const container = document.getElementById('forms-list-container');
     if (!container) return;
 
     const forms = this.getForms();
-    const tenantId = window.crmStore ? window.crmStore.getActiveTenantId() : 'tenant-demo';
-    const baseUrl = this.getProductionBaseUrl() + '/src/html/form.html';
+    const baseUrl = this.getProductionBaseUrl() + '/src/html/form';
 
     if (forms.length === 0) {
       container.innerHTML = `
@@ -48,7 +70,7 @@ class FormsManager {
     }
 
     container.innerHTML = forms.map(f => {
-      const publicLink = `${baseUrl}?tenant=${f.tenant_id}&form=${f.id}`;
+      const publicLink = `${baseUrl}?${this.buildFormQueryParams(f)}`;
       return `
         <div class="col-md-6 col-lg-4 mb-4">
           <div class="card border shadow-sm h-100 p-4 rounded-4 hover-shadow transition-all">
@@ -266,8 +288,7 @@ class FormsManager {
     const form = window.crmStore.getFormById(formId);
     if (!form) return;
 
-    const tenantId = form.tenant_id || (window.crmStore ? window.crmStore.getActiveTenantId() : 'tenant-demo');
-    const publicLink = `${this.getProductionBaseUrl()}/src/html/form.html?tenant=${tenantId}&form=${form.id}`;
+    const publicLink = `${this.getProductionBaseUrl()}/src/html/form?${this.buildFormQueryParams(form)}`;
 
     const embedHtmlCode = `<!-- Metrifique-se CRM Form Embed Code -->
 <iframe src="${publicLink}" 
@@ -281,7 +302,7 @@ class FormsManager {
     const htmlScriptCode = `<!-- Metrifique-se CRM Native Form Script -->
 <div id="metrifiquese-form-container"></div>
 <script src="${this.getProductionBaseUrl()}/src/assets/js/form-embed-widget.js" 
-        data-tenant="${tenantId}" 
+        data-tenant="${form.tenant_id}" 
         data-form="${form.id}">
 </script>`;
 

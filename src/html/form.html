@@ -182,6 +182,38 @@
         }
       }
 
+      // Check URL Query Parameters for instant inline form configuration
+      const urlTitle = urlParams.get('title');
+      const urlDesc = urlParams.get('desc');
+      const urlBtn = urlParams.get('btn');
+      const urlColor = urlParams.get('color');
+      const urlTheme = urlParams.get('theme');
+      const urlSource = urlParams.get('src');
+      const urlSuccess = urlParams.get('success');
+      const urlRedirect = urlParams.get('redirect');
+
+      if (!form && urlTitle) {
+        form = {
+          id: formId,
+          tenant_id: tenantId,
+          title: urlTitle,
+          description: urlDesc || '',
+          button_text: urlBtn || 'Enviar',
+          button_color: urlColor || '#FF7A59',
+          theme_mode: urlTheme || 'light',
+          source: urlSource || 'Formulário do Site',
+          success_message: urlSuccess || 'Solicitação Enviada com Sucesso!',
+          redirect_url: urlRedirect || '',
+          fields: {
+            name: urlParams.get('fn') !== '0',
+            email: urlParams.get('fe') !== '0',
+            phone: urlParams.get('fp') !== '0',
+            company: urlParams.get('fc') !== '0',
+            notes: urlParams.get('fm') === '1'
+          }
+        };
+      }
+
       // Default Form Fallback
       if (!form) {
         form = {
