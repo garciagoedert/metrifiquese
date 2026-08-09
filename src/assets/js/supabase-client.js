@@ -1135,24 +1135,31 @@ class LocalCRMStore {
     return allLeads.filter(l => l.tenant_id === tenantId);
   }
 
+  addLead(lead) {
+    return this.saveLead(lead);
+  }
+
   saveLead(lead) {
     const data = this.getData();
-    const tenantId = this.getActiveTenantId();
+    const tenantId = lead.tenant_id || this.getActiveTenantId();
     if (!lead.id) {
       lead.id = 'lead-' + Date.now();
       lead.tenant_id = tenantId;
-      lead.created_at = new Date().toISOString();
+      lead.created_at = lead.created_at || new Date().toISOString();
+      lead.score = parseInt(lead.score) || 25;
+      lead.lifecycle_stage = lead.lifecycle_stage || 'lead';
       lead.activities = lead.activities || [];
       if (!data.leads) data.leads = [];
       data.leads.unshift(lead);
 
       this.addNotification({
-        title: 'Novo Lead Cadastrado',
-        message: `${lead.name} foi adicionado à base via ${lead.source || 'Manual'}.`
+        title: 'Novo Lead Capturado',
+        message: `${lead.name} foi adicionado à base via ${lead.source || 'Formulário'}.`
       });
     } else {
       const idx = data.leads.findIndex(l => l.id === lead.id);
       if (idx !== -1) data.leads[idx] = { ...data.leads[idx], ...lead };
+      else data.leads.unshift(lead);
     }
     this.saveData(data);
 
@@ -1167,14 +1174,21 @@ class LocalCRMStore {
           company: lead.company || '',
           job_title: lead.job_title || '',
           lifecycle_stage: lead.lifecycle_stage || 'lead',
-          score: parseInt(lead.score) || 0,
-          source: lead.source || 'Organic',
+          score: parseInt(lead.score) || 25,
+          source: lead.source || 'Formulário do Site',
           tags: lead.tags || []
         };
-        supabaseClient.from('leads').upsert([payload]).then();
+        supabaseClient.from('leads').upsert([payload]).then(({ error }) => {
+          if (error) console.warn('[Supabase Sync Save Lead Error]', error);
+          else console.log('[Supabase Sync Save Lead Success]', lead.id);
+        });
       } catch (e) {
         console.warn('[Supabase Sync] Falha ao salvar lead:', e);
       }
+    }
+
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('leads-synced', { detail: data.leads }));
     }
 
     return lead;
