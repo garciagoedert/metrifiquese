@@ -61,7 +61,31 @@
 
     <form id="public-capture-form">
       <div id="form-fields-container">
-        <!-- Renderizado via JS -->
+        <!-- Campos iniciais pré-renderizados estaticamente -->
+        <div class="mb-3" id="field-box-name">
+          <label class="form-label fs-2 fw-semibold">Nome Completo *</label>
+          <input type="text" id="lead-name-input" class="form-control py-2.5" placeholder="Seu nome completo" required>
+        </div>
+
+        <div class="mb-3" id="field-box-email">
+          <label class="form-label fs-2 fw-semibold">E-mail Comercial *</label>
+          <input type="email" id="lead-email-input" class="form-control py-2.5" placeholder="seu@email.com" required>
+        </div>
+
+        <div class="mb-3" id="field-box-phone">
+          <label class="form-label fs-2 fw-semibold">WhatsApp / Telefone *</label>
+          <input type="tel" id="lead-phone-input" class="form-control py-2.5" placeholder="(00) 90000-0000" required>
+        </div>
+
+        <div class="mb-3" id="field-box-company">
+          <label class="form-label fs-2 fw-semibold">Nome da Empresa</label>
+          <input type="text" id="lead-company-input" class="form-control py-2.5" placeholder="Sua empresa">
+        </div>
+
+        <div class="mb-3 d-none" id="field-box-notes">
+          <label class="form-label fs-2 fw-semibold">Mensagem / Observação</label>
+          <textarea id="lead-notes-input" class="form-control" rows="3" placeholder="Como podemos te ajudar?"></textarea>
+        </div>
       </div>
 
       <button type="submit" class="btn fw-bold w-100 py-3 mt-3 shadow-sm" id="form-submit-btn" style="background-color: #FF7A59; color: #FFF; font-size: 1rem; border-radius: 10px; border: none;">
@@ -79,6 +103,24 @@
   </div>
 
   <script>
+    function renderCustomFields(fields) {
+      if (!fields) return;
+      const nameBox = document.getElementById('field-box-name');
+      const emailBox = document.getElementById('field-box-email');
+      const phoneBox = document.getElementById('field-box-phone');
+      const companyBox = document.getElementById('field-box-company');
+      const notesBox = document.getElementById('field-box-notes');
+
+      if (nameBox) nameBox.style.display = fields.name !== false ? 'block' : 'none';
+      if (emailBox) emailBox.style.display = fields.email !== false ? 'block' : 'none';
+      if (phoneBox) phoneBox.style.display = fields.phone !== false ? 'block' : 'none';
+      if (companyBox) companyBox.style.display = fields.company !== false ? 'block' : 'none';
+      if (notesBox) {
+        if (fields.notes) notesBox.classList.remove('d-none');
+        else notesBox.classList.add('d-none');
+      }
+    }
+
     document.addEventListener('DOMContentLoaded', async () => {
       const urlParams = new URLSearchParams(window.location.search);
       const tenantId = urlParams.get('tenant') || 'tenant-demo';
@@ -145,56 +187,7 @@
         formCard.classList.add('dark-mode');
       }
 
-      renderFields(form.fields || { name: true, email: true, phone: true, company: true, notes: false });
-
-      function renderFields(fields) {
-        const container = document.getElementById('form-fields-container');
-        if (!container) return;
-
-        let html = '';
-        if (fields.name !== false) {
-          html += `
-            <div class="mb-3">
-              <label class="form-label fs-2 fw-semibold">Nome Completo *</label>
-              <input type="text" id="lead-name-input" class="form-control py-2.5" placeholder="Seu nome completo" required>
-            </div>
-          `;
-        }
-        if (fields.email !== false) {
-          html += `
-            <div class="mb-3">
-              <label class="form-label fs-2 fw-semibold">E-mail Comercial *</label>
-              <input type="email" id="lead-email-input" class="form-control py-2.5" placeholder="seu@email.com" required>
-            </div>
-          `;
-        }
-        if (fields.phone !== false) {
-          html += `
-            <div class="mb-3">
-              <label class="form-label fs-2 fw-semibold">WhatsApp / Telefone *</label>
-              <input type="tel" id="lead-phone-input" class="form-control py-2.5" placeholder="(00) 90000-0000" required>
-            </div>
-          `;
-        }
-        if (fields.company !== false) {
-          html += `
-            <div class="mb-3">
-              <label class="form-label fs-2 fw-semibold">Nome da Empresa</label>
-              <input type="text" id="lead-company-input" class="form-control py-2.5" placeholder="Sua empresa">
-            </div>
-          `;
-        }
-        if (fields.notes) {
-          html += `
-            <div class="mb-3">
-              <label class="form-label fs-2 fw-semibold">Mensagem / Observação</label>
-              <textarea id="lead-notes-input" class="form-control" rows="3" placeholder="Como podemos te ajudar?"></textarea>
-            </div>
-          `;
-        }
-
-        container.innerHTML = html;
-      }
+      renderCustomFields(form.fields);
 
       // Handle Submit
       const formEl = document.getElementById('public-capture-form');
@@ -202,8 +195,10 @@
         formEl.addEventListener('submit', async (e) => {
           e.preventDefault();
 
-          submitBtn.disabled = true;
-          submitBtn.innerText = 'Enviando...';
+          if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.innerText = 'Enviando...';
+          }
 
           const nameInput = document.getElementById('lead-name-input');
           const emailInput = document.getElementById('lead-email-input');

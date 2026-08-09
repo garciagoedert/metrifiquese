@@ -513,7 +513,7 @@ class LocalCRMStore {
       const path = window.location.pathname.toLowerCase();
       const isLandingPage = path === '/' || path === '/index.html' || (path.endsWith('index.html') && !path.includes('/src/html/'));
       const isAuthPage = path.includes('login') || path.includes('authentication');
-      const isPublicFormPage = path.includes('form.html');
+      const isPublicFormPage = path.includes('/form') || path.includes('form.html');
       
       if (!isLandingPage && !isAuthPage && !isPublicFormPage) {
         if (!this.isAuthenticated()) {
