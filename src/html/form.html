@@ -159,7 +159,7 @@
       const tenantId = urlParams.get('tenant') || 'tenant-demo';
       const formId = urlParams.get('form');
 
-      if (window.crmStore) {
+      if (window.crmStore && typeof window.crmStore.setActiveTenantId === 'function') {
         window.crmStore.setActiveTenantId(tenantId);
       }
 

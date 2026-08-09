@@ -595,6 +595,14 @@ class LocalCRMStore {
     return user ? (user.tenant_id || 'tenant-demo-001') : 'tenant-demo-001';
   }
 
+  setActiveTenantId(tenantId) {
+    if (!tenantId) return;
+    const data = this.getData();
+    if (!data.session) data.session = {};
+    data.session.active_tenant_id = tenantId;
+    this.saveData(data);
+  }
+
   getTenant() {
     const tenantId = this.getActiveTenantId();
     const tenants = this.getTenants();
