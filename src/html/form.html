@@ -154,7 +154,7 @@
       }
     }
 
-    document.addEventListener('DOMContentLoaded', async () => {
+    document.addEventListener('DOMContentLoaded', () => {
       const urlParams = new URLSearchParams(window.location.search);
       const tenantId = urlParams.get('tenant') || 'tenant-demo';
       const formId = urlParams.get('form');
@@ -163,26 +163,7 @@
         window.crmStore.setActiveTenantId(tenantId);
       }
 
-      let form = window.crmStore ? window.crmStore.getFormById(formId) : null;
-      let tenant = window.crmStore ? window.crmStore.getTenant() : null;
-
-      // Cloud Supabase fallback if opening from external clean browser
-      if ((!form || !tenant) && window.supabaseClient) {
-        try {
-          if (!tenant) {
-            const { data: tData } = await window.supabaseClient.from('tenants').select('*').eq('id', tenantId).maybeSingle();
-            if (tData) tenant = tData;
-          }
-          if (!form && formId) {
-            const { data: fData } = await window.supabaseClient.from('tenant_forms').select('*').eq('id', formId).maybeSingle();
-            if (fData) form = fData;
-          }
-        } catch(e) {
-          console.warn('[Supabase External Form Load Exception]', e);
-        }
-      }
-
-      // Check URL Query Parameters for instant inline form configuration
+      // 1. Synchronous Parse: Check URL Query Parameters First (Instant 0ms UI render!)
       const urlTitle = urlParams.get('title');
       const urlDesc = urlParams.get('desc');
       const urlBtn = urlParams.get('btn');
@@ -191,6 +172,9 @@
       const urlSource = urlParams.get('src');
       const urlSuccess = urlParams.get('success');
       const urlRedirect = urlParams.get('redirect');
+
+      let form = window.crmStore ? window.crmStore.getFormById(formId) : null;
+      let tenant = window.crmStore ? window.crmStore.getTenant() : null;
 
       if (!form && urlTitle) {
         form = {
@@ -214,7 +198,7 @@
         };
       }
 
-      // Default Form Fallback
+      // Fallback default form if still null
       if (!form) {
         form = {
           title: 'Solicitar Demonstração / Orçamento',
@@ -227,7 +211,22 @@
         };
       }
 
-      // Apply Tenant Logo
+      // Update UI Immediately (0ms)
+      const formCard = document.getElementById('form-card-container');
+      const formTitle = document.getElementById('form-title');
+      const formDesc = document.getElementById('form-desc');
+      const submitBtn = document.getElementById('form-submit-btn');
+
+      if (formTitle && form.title) formTitle.innerText = form.title;
+      if (formDesc && form.description) formDesc.innerText = form.description;
+      if (submitBtn) {
+        if (form.button_text) submitBtn.innerText = form.button_text;
+        if (form.button_color) submitBtn.style.backgroundColor = form.button_color;
+      }
+      if (form.theme_mode === 'dark' && formCard) {
+        formCard.classList.add('dark-mode');
+      }
+
       const logoImg = document.getElementById('tenant-logo-img');
       if (logoImg) {
         if (tenant && tenant.logo_url) {
@@ -237,27 +236,31 @@
         }
       }
 
-      const formCard = document.getElementById('form-card-container');
-      const formTitle = document.getElementById('form-title');
-      const formDesc = document.getElementById('form-desc');
-      const submitBtn = document.getElementById('form-submit-btn');
-
-      if (formTitle) formTitle.innerText = form.title || 'Solicitar Orçamento';
-      if (formDesc) formDesc.innerText = form.description || 'Preencha os campos abaixo.';
-      if (submitBtn) {
-        submitBtn.innerText = form.button_text || 'Enviar';
-        submitBtn.style.backgroundColor = form.button_color || '#FF7A59';
-      }
-      if (form.theme_mode === 'dark' && formCard) {
-        formCard.classList.add('dark-mode');
-      }
-
       renderCustomFields(form.fields);
 
-      // Handle Submit
+      // 2. Asynchronous Background Check (Supabase Cloud)
+      if (window.supabaseClient) {
+        Promise.all([
+          !tenant && tenantId ? window.supabaseClient.from('tenants').select('*').eq('id', tenantId).maybeSingle() : Promise.resolve({ data: null }),
+          !form && formId ? window.supabaseClient.from('tenant_forms').select('*').eq('id', formId).maybeSingle() : Promise.resolve({ data: null })
+        ]).then(([tRes, fRes]) => {
+          if (tRes && tRes.data && logoImg) logoImg.src = tRes.data.logo_url;
+          if (fRes && fRes.data) {
+            const cloudForm = fRes.data;
+            if (formTitle && cloudForm.title) formTitle.innerText = cloudForm.title;
+            if (formDesc && cloudForm.description) formDesc.innerText = cloudForm.description;
+            if (submitBtn && cloudForm.button_text) submitBtn.innerText = cloudForm.button_text;
+            if (submitBtn && cloudForm.button_color) submitBtn.style.backgroundColor = cloudForm.button_color;
+            if (cloudForm.fields) renderCustomFields(cloudForm.fields);
+            form = cloudForm;
+          }
+        }).catch(err => console.warn('[Supabase Cloud Form Fetch Error]', err));
+      }
+
+      // 3. Handle Submit (Instant & Non-Blocking)
       const formEl = document.getElementById('public-capture-form');
       if (formEl) {
-        formEl.addEventListener('submit', async (e) => {
+        formEl.addEventListener('submit', (e) => {
           e.preventDefault();
 
           if (submitBtn) {
@@ -295,28 +298,27 @@
             }
           }
 
-          // Save to Supabase Cloud
+          // Non-blocking Save to Supabase Cloud in background
           if (window.supabaseClient) {
-            try {
-              const payload = {
-                id: 'lead-' + Date.now(),
-                tenant_id: tenantId,
-                name: leadData.name,
-                email: leadData.email,
-                phone: leadData.phone,
-                company: leadData.company,
-                source: leadData.source,
-                notes: leadData.notes,
-                score: 25,
-                created_at: new Date().toISOString()
-              };
-              await window.supabaseClient.from('leads').upsert([payload]);
-            } catch(err) {
-              console.warn('[Lead Submit Supabase Exception]', err);
-            }
+            const payload = {
+              id: 'lead-' + Date.now(),
+              tenant_id: tenantId,
+              name: leadData.name,
+              email: leadData.email,
+              phone: leadData.phone,
+              company: leadData.company,
+              source: leadData.source,
+              notes: leadData.notes,
+              score: 25,
+              created_at: new Date().toISOString()
+            };
+            window.supabaseClient.from('leads').upsert([payload]).then(({ error }) => {
+              if (error) console.warn('[Supabase Save Lead Warning]', error);
+              else console.log('[Supabase Save Lead Success]', payload.id);
+            }).catch(err => console.warn('[Lead Submit Supabase Exception]', err));
           }
 
-          // Handle Custom Redirect URL or Show Default Thank You Screen
+          // Handle Custom Redirect URL or Instant Default Thank You Screen (0ms)
           if (form && form.redirect_url && form.redirect_url.trim().startsWith('http')) {
             window.location.href = form.redirect_url.trim();
           } else {
