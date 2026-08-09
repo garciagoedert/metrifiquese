@@ -26,7 +26,8 @@ export default defineConfig(({ mode }) => {
           capturas: resolve(__dirname, 'src/html/capturas.html'),
           relatorios: resolve(__dirname, 'src/html/relatorios.html'),
           configuracoesWhitelabel: resolve(__dirname, 'src/html/configuracoes-whitelabel.html'),
-          perfil: resolve(__dirname, 'src/html/perfil.html')
+          perfil: resolve(__dirname, 'src/html/perfil.html'),
+          form: resolve(__dirname, 'src/html/form.html')
         }
       }
     }
