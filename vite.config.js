@@ -11,6 +11,40 @@ export default defineConfig(({ mode }) => {
       '__SUPABASE_URL__': JSON.stringify(sbUrl),
       '__SUPABASE_ANON_KEY__': JSON.stringify(sbAnonKey)
     },
+    plugins: [
+      {
+        name: 'api-server-middleware',
+        configureServer(server) {
+          server.middlewares.use(async (req, res, next) => {
+            const rawUrl = req.url || '';
+            const urlPath = rawUrl.split('?')[0];
+            if (urlPath === '/api/leads' || urlPath === '/api/webhook' || urlPath === '/api/v1/leads/webhook') {
+              try {
+                // Parse query parameters
+                const queryStr = rawUrl.includes('?') ? rawUrl.split('?')[1] : '';
+                const searchParams = new URLSearchParams(queryStr);
+                const query = {};
+                for (const [k, v] of searchParams.entries()) {
+                  query[k] = v;
+                }
+                req.query = query;
+
+                const { createRequire } = await import('module');
+                const reqRequire = createRequire(import.meta.url);
+                const handler = reqRequire('./api/_handler.js');
+                return handler(req, res);
+              } catch (e) {
+                console.error('[Vite API Dev Middleware Error]', e);
+                res.statusCode = 500;
+                res.setHeader('Content-Type', 'application/json');
+                return res.end(JSON.stringify({ success: false, error: e.message }));
+              }
+            }
+            next();
+          });
+        }
+      }
+    ],
     build: {
       outDir: 'dist',
       rollupOptions: {

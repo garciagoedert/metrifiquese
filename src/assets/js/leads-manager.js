@@ -261,6 +261,8 @@ class LeadsManager {
 
               <div class="fs-2 text-muted mb-1">Lead Score</div>
               <div class="badge bg-primary px-3 py-2 fs-3 mb-3">${lead.score} pontos</div>
+
+              ${this.renderChatbotDetailsHtml(lead)}
             </div>
           </div>
 
@@ -595,6 +597,73 @@ class LeadsManager {
     this.renderLeadsTable();
 
     alert(`✅ ${imported} contato${imported > 1 ? 's' : ''} importado${imported > 1 ? 's' : ''} com sucesso!${skipDuplicates && rows.length > imported ? `\n⚠️ ${rows.length - imported} ignorado${rows.length - imported > 1 ? 's' : ''} (e-mails já existentes).` : ''}`);
+  }
+
+  renderChatbotDetailsHtml(lead) {
+    const cf = lead.custom_fields || {};
+    const rast = cf.rastreamento || {};
+    const hasChatbotData = cf.area_interesse || cf.resumo_caso || (cf.respostas_triagem && cf.respostas_triagem.length > 0) || cf.qualificacao || rast.utm_source || rast.gclid;
+
+    if (!hasChatbotData) return '';
+
+    const areaInteresse = cf.area_interesse || '';
+    const resumoCaso = cf.resumo_caso || '';
+    const qualificacao = cf.qualificacao || '';
+    const triagem = cf.respostas_triagem || [];
+
+    let triagemHtml = '';
+    if (Array.isArray(triagem) && triagem.length > 0) {
+      triagemHtml = triagem.map(t => {
+        const txt = typeof t === 'string' ? t : (t.resposta_qualificacao || Object.values(t).join(' '));
+        return `<div class="p-2 mb-1 bg-white rounded border border-light text-dark fs-2"><i class="ti ti-check text-success me-1"></i>${txt}</div>`;
+      }).join('');
+    }
+
+    let utmItems = [];
+    if (rast.utm_source) utmItems.push(`<div><strong>Fonte:</strong> <span class="badge bg-light-primary text-primary">${rast.utm_source}</span></div>`);
+    if (rast.utm_medium) utmItems.push(`<div><strong>Mídia:</strong> ${rast.utm_medium}</div>`);
+    if (rast.utm_campaign) utmItems.push(`<div><strong>Campanha:</strong> <span class="badge bg-light-info text-info">${rast.utm_campaign}</span></div>`);
+    if (rast.gclid) utmItems.push(`<div><strong>GCLID:</strong> <code class="text-primary">${rast.gclid}</code></div>`);
+    if (rast.landing_page) utmItems.push(`<div><strong>Landing Page:</strong> <a href="${rast.landing_page}" target="_blank" class="text-truncate d-inline-block text-primary" style="max-width: 170px;">${rast.landing_page}</a></div>`);
+
+    return `
+      <div class="mt-3 pt-3 border-top">
+        <div class="d-flex align-items-center justify-content-between mb-2">
+          <span class="fw-bold text-dark fs-2"><i class="ti ti-brand-whatsapp text-success me-1"></i> Chatbot WhatsApp</span>
+          ${qualificacao ? `<span class="badge ${qualificacao === 'alta' ? 'bg-danger text-white' : 'bg-warning text-dark'} text-uppercase fs-1">${qualificacao}</span>` : ''}
+        </div>
+
+        ${areaInteresse ? `
+          <div class="mb-2">
+            <span class="fs-2 text-muted d-block">Área de Interesse</span>
+            <span class="badge bg-light-primary text-primary fs-2">${areaInteresse}</span>
+          </div>
+        ` : ''}
+
+        ${resumoCaso ? `
+          <div class="mb-2">
+            <span class="fs-2 text-muted d-block">Resumo do Caso</span>
+            <div class="p-2 bg-light rounded text-dark fs-2 border">${resumoCaso}</div>
+          </div>
+        ` : ''}
+
+        ${triagemHtml ? `
+          <div class="mb-2">
+            <span class="fs-2 text-muted d-block">Triagem</span>
+            <div class="bg-light p-2 rounded">${triagemHtml}</div>
+          </div>
+        ` : ''}
+
+        ${utmItems.length > 0 ? `
+          <div class="mt-3 pt-2 border-top">
+            <div class="fw-bold text-dark fs-2 mb-1"><i class="ti ti-chart-arrows text-warning me-1"></i> Tráfego / UTMs</div>
+            <div class="fs-2 text-muted d-flex flex-column gap-1 bg-light p-2 rounded border">
+              ${utmItems.join('')}
+            </div>
+          </div>
+        ` : ''}
+      </div>
+    `;
   }
 }
 

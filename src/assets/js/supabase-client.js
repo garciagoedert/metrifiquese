@@ -1184,7 +1184,8 @@ class LocalCRMStore {
           lifecycle_stage: lead.lifecycle_stage || 'lead',
           score: parseInt(lead.score) || 25,
           source: lead.source || 'Formulário do Site',
-          tags: lead.tags || []
+          tags: lead.tags || [],
+          custom_fields: lead.custom_fields || {}
         };
         supabaseClient.from('leads').upsert([payload]).then(({ error }) => {
           if (error) console.warn('[Supabase Sync Save Lead Error]', error);
