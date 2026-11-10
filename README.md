@@ -27,6 +27,14 @@ Plataforma de **CRM Whitelabel e Gestão Comercial Multi-Tenant SaaS** construí
   - Integração nativa com `@supabase/supabase-js` v2.
   - Fallback local de persistência para demonstrações e testes offline.
 
+- **💬 WhatsApp Web & Central de Atendimento Multiatendente**:
+  - Painel de atendimento integrado estilo WhatsApp Web (`/src/html/whatsapp.html` ou `/whatsapp`).
+  - **Pareamento via QR Code**: Conexão simples e rápida via celular (com suporte a Evolution API / Docker e modo demonstração interativo).
+  - **Sincronização 100% com o CRM**: Cada mensagem enviada/recebida é gravada automaticamente na timeline de atividades do Lead.
+  - **Conversão de Contatos**: Transforme conversas avulsas em Leads no CRM em 1 clique.
+  - **Mover Etapas do Funil pelo Chat**: Atualize a fase do Lead no Kanban (Contato Realizado, Proposta Enviada, etc.) diretamente dentro da conversa.
+  - **Respostas Rápidas**: Disparo de templates pré-configurados de apresentação, agendamento de demo e propostas.
+
 - **📊 Gestão Comercial Completa**:
   - **Base de Leads**: Visualização em 3 colunas com timeline de atividades, Lead Scoring e filtros.
   - **Funil de Vendas (Kanban)**: Drag and drop interativo de oportunidades por etapa.

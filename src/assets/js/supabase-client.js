@@ -1783,6 +1783,317 @@ class LocalCRMStore {
       this.saveData(data);
     }
   }
+
+  // --- WHATSAPP & MULTI-TENANT CONVERSATION ENGINE ---
+
+  getWhatsAppConfig() {
+    const tenantId = this.getActiveTenantId();
+    const data = this.getData();
+    if (!data.whatsapp_configs) data.whatsapp_configs = {};
+    if (!data.whatsapp_configs[tenantId]) {
+      const tenant = this.getTenant();
+      const slug = tenant ? (tenant.slug || tenant.id) : 'metrifiquese';
+      data.whatsapp_configs[tenantId] = {
+        tenant_id: tenantId,
+        instance_name: `metrifiquese-${slug}`,
+        server_url: '',
+        api_key: '',
+        status: 'disconnected', // 'disconnected', 'qrcode', 'connecting', 'connected'
+        phone_number: '',
+        profile_name: tenant ? tenant.name : 'Metrifique-se Atendimento',
+        profile_pic: '',
+        battery_level: 88,
+        qrcode: '',
+        auto_create_leads: true,
+        updated_at: new Date().toISOString()
+      };
+      this.saveData(data);
+    }
+    return data.whatsapp_configs[tenantId];
+  }
+
+  saveWhatsAppConfig(config) {
+    const tenantId = this.getActiveTenantId();
+    const data = this.getData();
+    if (!data.whatsapp_configs) data.whatsapp_configs = {};
+    data.whatsapp_configs[tenantId] = {
+      ...(data.whatsapp_configs[tenantId] || {}),
+      ...config,
+      tenant_id: tenantId,
+      updated_at: new Date().toISOString()
+    };
+    this.saveData(data);
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('whatsapp-config-updated', { detail: data.whatsapp_configs[tenantId] }));
+    }
+    return data.whatsapp_configs[tenantId];
+  }
+
+  getWhatsAppChats() {
+    const tenantId = this.getActiveTenantId();
+    const data = this.getData();
+    if (!data.whatsapp_chats) data.whatsapp_chats = [];
+    
+    let tenantChats = data.whatsapp_chats.filter(c => c.tenant_id === tenantId);
+    
+    // Seed initial demo chats if none exist for this tenant
+    if (tenantChats.length === 0) {
+      const leads = this.getLeads();
+      const firstLead = leads[0];
+      const secondLead = leads[1];
+      
+      const defaultChats = [
+        {
+          id: 'chat-demo-1',
+          tenant_id: tenantId,
+          lead_id: firstLead ? firstLead.id : null,
+          name: firstLead ? firstLead.name : 'Mariana Silva',
+          phone: firstLead ? (firstLead.phone || '(11) 98765-4321') : '(11) 98765-4321',
+          avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150',
+          company: firstLead ? firstLead.company : 'SolarTech Inovações',
+          unread_count: 1,
+          last_message: 'Perfeito! Consegue me enviar a proposta detalhada por aqui?',
+          last_message_time: '10:42',
+          messages: [
+            { id: 'm-1', from_me: false, text: 'Olá! Vi a apresentação do Metrifique-se e achei incrível.', time: '10:30', status: 'read' },
+            { id: 'm-2', from_me: true, text: 'Olá, Mariana! Que ótimo falar com você. O Metrifique-se organiza todo o seu funil e centraliza seu WhatsApp.', time: '10:32', status: 'read' },
+            { id: 'm-3', from_me: false, text: 'Vocês têm integração com funil de vendas e relatórios de conversão em tempo real?', time: '10:35', status: 'read' },
+            { id: 'm-4', from_me: true, text: 'Sim, 100%! Inclusive você consegue acompanhar o score dos leads e mover etapas direto pelo chat.', time: '10:38', status: 'read' },
+            { id: 'm-5', from_me: false, text: 'Perfeito! Consegue me enviar a proposta detalhada por aqui?', time: '10:42', status: 'delivered' }
+          ]
+        },
+        {
+          id: 'chat-demo-2',
+          tenant_id: tenantId,
+          lead_id: secondLead ? secondLead.id : null,
+          name: secondLead ? secondLead.name : 'Carlos Eduardo',
+          phone: secondLead ? (secondLead.phone || '(21) 99123-4567') : '(21) 99123-4567',
+          avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150',
+          company: secondLead ? secondLead.company : 'Logística Express',
+          unread_count: 0,
+          last_message: 'Combinado então! Assinamos o contrato hoje à tarde.',
+          last_message_time: 'Ontem',
+          messages: [
+            { id: 'm-10', from_me: false, text: 'Boa tarde! Analisamos a proposta de R$ 25.000 da nossa equipe.', time: 'Ontem 15:10', status: 'read' },
+            { id: 'm-11', from_me: true, text: 'Boa tarde Carlos! Ficou com alguma dúvida quanto ao cronograma de onboarding?', time: 'Ontem 15:15', status: 'read' },
+            { id: 'm-12', from_me: false, text: 'Combinado então! Assinamos o contrato hoje à tarde.', time: 'Ontem 16:30', status: 'read' }
+          ]
+        },
+        {
+          id: 'chat-demo-3',
+          tenant_id: tenantId,
+          lead_id: null,
+          name: 'Lucas Mendes (Contato Novo)',
+          phone: '(31) 98844-5566',
+          avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150',
+          company: 'Belo Horizonte / MG',
+          unread_count: 2,
+          last_message: 'Olá, gostaria de saber se vocês atendem empresas de serviços.',
+          last_message_time: '09:15',
+          messages: [
+            { id: 'm-20', from_me: false, text: 'Bom dia!', time: '09:14', status: 'delivered' },
+            { id: 'm-21', from_me: false, text: 'Olá, gostaria de saber se vocês atendem empresas de serviços.', time: '09:15', status: 'delivered' }
+          ]
+        }
+      ];
+
+      data.whatsapp_chats.push(...defaultChats);
+      this.saveData(data);
+      tenantChats = defaultChats;
+    }
+
+    return tenantChats;
+  }
+
+  getWhatsAppChatById(chatId) {
+    const chats = this.getWhatsAppChats();
+    return chats.find(c => c.id === chatId);
+  }
+
+  saveWhatsAppChat(chat) {
+    const tenantId = this.getActiveTenantId();
+    const data = this.getData();
+    if (!data.whatsapp_chats) data.whatsapp_chats = [];
+    
+    chat.tenant_id = tenantId;
+    const idx = data.whatsapp_chats.findIndex(c => c.id === chat.id);
+    if (idx >= 0) {
+      data.whatsapp_chats[idx] = { ...data.whatsapp_chats[idx], ...chat };
+    } else {
+      data.whatsapp_chats.unshift(chat);
+    }
+    this.saveData(data);
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('whatsapp-chats-updated'));
+    }
+    return chat;
+  }
+
+  sendWhatsAppMessage(chatId, text) {
+    if (!text || !text.trim()) return null;
+    const tenantId = this.getActiveTenantId();
+    const data = this.getData();
+    if (!data.whatsapp_chats) data.whatsapp_chats = [];
+    
+    const chat = data.whatsapp_chats.find(c => c.id === chatId && c.tenant_id === tenantId);
+    if (!chat) return null;
+
+    const user = this.getUser() || { full_name: 'Atendente' };
+    const now = new Date();
+    const timeStr = now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+
+    const newMsg = {
+      id: 'msg-' + Date.now(),
+      from_me: true,
+      text: text.trim(),
+      time: timeStr,
+      status: 'delivered',
+      sender_name: user.full_name
+    };
+
+    if (!chat.messages) chat.messages = [];
+    chat.messages.push(newMsg);
+    chat.last_message = text.trim();
+    chat.last_message_time = timeStr;
+    chat.unread_count = 0;
+
+    // Se o chat estiver vinculado a um Lead, registrar na timeline do Lead
+    if (chat.lead_id) {
+      this.addLeadActivity(chat.lead_id, {
+        type: 'whatsapp',
+        title: 'Mensagem de WhatsApp enviada',
+        text: text.trim(),
+        user: user.full_name
+      });
+    }
+
+    this.saveData(data);
+
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('whatsapp-message-sent', { detail: { chatId, message: newMsg } }));
+      window.dispatchEvent(new CustomEvent('whatsapp-chats-updated'));
+    }
+
+    // Se houver Evolution API configurada com server_url, enviar via HTTP real
+    const cfg = this.getWhatsAppConfig();
+    if (cfg && cfg.server_url && cfg.status === 'connected') {
+      try {
+        const cleanPhone = (chat.phone || '').replace(/\D/g, '');
+        fetch(`${cfg.server_url.replace(/\/$/, '')}/message/sendText/${cfg.instance_name}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'apikey': cfg.api_key || ''
+          },
+          body: JSON.stringify({
+            number: cleanPhone,
+            text: text.trim()
+          })
+        }).catch(err => console.warn('[Evolution API Send Error]', err));
+      } catch (e) {
+        console.warn('[Evolution API Request Failed]', e);
+      }
+    }
+
+    return newMsg;
+  }
+
+  receiveWhatsAppMessage(chatId, text, senderName) {
+    if (!text) return null;
+    const tenantId = this.getActiveTenantId();
+    const data = this.getData();
+    if (!data.whatsapp_chats) data.whatsapp_chats = [];
+
+    let chat = data.whatsapp_chats.find(c => c.id === chatId && c.tenant_id === tenantId);
+    const now = new Date();
+    const timeStr = now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+
+    if (!chat) {
+      chat = {
+        id: chatId,
+        tenant_id: tenantId,
+        lead_id: null,
+        name: senderName || 'Novo Contato WhatsApp',
+        phone: chatId.replace('chat-', ''),
+        avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150',
+        unread_count: 1,
+        last_message: text,
+        last_message_time: timeStr,
+        messages: []
+      };
+      data.whatsapp_chats.unshift(chat);
+    }
+
+    const newMsg = {
+      id: 'msg-' + Date.now(),
+      from_me: false,
+      text: text.trim(),
+      time: timeStr,
+      status: 'delivered',
+      sender_name: chat.name
+    };
+
+    if (!chat.messages) chat.messages = [];
+    chat.messages.push(newMsg);
+    chat.last_message = text.trim();
+    chat.last_message_time = timeStr;
+    chat.unread_count = (chat.unread_count || 0) + 1;
+
+    // Se vinculado a um Lead, registrar na timeline do Lead
+    if (chat.lead_id) {
+      this.addLeadActivity(chat.lead_id, {
+        type: 'whatsapp',
+        title: 'Mensagem de WhatsApp recebida',
+        text: text.trim(),
+        user: chat.name
+      });
+    }
+
+    this.saveData(data);
+
+    this.addNotification({
+      title: 'Nova Mensagem WhatsApp',
+      message: `${chat.name}: ${text.length > 50 ? text.substring(0, 50) + '...' : text}`
+    });
+
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('whatsapp-message-received', { detail: { chatId, message: newMsg } }));
+      window.dispatchEvent(new CustomEvent('whatsapp-chats-updated'));
+    }
+
+    return newMsg;
+  }
+
+  createLeadFromWhatsApp(chatId) {
+    const chat = this.getWhatsAppChatById(chatId);
+    if (!chat) return null;
+
+    const newLead = {
+      name: chat.name || 'Lead WhatsApp',
+      phone: chat.phone || '',
+      email: '',
+      company: chat.company || 'Contato via WhatsApp',
+      source: 'WhatsApp',
+      score: 40,
+      lifecycle_stage: 'lead',
+      activities: [
+        {
+          id: 'act-' + Date.now(),
+          type: 'whatsapp',
+          title: 'Lead gerado via WhatsApp',
+          text: `Iniciou conversa pelo WhatsApp com a mensagem: "${chat.last_message || ''}"`,
+          date: new Date().toLocaleDateString('pt-BR') + ' às ' + new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
+          user: 'Sistema WhatsApp'
+        }
+      ]
+    };
+
+    const savedLead = this.saveLead(newLead);
+    chat.lead_id = savedLead.id;
+    this.saveWhatsAppChat(chat);
+
+    return savedLead;
+  }
 }
 
 window.crmStore = new LocalCRMStore();

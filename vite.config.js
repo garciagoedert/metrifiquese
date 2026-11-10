@@ -18,7 +18,7 @@ export default defineConfig(({ mode }) => {
           server.middlewares.use(async (req, res, next) => {
             const rawUrl = req.url || '';
             const urlPath = rawUrl.split('?')[0];
-            if (urlPath === '/api/leads' || urlPath === '/api/webhook' || urlPath === '/api/v1/leads/webhook') {
+            if (urlPath === '/api/leads' || urlPath === '/api/webhook' || urlPath === '/api/v1/leads/webhook' || urlPath === '/api/whatsapp' || urlPath === '/api/v1/whatsapp/webhook') {
               try {
                 // Parse query parameters
                 const queryStr = rawUrl.includes('?') ? rawUrl.split('?')[1] : '';
@@ -31,7 +31,7 @@ export default defineConfig(({ mode }) => {
 
                 const { createRequire } = await import('module');
                 const reqRequire = createRequire(import.meta.url);
-                const handler = reqRequire('./api/_handler.js');
+                const handler = urlPath.includes('whatsapp') ? reqRequire('./api/whatsapp.js') : reqRequire('./api/_handler.js');
                 return handler(req, res);
               } catch (e) {
                 console.error('[Vite API Dev Middleware Error]', e);
@@ -60,6 +60,8 @@ export default defineConfig(({ mode }) => {
           capturas: resolve(__dirname, 'src/html/capturas.html'),
           relatorios: resolve(__dirname, 'src/html/relatorios.html'),
           configuracoesWhitelabel: resolve(__dirname, 'src/html/configuracoes-whitelabel.html'),
+          whatsapp: resolve(__dirname, 'src/html/whatsapp.html'),
+          chat: resolve(__dirname, 'src/html/chat.html'),
           perfil: resolve(__dirname, 'src/html/perfil.html'),
           form: resolve(__dirname, 'src/html/form.html')
         }

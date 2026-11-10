@@ -133,6 +133,13 @@ class LeadsManager {
           <td>${tagsHtml || '<small class="text-muted">Sem tags</small>'}</td>
           <td class="text-end text-nowrap pe-4">
             <div class="d-inline-flex align-items-center justify-content-end gap-2">
+              ${lead.phone ? `
+                <a href="./whatsapp.html?phone=${encodeURIComponent(lead.phone)}&name=${encodeURIComponent(lead.name)}&lead_id=${lead.id}" 
+                   class="btn btn-sm btn-success text-white px-2 py-1-5 d-inline-flex align-items-center gap-1 shadow-sm" 
+                   title="Conversar no WhatsApp">
+                  <i class="ti ti-brand-whatsapp fs-4"></i>
+                </a>
+              ` : ''}
               <button class="btn btn-sm btn-primary text-nowrap fw-semibold px-3 py-1-5 d-inline-flex align-items-center gap-1 shadow-sm" onclick="window.leadsManager.openLeadModal('${lead.id}')" title="Perfil Completo do Contato">
                 <i class="ti ti-id fs-4"></i>
                 <span>Ver Perfil</span>
@@ -229,6 +236,12 @@ class LeadsManager {
 
               <!-- ACTION PILLS CIRCULARES -->
               <div class="d-flex align-items-center justify-content-center gap-2 mb-3">
+                ${lead.phone ? `
+                  <a href="./whatsapp.html?phone=${encodeURIComponent(lead.phone)}&name=${encodeURIComponent(lead.name)}&lead_id=${lead.id}" 
+                     class="hs-action-pill text-success" title="Chamar no WhatsApp" style="background-color: #dcfce7; color: #16a34a !important;">
+                    <i class="ti ti-brand-whatsapp"></i>
+                  </a>
+                ` : ''}
                 <div class="hs-action-pill" title="Criar Nota" onclick="window.leadsManager.promptAddActivity('${lead.id}', 'note')"><i class="ti ti-notes"></i></div>
                 <div class="hs-action-pill" title="Enviar E-mail" onclick="window.leadsManager.promptAddActivity('${lead.id}', 'email')"><i class="ti ti-mail"></i></div>
                 <div class="hs-action-pill" title="Ligar" onclick="window.leadsManager.promptAddActivity('${lead.id}', 'call')"><i class="ti ti-phone"></i></div>

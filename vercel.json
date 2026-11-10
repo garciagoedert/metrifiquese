@@ -13,6 +13,8 @@
     { "source": "/crm", "destination": "/src/html/dashboard.html" },
     { "source": "/leads", "destination": "/src/html/leads.html" },
     { "source": "/kanban", "destination": "/src/html/kanban.html" },
+    { "source": "/whatsapp", "destination": "/src/html/whatsapp.html" },
+    { "source": "/chat", "destination": "/src/html/whatsapp.html" },
     { "source": "/automacoes", "destination": "/src/html/automacoes.html" },
     { "source": "/capturas", "destination": "/src/html/capturas.html" },
     { "source": "/relatorios", "destination": "/src/html/relatorios.html" },

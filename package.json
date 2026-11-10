@@ -16,8 +16,11 @@
     "vite": "^4.0.0"
   },
   "dependencies": {
+    "@whiskeysockets/baileys": "^7.0.0-rc14",
     "apexcharts": "^3.37.0",
     "bootstrap": "^5.2.3",
-    "jquery": "^3.6.3"
+    "jquery": "^3.6.3",
+    "pino": "^10.4.0",
+    "qrcode": "^1.5.4"
   }
 }
