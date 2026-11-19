@@ -1869,66 +1869,229 @@ class LocalCRMStore {
 
   // --- WHATSAPP & MULTI-TENANT CONVERSATION ENGINE ---
 
-  getWhatsAppConfig() {
-    const tenantId = this.getActiveTenantId();
-    const data = this.getData();
-    if (!data.whatsapp_configs) data.whatsapp_configs = {};
-    if (!data.whatsapp_configs[tenantId]) {
-      const tenant = this.getTenant();
-      const slug = tenant ? (tenant.slug || tenant.id) : 'metrifiquese';
-      data.whatsapp_configs[tenantId] = {
-        tenant_id: tenantId,
-        instance_name: `metrifiquese-${slug}`,
-        server_url: '',
-        api_key: '',
-        status: 'disconnected', // 'disconnected', 'qrcode', 'connecting', 'connected'
-        phone_number: '',
-        profile_name: tenant ? tenant.name : 'Metrifique-se Atendimento',
-        profile_pic: '',
-        battery_level: 88,
-        qrcode: '',
-        auto_create_leads: true,
-        updated_at: new Date().toISOString()
-      };
-      this.saveData(data);
-    }
-    return data.whatsapp_configs[tenantId];
+  _createDefaultWhatsAppAccount(tenantId, existingCfg = null) {
+    const tenant = this.getTenant();
+    const slug = tenant ? (tenant.slug || tenant.id) : 'metrifiquese';
+    return {
+      id: 'default',
+      tenant_id: tenantId,
+      label: existingCfg?.label || 'WhatsApp Principal',
+      color: existingCfg?.color || '#143E2B',
+      instance_name: existingCfg?.instance_name || `metrifiquese-${slug}`,
+      server_url: existingCfg?.server_url || '',
+      api_key: existingCfg?.api_key || '',
+      status: existingCfg?.status || 'disconnected',
+      phone_number: existingCfg?.phone_number || '',
+      profile_name: existingCfg?.profile_name || (tenant ? tenant.name : 'Metrifique-se Atendimento'),
+      profile_pic: existingCfg?.profile_pic || '',
+      battery_level: existingCfg?.battery_level ?? 90,
+      qrcode: existingCfg?.qrcode || '',
+      auto_create_leads: existingCfg?.auto_create_leads !== undefined ? existingCfg.auto_create_leads : true,
+      created_at: existingCfg?.created_at || new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    };
   }
 
-  saveWhatsAppConfig(config) {
+  getWhatsAppAccounts() {
     const tenantId = this.getActiveTenantId();
     const data = this.getData();
-    if (!data.whatsapp_configs) data.whatsapp_configs = {};
-    data.whatsapp_configs[tenantId] = {
-      ...(data.whatsapp_configs[tenantId] || {}),
-      ...config,
+    if (!data.whatsapp_accounts) data.whatsapp_accounts = {};
+
+    let accounts = data.whatsapp_accounts[tenantId];
+    if (!Array.isArray(accounts) || accounts.length === 0) {
+      const legacyCfg = data.whatsapp_configs ? data.whatsapp_configs[tenantId] : null;
+      accounts = [this._createDefaultWhatsAppAccount(tenantId, legacyCfg)];
+      data.whatsapp_accounts[tenantId] = accounts;
+      if (!data.whatsapp_configs) data.whatsapp_configs = {};
+      data.whatsapp_configs[tenantId] = { ...accounts[0] };
+      this.saveData(data);
+    }
+
+    return accounts;
+  }
+
+  getWhatsAppAccountById(accountId) {
+    const accounts = this.getWhatsAppAccounts();
+    if (!accountId || accountId === 'all') return accounts[0] || null;
+    return accounts.find(a => a.id === accountId) || accounts[0] || null;
+  }
+
+  addWhatsAppAccount({ label = '', color = '', server_url = '', api_key = '', instance_name = '' } = {}) {
+    const tenantId = this.getActiveTenantId();
+    const data = this.getData();
+    if (!data.whatsapp_accounts) data.whatsapp_accounts = {};
+    const existing = this.getWhatsAppAccounts();
+
+    const palette = ['#143E2B', '#1D4ED8', '#7C3AED', '#B45309', '#0F766E'];
+    const nextColor = color || palette[existing.length % palette.length];
+    const cleanLabel = (label || `WhatsApp ${existing.length + 1}`).trim();
+    const slugBase = cleanLabel.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || `canal-${existing.length + 1}`;
+    const accountId = `wa-${Date.now()}`;
+
+    const newAccount = {
+      id: accountId,
+      tenant_id: tenantId,
+      label: cleanLabel,
+      color: nextColor,
+      instance_name: (instance_name || `${slugBase}-${String(Date.now()).slice(-4)}`).trim(),
+      server_url: (server_url || '').trim(),
+      api_key: (api_key || '').trim(),
+      status: 'disconnected',
+      phone_number: '',
+      profile_name: cleanLabel,
+      profile_pic: '',
+      battery_level: 95,
+      qrcode: '',
+      auto_create_leads: true,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    };
+
+    data.whatsapp_accounts[tenantId] = [...existing, newAccount];
+    this.saveData(data);
+
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('whatsapp-accounts-updated', { detail: data.whatsapp_accounts[tenantId] }));
+    }
+    return newAccount;
+  }
+
+  updateWhatsAppAccount(accountId, patch = {}) {
+    const tenantId = this.getActiveTenantId();
+    const data = this.getData();
+    const accounts = [...this.getWhatsAppAccounts()];
+    const idx = accounts.findIndex(a => a.id === (accountId || 'default'));
+    if (idx === -1) return null;
+
+    accounts[idx] = {
+      ...accounts[idx],
+      ...patch,
       tenant_id: tenantId,
       updated_at: new Date().toISOString()
     };
+    if (!data.whatsapp_accounts) data.whatsapp_accounts = {};
+    data.whatsapp_accounts[tenantId] = accounts;
+
+    if (accounts[idx].id === 'default') {
+      if (!data.whatsapp_configs) data.whatsapp_configs = {};
+      data.whatsapp_configs[tenantId] = { ...accounts[idx] };
+    }
+
     this.saveData(data);
     if (typeof window !== 'undefined') {
-      window.dispatchEvent(new CustomEvent('whatsapp-config-updated', { detail: data.whatsapp_configs[tenantId] }));
+      window.dispatchEvent(new CustomEvent('whatsapp-accounts-updated', { detail: accounts }));
+      window.dispatchEvent(new CustomEvent('whatsapp-config-updated', { detail: accounts[idx] }));
     }
-    return data.whatsapp_configs[tenantId];
+    return accounts[idx];
   }
 
-  getWhatsAppChats() {
+  removeWhatsAppAccount(accountId) {
+    const tenantId = this.getActiveTenantId();
+    const data = this.getData();
+    const accounts = [...this.getWhatsAppAccounts()];
+
+    if (accounts.length <= 1 || accountId === 'default') {
+      return this.updateWhatsAppAccount(accountId || 'default', {
+        status: 'disconnected',
+        phone_number: '',
+        qrcode: '',
+        battery_level: 0
+      });
+    }
+
+    const filtered = accounts.filter(a => a.id !== accountId);
+    if (!data.whatsapp_accounts) data.whatsapp_accounts = {};
+    data.whatsapp_accounts[tenantId] = filtered;
+
+    // Reassign orphan chats from removed channel back to primary channel or remove empty chats
+    if (Array.isArray(data.whatsapp_chats)) {
+      data.whatsapp_chats = data.whatsapp_chats.filter(c => !(c.tenant_id === tenantId && c.account_id === accountId));
+    }
+
+    this.saveData(data);
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('whatsapp-accounts-updated', { detail: filtered }));
+      window.dispatchEvent(new CustomEvent('whatsapp-chats-updated'));
+    }
+    return true;
+  }
+
+  getWhatsAppConfig(accountId = 'default') {
+    const accounts = this.getWhatsAppAccounts();
+    return accounts.find(a => a.id === accountId) || accounts[0];
+  }
+
+  saveWhatsAppConfig(config, accountId = 'default') {
+    return this.updateWhatsAppAccount(accountId, config);
+  }
+
+  _normalizeAndDeduplicateChats(data, tenantId) {
+    if (!Array.isArray(data.whatsapp_chats)) return false;
+    let changed = false;
+    const seen = new Map();
+    const deduped = [];
+
+    for (const chat of data.whatsapp_chats) {
+      if (chat.tenant_id !== tenantId) {
+        deduped.push(chat);
+        continue;
+      }
+
+      if (!chat.account_id) {
+        chat.account_id = 'default';
+        changed = true;
+      }
+
+      const digits = (chat.phone || '').replace(/\D/g, '').slice(-8);
+      const dedupeKey = digits ? `${chat.account_id}::${digits}` : `${chat.account_id}::id::${chat.id}`;
+
+      const existing = seen.get(dedupeKey);
+      if (!existing) {
+        seen.set(dedupeKey, chat);
+        deduped.push(chat);
+      } else {
+        changed = true;
+        if (!existing.lead_id && chat.lead_id) existing.lead_id = chat.lead_id;
+        if ((!existing.name || existing.name.startsWith('+')) && chat.name && !chat.name.startsWith('+')) {
+          existing.name = chat.name;
+        }
+        if (!existing.company && chat.company) existing.company = chat.company;
+        const existingMsgs = existing.messages || [];
+        const incomingMsgs = chat.messages || [];
+        if (incomingMsgs.length > existingMsgs.length) {
+          existing.messages = incomingMsgs;
+          existing.last_message = chat.last_message || existing.last_message;
+          existing.last_message_time = chat.last_message_time || existing.last_message_time;
+        }
+        existing.unread_count = Math.max(existing.unread_count || 0, chat.unread_count || 0);
+      }
+    }
+
+    if (changed) {
+      data.whatsapp_chats = deduped;
+    }
+    return changed;
+  }
+
+  getWhatsAppChats(accountId = null) {
     const tenantId = this.getActiveTenantId();
     const data = this.getData();
     if (!data.whatsapp_chats) data.whatsapp_chats = [];
-    
+
+    const dedupedChanged = this._normalizeAndDeduplicateChats(data, tenantId);
     let tenantChats = data.whatsapp_chats.filter(c => c.tenant_id === tenantId);
-    
+
     // Seed initial demo chats if none exist for this tenant
     if (tenantChats.length === 0) {
       const leads = this.getLeads();
       const firstLead = leads[0];
       const secondLead = leads[1];
-      
+
       const defaultChats = [
         {
           id: 'chat-demo-1',
           tenant_id: tenantId,
+          account_id: 'default',
           lead_id: firstLead ? firstLead.id : null,
           name: firstLead ? firstLead.name : 'Mariana Silva',
           phone: firstLead ? (firstLead.phone || '(11) 98765-4321') : '(11) 98765-4321',
@@ -1948,6 +2111,7 @@ class LocalCRMStore {
         {
           id: 'chat-demo-2',
           tenant_id: tenantId,
+          account_id: 'default',
           lead_id: secondLead ? secondLead.id : null,
           name: secondLead ? secondLead.name : 'Carlos Eduardo',
           phone: secondLead ? (secondLead.phone || '(21) 99123-4567') : '(21) 99123-4567',
@@ -1965,6 +2129,7 @@ class LocalCRMStore {
         {
           id: 'chat-demo-3',
           tenant_id: tenantId,
+          account_id: 'default',
           lead_id: null,
           name: 'Lucas Mendes (Contato Novo)',
           phone: '(31) 98844-5566',
@@ -1983,6 +2148,13 @@ class LocalCRMStore {
       data.whatsapp_chats.push(...defaultChats);
       this.saveData(data);
       tenantChats = defaultChats;
+    } else if (dedupedChanged) {
+      this.saveData(data);
+      tenantChats = data.whatsapp_chats.filter(c => c.tenant_id === tenantId);
+    }
+
+    if (accountId && accountId !== 'all') {
+      return tenantChats.filter(c => (c.account_id || 'default') === accountId);
     }
 
     return tenantChats;
@@ -1997,14 +2169,28 @@ class LocalCRMStore {
     const tenantId = this.getActiveTenantId();
     const data = this.getData();
     if (!data.whatsapp_chats) data.whatsapp_chats = [];
-    
+
     chat.tenant_id = tenantId;
-    const idx = data.whatsapp_chats.findIndex(c => c.id === chat.id);
+    chat.account_id = chat.account_id || 'default';
+
+    const cleanLast8 = (chat.phone || '').replace(/\D/g, '').slice(-8);
+    let idx = data.whatsapp_chats.findIndex(c => c.id === chat.id && c.tenant_id === tenantId);
+    if (idx === -1 && cleanLast8) {
+      idx = data.whatsapp_chats.findIndex(c =>
+        c.tenant_id === tenantId &&
+        (c.account_id || 'default') === chat.account_id &&
+        (c.phone || '').replace(/\D/g, '').slice(-8) === cleanLast8
+      );
+    }
+
     if (idx >= 0) {
-      data.whatsapp_chats[idx] = { ...data.whatsapp_chats[idx], ...chat };
+      const preservedId = data.whatsapp_chats[idx].id;
+      data.whatsapp_chats[idx] = { ...data.whatsapp_chats[idx], ...chat, id: preservedId };
+      chat = data.whatsapp_chats[idx];
     } else {
       data.whatsapp_chats.unshift(chat);
     }
+
     this.saveData(data);
     if (typeof window !== 'undefined') {
       window.dispatchEvent(new CustomEvent('whatsapp-chats-updated'));
@@ -2017,9 +2203,13 @@ class LocalCRMStore {
     const tenantId = this.getActiveTenantId();
     const data = this.getData();
     if (!data.whatsapp_chats) data.whatsapp_chats = [];
-    
+
     const chat = data.whatsapp_chats.find(c => c.id === chatId && c.tenant_id === tenantId);
     if (!chat) return null;
+
+    const accountId = chat.account_id || 'default';
+    const accounts = this.getWhatsAppAccounts();
+    const account = accounts.find(a => a.id === accountId) || accounts[0];
 
     const user = this.getUser() || { full_name: 'Atendente' };
     const now = new Date();
@@ -2040,11 +2230,11 @@ class LocalCRMStore {
     chat.last_message_time = timeStr;
     chat.unread_count = 0;
 
-    // Se o chat estiver vinculado a um Lead, registrar na timeline do Lead
     if (chat.lead_id) {
+      const channelTag = accounts.length > 1 && account ? ` (${account.label})` : '';
       this.addLeadActivity(chat.lead_id, {
         type: 'whatsapp',
-        title: 'Mensagem de WhatsApp enviada',
+        title: `Mensagem de WhatsApp enviada${channelTag}`,
         text: text.trim(),
         user: user.full_name
       });
@@ -2053,20 +2243,19 @@ class LocalCRMStore {
     this.saveData(data);
 
     if (typeof window !== 'undefined') {
-      window.dispatchEvent(new CustomEvent('whatsapp-message-sent', { detail: { chatId, message: newMsg } }));
+      window.dispatchEvent(new CustomEvent('whatsapp-message-sent', { detail: { chatId, accountId, message: newMsg } }));
       window.dispatchEvent(new CustomEvent('whatsapp-chats-updated'));
     }
 
-    // Se houver Evolution API configurada com server_url, enviar via HTTP real
-    const cfg = this.getWhatsAppConfig();
-    if (cfg && cfg.server_url && cfg.status === 'connected') {
+    // Se houver Evolution API configurada nessa conta, enviar via HTTP real
+    if (account && account.server_url && account.status === 'connected') {
       try {
         const cleanPhone = (chat.phone || '').replace(/\D/g, '');
-        fetch(`${cfg.server_url.replace(/\/$/, '')}/message/sendText/${cfg.instance_name}`, {
+        fetch(`${account.server_url.replace(/\/$/, '')}/message/sendText/${account.instance_name}`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'apikey': cfg.api_key || ''
+            'apikey': account.api_key || ''
           },
           body: JSON.stringify({
             number: cleanPhone,
@@ -2081,7 +2270,7 @@ class LocalCRMStore {
     return newMsg;
   }
 
-  receiveWhatsAppMessage(chatId, text, senderName) {
+  receiveWhatsAppMessage(chatId, text, senderName, accountId = 'default') {
     if (!text) return null;
     const tenantId = this.getActiveTenantId();
     const data = this.getData();
@@ -2091,14 +2280,18 @@ class LocalCRMStore {
     const now = new Date();
     const timeStr = now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
 
+    const accounts = this.getWhatsAppAccounts();
+    const account = accounts.find(a => a.id === accountId) || accounts[0];
+
     if (!chat) {
       chat = {
         id: chatId,
         tenant_id: tenantId,
+        account_id: accountId || 'default',
         lead_id: null,
         name: senderName || 'Novo Contato WhatsApp',
-        phone: chatId.replace('chat-', ''),
-        avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150',
+        phone: chatId.replace(/^chat-(?:wa-\d+-)?/, ''),
+        avatar: '../assets/images/profile/user-1.jpg',
         unread_count: 1,
         last_message: text,
         last_message_time: timeStr,
@@ -2122,11 +2315,11 @@ class LocalCRMStore {
     chat.last_message_time = timeStr;
     chat.unread_count = (chat.unread_count || 0) + 1;
 
-    // Se vinculado a um Lead, registrar na timeline do Lead
     if (chat.lead_id) {
+      const channelTag = accounts.length > 1 && account ? ` (${account.label})` : '';
       this.addLeadActivity(chat.lead_id, {
         type: 'whatsapp',
-        title: 'Mensagem de WhatsApp recebida',
+        title: `Mensagem de WhatsApp recebida${channelTag}`,
         text: text.trim(),
         user: chat.name
       });
@@ -2134,13 +2327,14 @@ class LocalCRMStore {
 
     this.saveData(data);
 
+    const channelPrefix = accounts.length > 1 && account ? `[${account.label}] ` : '';
     this.addNotification({
       title: 'Nova Mensagem WhatsApp',
-      message: `${chat.name}: ${text.length > 50 ? text.substring(0, 50) + '...' : text}`
+      message: `${channelPrefix}${chat.name}: ${text.length > 50 ? text.substring(0, 50) + '...' : text}`
     });
 
     if (typeof window !== 'undefined') {
-      window.dispatchEvent(new CustomEvent('whatsapp-message-received', { detail: { chatId, message: newMsg } }));
+      window.dispatchEvent(new CustomEvent('whatsapp-message-received', { detail: { chatId, accountId: chat.account_id, message: newMsg } }));
       window.dispatchEvent(new CustomEvent('whatsapp-chats-updated'));
     }
 
@@ -2150,6 +2344,10 @@ class LocalCRMStore {
   createLeadFromWhatsApp(chatId) {
     const chat = this.getWhatsAppChatById(chatId);
     if (!chat) return null;
+
+    const accounts = this.getWhatsAppAccounts();
+    const account = accounts.find(a => a.id === (chat.account_id || 'default'));
+    const channelInfo = accounts.length > 1 && account ? ` (${account.label})` : '';
 
     const newLead = {
       name: chat.name || 'Lead WhatsApp',
@@ -2163,7 +2361,7 @@ class LocalCRMStore {
         {
           id: 'act-' + Date.now(),
           type: 'whatsapp',
-          title: 'Lead gerado via WhatsApp',
+          title: `Lead gerado via WhatsApp${channelInfo}`,
           text: `Iniciou conversa pelo WhatsApp com a mensagem: "${chat.last_message || ''}"`,
           date: new Date().toLocaleDateString('pt-BR') + ' às ' + new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
           user: 'Sistema WhatsApp'

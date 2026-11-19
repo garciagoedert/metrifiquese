@@ -9,3 +9,4 @@
 .env.test.local
 .env.production.local
 .whatsapp_auth/
+.whatsapp_auth_sessions/

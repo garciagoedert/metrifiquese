@@ -119,7 +119,7 @@ async function handleWhatsAppWebhook(req, res) {
           activities.unshift({
             id: 'act-wpp-' + Date.now(),
             type: 'whatsapp',
-            title: fromMe ? 'Mensagem WhatsApp enviada' : 'Mensagem WhatsApp recebida',
+            title: `${fromMe ? 'Mensagem WhatsApp enviada' : 'Mensagem WhatsApp recebida'} (${instance})`,
             text: text,
             date: new Date().toLocaleDateString('pt-BR') + ' às ' + new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
             user: fromMe ? 'Atendente' : (pushName || lead.name)

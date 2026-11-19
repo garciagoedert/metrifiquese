@@ -56,6 +56,11 @@
 
   --bs-primary: #143E2B;
   --bs-primary-rgb: 20, 62, 43;
+  --bs-success: #15803D;
+  --bs-success-rgb: 21, 128, 61;
+  --mq-success: #15803D;
+  --mq-success-soft: #ECFDF5;
+  --mq-success-border: #A7F3D0;
   --bs-body-font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 
   /* Material UI Layered Elevation Shadows */
@@ -100,6 +105,11 @@
   --hs-card-border: #27272A;
 
   /* Maintain WCAG AA readable contrast on dark backgrounds for green/dark accents */
+  --bs-success: #4ADE80;
+  --bs-success-rgb: 74, 222, 128;
+  --mq-success: #4ADE80;
+  --mq-success-soft: rgba(34, 197, 94, 0.16);
+  --mq-success-border: rgba(74, 222, 128, 0.35);
   --theme-primary-text: #6EE7B7;
   --theme-primary-soft: rgba(34, 197, 94, 0.16);
   --theme-primary-soft-hover: rgba(34, 197, 94, 0.24);
@@ -527,6 +537,16 @@ input, button, select, textarea {
 
 .text-primary, a.text-primary {
   color: var(--theme-primary-text) !important;
+}
+
+.text-success {
+  color: var(--mq-success) !important;
+}
+
+.bg-success-subtle {
+  background-color: var(--mq-success-soft) !important;
+  color: var(--mq-success) !important;
+  border-color: var(--mq-success-border) !important;
 }
 
 /* Material Chips & Status Badges */
@@ -1279,8 +1299,14 @@ dialog.mq-dialog::backdrop {
   dialog.mq-dialog,
   .mq-toast[popover],
   .left-sidebar,
-  .app-header.hs-header {
+  .app-header.hs-header,
+  .wa-bubble-out,
+  .wa-bubble-in {
     border: 1px solid CanvasText !important;
+  }
+
+  .wa-tab[aria-selected="true"]::after {
+    border-block-end-color: Highlight !important;
   }
 
   .sidebar-nav ul .sidebar-item.selected > .sidebar-link,
@@ -1289,3 +1315,334 @@ dialog.mq-dialog::backdrop {
     outline-offset: 2px;
   }
 }
+
+/* 17. WHATSAPP MULTI-CHANNEL WORKSPACE & ACCESSIBLE TABS */
+@property --wa-fade-start {
+  syntax: "<length>";
+  inherits: false;
+  initial-value: 0px;
+}
+
+@property --wa-fade-end {
+  syntax: "<length>";
+  inherits: false;
+  initial-value: 0px;
+}
+
+.wa-channels-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  background-color: var(--mq-surface);
+  border-bottom: 1px solid var(--mq-border);
+  padding: 0 1rem;
+  min-block-size: 48px;
+  flex-shrink: 0;
+}
+
+.wa-tablist {
+  position: relative;
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: stretch;
+  gap: 0.25rem;
+  overflow-x: auto;
+  scrollbar-width: none;
+  scroll-snap-type: inline proximity;
+  scroll-padding-inline: 2.5rem;
+  flex: 1 1 auto;
+  min-inline-size: 0;
+  --wa-fade-size: 2.5rem;
+}
+
+.wa-tablist::-webkit-scrollbar {
+  display: none;
+}
+
+@supports (animation-timeline: scroll(self inline)) {
+  .wa-tablist {
+    mask:
+      linear-gradient(black, black) no-clip subtract,
+      linear-gradient(to right, black, transparent) 0 0 / var(--wa-fade-start) 100% no-repeat no-clip,
+      linear-gradient(to right, transparent, black) 100% 0 / var(--wa-fade-end) 100% no-repeat no-clip;
+    animation: wa-reveal-fade-start linear both, wa-hide-fade-end linear both;
+    animation-timeline: scroll(self inline);
+    animation-range: 0 var(--wa-fade-size), calc(100% - var(--wa-fade-size)) 100%;
+  }
+
+  @keyframes wa-reveal-fade-start {
+    to {
+      --wa-fade-start: var(--wa-fade-size);
+    }
+  }
+
+  @keyframes wa-hide-fade-end {
+    from {
+      --wa-fade-end: var(--wa-fade-size);
+    }
+  }
+}
+
+@supports not (animation-timeline: scroll(self inline)) {
+  .wa-tablist {
+    transition: --wa-fade-start 0.2s, --wa-fade-end 0.2s;
+    mask:
+      linear-gradient(black, black) no-clip subtract,
+      linear-gradient(to right, black, transparent) 0 0 / var(--wa-fade-start) 100% no-repeat no-clip,
+      linear-gradient(to right, transparent, black) 100% 0 / var(--wa-fade-end) 100% no-repeat no-clip;
+  }
+
+  .wa-tablist.more-start {
+    --wa-fade-start: var(--wa-fade-size);
+  }
+
+  .wa-tablist.more-end {
+    --wa-fade-end: var(--wa-fade-size);
+  }
+}
+
+.wa-tab {
+  position: relative;
+  flex: none;
+  scroll-snap-align: start;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.72rem 0.95rem;
+  border: 0;
+  margin: 0;
+  background: transparent;
+  color: var(--mq-muted);
+  font-weight: 600;
+  font-size: 0.85rem;
+  white-space: nowrap;
+  cursor: pointer;
+  min-block-size: 46px;
+  border-radius: 0;
+  transition: color 0.15s ease, background-color 0.15s ease;
+}
+
+.wa-tab:hover {
+  color: var(--mq-heading);
+  background-color: var(--mq-surface-subtle);
+}
+
+.wa-tab[aria-selected="true"] {
+  color: var(--mq-heading);
+}
+
+.wa-tab[aria-selected="true"]::after {
+  content: "";
+  position: absolute;
+  inset: auto 0.25rem 0;
+  border-block-end: 3px solid var(--theme-primary-text);
+  border-radius: 3px 3px 0 0;
+}
+
+.wa-tab-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-inline-size: 20px;
+  padding: 0.1em 0.45em;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  background-color: var(--theme-primary-soft);
+  color: var(--theme-primary-text);
+}
+
+.wa-status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: inline-block;
+  background-color: #A1A1AA;
+}
+
+.wa-status-dot--online {
+  background-color: var(--mq-success);
+}
+
+.wa-status-dot--pending {
+  background-color: #D97706;
+}
+
+.wa-status-dot--offline {
+  background-color: #A1A1AA;
+}
+
+.wa-status-dot--all {
+  background-color: var(--theme-primary);
+}
+
+/* Unified WhatsApp Search & Segmented Filters */
+.wa-search-box {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background-color: var(--mq-surface);
+  border: 1.5px solid var(--mq-border-strong);
+  border-radius: 10px;
+  padding: 0.35rem 0.75rem;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.wa-search-box:focus-within {
+  border-color: var(--theme-primary);
+  box-shadow: 0 0 0 3px var(--theme-primary-soft);
+}
+
+.wa-search-box input {
+  border: 0 !important;
+  outline: none !important;
+  box-shadow: none !important;
+  background: transparent !important;
+  padding: 0.2rem 0 !important;
+  width: 100%;
+  color: var(--mq-heading);
+  font-size: 0.875rem;
+}
+
+.wa-filter-segmented {
+  background-color: var(--mq-surface-subtle);
+  padding: 3px;
+  border-radius: 10px;
+  display: flex;
+  gap: 3px;
+  border: 1px solid var(--mq-border);
+}
+
+.wa-filter-btn {
+  flex: 1 1 0;
+  border: 0;
+  background: transparent;
+  color: var(--mq-muted);
+  font-weight: 600;
+  font-size: 0.75rem;
+  padding: 0.38rem 0.5rem;
+  border-radius: 8px;
+  min-block-size: 30px;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.wa-filter-btn:hover:not(.is-active) {
+  color: var(--mq-heading);
+}
+
+.wa-filter-btn.is-active {
+  background-color: var(--mq-surface);
+  color: var(--mq-heading);
+  font-weight: 700;
+  box-shadow: var(--mq-elev-1);
+}
+
+/* Chat Items & Channel Chips */
+.wa-chat-item {
+  width: 100%;
+  text-align: start;
+  border: 0;
+  border-bottom: 1px solid var(--mq-border);
+  border-inline-start: 3px solid transparent;
+  padding: 0.85rem 1rem;
+  background: transparent;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.wa-chat-item:hover {
+  background-color: var(--mq-surface-subtle);
+}
+
+.wa-chat-item.is-selected {
+  background-color: var(--theme-primary-soft);
+  border-inline-start-color: var(--theme-primary-text);
+}
+
+.wa-channel-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.14rem 0.48rem;
+  border-radius: 6px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  background-color: var(--mq-surface-subtle);
+  color: var(--mq-text);
+  border: 1px solid var(--mq-border);
+  max-inline-size: 130px;
+}
+
+/* Material UI Chat Bubbles */
+.wa-bubble-out {
+  background-color: var(--theme-primary);
+  color: var(--theme-primary-fg);
+  border-radius: 16px 16px 4px 16px;
+  box-shadow: var(--mq-elev-1);
+}
+
+.wa-bubble-out-meta {
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 10px;
+}
+
+.wa-bubble-out-check {
+  color: #86EFAC;
+  font-size: 13px;
+}
+
+.wa-bubble-in {
+  background-color: var(--mq-surface);
+  color: var(--mq-heading);
+  border: 1px solid var(--mq-border);
+  border-radius: 16px 16px 16px 4px;
+  box-shadow: var(--mq-elev-1);
+}
+
+.wa-bubble-in-meta {
+  color: var(--mq-muted);
+  font-size: 10px;
+}
+
+.wa-quick-chip {
+  border-radius: 999px;
+  background-color: var(--mq-surface-subtle);
+  border: 1px solid var(--mq-border);
+  color: var(--mq-text);
+  font-size: 0.76rem;
+  font-weight: 600;
+  padding: 0.3rem 0.75rem;
+  min-block-size: 30px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: border-color 0.15s ease, color 0.15s ease, background-color 0.15s ease;
+}
+
+.wa-quick-chip:hover {
+  border-color: var(--theme-primary);
+  color: var(--theme-primary-text);
+  background-color: var(--theme-primary-soft);
+}
+
+.wa-account-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.75rem 0.9rem;
+  border-radius: 12px;
+  border: 1.5px solid var(--mq-border);
+  background-color: var(--mq-surface);
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.wa-account-card.is-active {
+  border-color: var(--theme-primary);
+  background-color: var(--theme-primary-soft);
+}
+

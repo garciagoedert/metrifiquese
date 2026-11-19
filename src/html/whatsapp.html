@@ -22,8 +22,10 @@
 
   <style>
     .chat-container-card {
-      height: calc(100dvh - 115px);
-      min-height: 520px;
+      display: flex;
+      flex-direction: column;
+      height: calc(100dvh - 96px);
+      min-height: 540px;
       overflow: hidden;
     }
     .chat-sidebar-col {
@@ -34,10 +36,15 @@
       display: flex;
       flex-direction: column;
       background: var(--mq-surface, #ffffff);
+      min-height: 0;
+    }
+    .chat-thread-col {
+      min-width: 0;
+      min-height: 0;
     }
     .chat-messages-area {
-      background-color: var(--mq-surface-subtle, #f0f2f5);
-      background-image: radial-gradient(rgba(148, 163, 184, 0.28) 0.75px, transparent 0.75px);
+      background-color: var(--mq-surface-subtle, #f4f4f5);
+      background-image: radial-gradient(rgba(113, 113, 122, 0.2) 0.75px, transparent 0.75px);
       background-size: 16px 16px;
       overflow-y: auto;
       flex-grow: 1;
@@ -47,10 +54,12 @@
       min-width: 290px;
       border-left: 1px solid var(--mq-border, #e5e7eb);
       background: var(--mq-surface, #ffffff);
+      min-height: 0;
+      overflow-y: auto;
       transition: background-color 0.2s ease, border-color 0.2s ease;
     }
     .hover-bg-light:hover {
-      background-color: var(--mq-surface-hover, #f8fafc);
+      background-color: var(--mq-surface-subtle, #f4f4f5);
     }
     .spin-animate {
       animation: spin 1.5s linear infinite;
@@ -59,7 +68,7 @@
       field-sizing: content;
       height: auto;
       width: 100%;
-      min-block-size: 2.65rem;
+      min-block-size: 2.5rem;
       max-block-size: 120px;
       resize: none;
     }
@@ -71,8 +80,8 @@
     }
     @media (max-width: 767.98px) {
       .chat-container-card {
-        height: calc(100dvh - 96px);
-        min-height: 460px;
+        height: calc(100dvh - 88px);
+        min-height: 480px;
       }
       .chat-sidebar-col {
         width: 100%;
@@ -106,14 +115,14 @@
 
     <div class="d-flex align-items-center gap-2 gap-md-3">
       <!-- WhatsApp Status Header Pill -->
-      <div id="whatsapp-status-pill" class="badge bg-secondary-subtle text-secondary border px-2 px-md-3 py-2 d-inline-flex align-items-center gap-2">
+      <button type="button" id="whatsapp-status-pill" class="badge bg-light text-secondary border px-2 px-md-3 py-2 d-inline-flex align-items-center gap-2 cursor-pointer" onclick="window.whatsAppManager.openConnectModal()" title="Ver e gerenciar conexões de WhatsApp">
         <i id="whatsapp-status-icon" class="ti ti-circle-filled fs-3" aria-hidden="true"></i>
         <span id="whatsapp-status-text" class="fw-semibold d-none d-sm-inline">Verificando WhatsApp...</span>
-      </div>
+      </button>
 
-      <button type="button" id="whatsapp-connect-btn" class="btn btn-sm btn-success d-flex align-items-center gap-1 shadow-sm" onclick="window.whatsAppManager.openConnectModal()">
+      <button type="button" id="whatsapp-connect-btn" class="btn btn-sm btn-primary d-flex align-items-center gap-1 shadow-sm" onclick="window.whatsAppManager.openConnectModal()">
         <i class="ti ti-qrcode" aria-hidden="true"></i>
-        <span class="d-none d-md-inline">Conectar WhatsApp</span>
+        <span class="d-none d-md-inline">Gerenciar Canais</span>
       </button>
 
       <button type="button" class="btn btn-light text-secondary border-0 rounded-circle p-2 d-none d-md-inline-flex align-items-center justify-content-center" data-global-search-trigger title="Busca global (Ctrl/Cmd + K)" aria-label="Abrir busca global no CRM">
@@ -220,18 +229,35 @@
 
         <!-- WHATSAPP WEB WORKSPACE CARD -->
         <div class="card shadow-sm border-0 mb-0 chat-container-card">
-          <div id="whatsapp-shell" class="d-flex h-100 w-100 overflow-hidden">
+          <!-- BARRA DE CANAIS & ABAS MULTI-WHATSAPP -->
+          <div id="whatsapp-channels-bar" class="wa-channels-bar">
+            <div id="whatsapp-account-tabs" class="wa-tablist" focusgroup="tablist nomemory" role="tablist" aria-label="Canais de WhatsApp conectados">
+              <!-- Renderizado dinamicamente via whatsapp-manager.js -->
+            </div>
+            <div class="d-flex align-items-center gap-2 flex-shrink-0 ms-2">
+              <button type="button" class="btn btn-sm btn-outline-primary py-1 px-2 d-inline-flex align-items-center gap-1" onclick="window.whatsAppManager.openAddAccountFlow()" title="Conectar outro número de WhatsApp">
+                <i class="ti ti-plus fs-4" aria-hidden="true"></i>
+                <span class="d-none d-sm-inline">Novo WhatsApp</span>
+              </button>
+              <button type="button" class="btn btn-sm btn-light py-1 px-2 d-inline-flex align-items-center gap-1" onclick="window.whatsAppManager.openConnectModal()" title="Gerenciar contas conectadas" aria-label="Gerenciar contas do WhatsApp">
+                <i class="ti ti-plug-connected fs-4" aria-hidden="true"></i>
+              </button>
+            </div>
+          </div>
+
+          <div id="whatsapp-shell" class="d-flex flex-grow-1 w-100 overflow-hidden" style="min-height: 0;" role="tabpanel" aria-labelledby="wa-tab-default">
 
             <!-- 1. COLUNA ESQUERDA: LISTA DE CONVERSAS -->
             <div class="chat-sidebar-col">
               <!-- Top Search and Header -->
-              <div class="p-3 border-bottom bg-light">
+              <div class="p-3 border-bottom bg-white">
                 <div class="d-flex align-items-center justify-content-between mb-2">
-                  <h1 class="mb-0 fw-bold fs-4 d-flex align-items-center gap-2">
-                    <i class="ti ti-brand-whatsapp text-success fs-6" aria-hidden="true"></i> WhatsApp
-                  </h1>
-                  <div class="d-flex align-items-center gap-1">
-                    <button type="button" class="btn btn-sm btn-primary py-1 px-2 d-flex align-items-center gap-1 shadow-sm" title="Iniciar Nova Conversa" onclick="window.whatsAppManager.openNewChatModal()">
+                  <div class="d-flex align-items-center gap-2 min-w-0">
+                    <i class="ti ti-brand-whatsapp text-success fs-6 flex-shrink-0" aria-hidden="true"></i>
+                    <h1 id="wa-active-channel-title" class="mb-0 fw-bold fs-4 text-truncate">WhatsApp</h1>
+                  </div>
+                  <div class="d-flex align-items-center gap-1 flex-shrink-0">
+                    <button type="button" class="btn btn-sm btn-primary py-1 px-2 d-flex align-items-center gap-1" title="Iniciar Nova Conversa" onclick="window.whatsAppManager.openNewChatModal()">
                       <i class="ti ti-message-plus fs-4" aria-hidden="true"></i>
                       <span class="fs-2 fw-semibold">Novo</span>
                     </button>
@@ -241,18 +267,18 @@
                   </div>
                 </div>
 
-                <!-- Campo de busca -->
-                <div class="input-group input-group-sm mb-2">
+                <!-- Campo de busca unificado -->
+                <div class="wa-search-box mb-2">
                   <label for="search-chats-input" class="visually-hidden">Buscar conversas ou telefone</label>
-                  <span class="input-group-text bg-white border-end-0 text-muted"><i class="ti ti-search" aria-hidden="true"></i></span>
-                  <input type="search" id="search-chats-input" class="form-control border-start-0 ps-0" placeholder="Buscar conversas ou telefone..." enterkeyhint="search">
+                  <i class="ti ti-search text-muted flex-shrink-0" aria-hidden="true"></i>
+                  <input type="search" id="search-chats-input" placeholder="Buscar conversas ou telefone..." enterkeyhint="search">
                 </div>
 
-                <!-- Filtros rápidos -->
-                <div class="d-flex gap-1" role="group" aria-label="Filtrar conversas">
-                  <button type="button" class="btn btn-xs btn-primary rounded-pill px-2 py-1 fs-1 flex-grow-1 active" data-chat-filter="all">Todas</button>
-                  <button type="button" class="btn btn-xs btn-light-secondary rounded-pill px-2 py-1 fs-1 flex-grow-1" data-chat-filter="unread">Não Lidas</button>
-                  <button type="button" class="btn btn-xs btn-light-secondary rounded-pill px-2 py-1 fs-1 flex-grow-1" data-chat-filter="leads">Leads CRM</button>
+                <!-- Filtros segmentados -->
+                <div class="wa-filter-segmented" role="group" aria-label="Filtrar conversas">
+                  <button type="button" class="wa-filter-btn is-active" data-chat-filter="all" aria-pressed="true">Todas</button>
+                  <button type="button" class="wa-filter-btn" data-chat-filter="unread" aria-pressed="false">Não Lidas</button>
+                  <button type="button" class="wa-filter-btn" data-chat-filter="leads" aria-pressed="false">Leads CRM</button>
                 </div>
               </div>
 
@@ -274,7 +300,7 @@
                 <!-- Preenchido via JS -->
               </div>
 
-              <!-- Área de Mensagens (Estilo WhatsApp) -->
+              <!-- Área de Mensagens (Estilo WhatsApp Material UI) -->
               <div id="chat-messages-container" class="chat-messages-area p-3">
                 <!-- Balões de conversa preenchidos via JS -->
               </div>
@@ -283,26 +309,28 @@
               <div class="p-3 border-top bg-white">
                 <!-- Respostas Rápidas / Templates -->
                 <div class="d-flex align-items-center gap-2 mb-2 overflow-auto pb-1" style="white-space: nowrap;">
-                  <span class="badge bg-light text-muted border d-flex align-items-center gap-1" style="font-size: 11px;">
-                    <i class="ti ti-bolt text-warning" aria-hidden="true"></i> Resposta Rápida:
+                  <span class="text-muted fw-bold d-inline-flex align-items-center gap-1" style="font-size: 11px;">
+                    <i class="ti ti-bolt text-warning" aria-hidden="true"></i> Rápidas:
                   </span>
-                  <button type="button" class="btn btn-xs btn-outline-secondary rounded-pill px-2 py-1" style="font-size: 11px;"
+                  <button type="button" class="wa-quick-chip"
                           data-quick-template="Olá! Sou do time Metrifique-se. Como posso te ajudar hoje?">
-                    👋 Apresentação
+                    Apresentação
                   </button>
-                  <button type="button" class="btn btn-xs btn-outline-secondary rounded-pill px-2 py-1" style="font-size: 11px;"
+                  <button type="button" class="wa-quick-chip"
                           data-quick-template="Olá! Acabei de gerar sua proposta comercial personalizada. Podemos conversar 5 minutinhos?">
-                    📄 Envio de Proposta
+                    Envio de Proposta
                   </button>
-                  <button type="button" class="btn btn-xs btn-outline-secondary rounded-pill px-2 py-1" style="font-size: 11px;"
+                  <button type="button" class="wa-quick-chip"
                           data-quick-template="Que tal marcarmos 15 minutos amanhã para eu te mostrar a plataforma na prática?">
-                    📅 Agendar Demo
+                    Agendar Demo
                   </button>
-                  <button type="button" class="btn btn-xs btn-outline-secondary rounded-pill px-2 py-1" style="font-size: 11px;"
+                  <button type="button" class="wa-quick-chip"
                           data-quick-template="Muito obrigado pela preferência! Ficamos à total disposição caso precise de algo.">
-                    ✅ Agradecimento
+                    Agradecimento
                   </button>
                 </div>
+
+                <div id="wa-composer-channel-indicator" class="d-none align-items-center gap-1 mb-1 text-muted" style="font-size: 11px;"></div>
 
                 <!-- Formulário de Mensagem -->
                 <form id="chat-message-form" class="d-flex align-items-end gap-2">
@@ -310,7 +338,7 @@
                     <label for="chat-message-input" class="visually-hidden">Mensagem do WhatsApp</label>
                     <textarea id="chat-message-input" rows="1" enterkeyhint="send" class="form-control" placeholder="Digite uma mensagem (Enter envia, Shift+Enter quebra linha)..." autocomplete="off"></textarea>
                   </div>
-                  <button type="submit" class="btn btn-success px-3 d-flex align-items-center gap-1 shadow-sm" aria-label="Enviar mensagem">
+                  <button type="submit" class="btn btn-primary px-3 d-flex align-items-center gap-1" aria-label="Enviar mensagem">
                     <i class="ti ti-send fs-5" aria-hidden="true"></i>
                     <span class="d-none d-md-inline">Enviar</span>
                   </button>
@@ -345,6 +373,13 @@
         </div>
 
         <div class="modal-body p-0">
+          <div id="new-chat-account-wrapper" class="px-4 pt-3 pb-2 border-bottom bg-light d-none">
+            <label for="new-chat-account-select" class="form-label fw-semibold small mb-1">
+              <i class="ti ti-brand-whatsapp text-success me-1" aria-hidden="true"></i> Canal / Número de Saída
+            </label>
+            <select id="new-chat-account-select" class="form-select form-select-sm"></select>
+          </div>
+
           <ul class="nav nav-tabs nav-justified bg-light border-bottom" id="newChatTab" role="tablist">
             <li class="nav-item" role="presentation">
               <button class="nav-link active fw-bold py-3 text-dark d-flex align-items-center justify-content-center gap-2" id="tab-direct-number-btn" data-bs-toggle="tab" data-bs-target="#tab-direct-number" type="button" role="tab">
@@ -390,7 +425,7 @@
 
                 <div class="d-flex justify-content-end gap-2">
                   <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
-                  <button type="submit" class="btn btn-success px-4 py-2 fw-semibold d-flex align-items-center gap-2 shadow-sm">
+                  <button type="submit" class="btn btn-primary px-4 py-2 fw-semibold d-flex align-items-center gap-2">
                     <i class="ti ti-send fs-5"></i> Iniciar Conversa
                   </button>
                 </div>
@@ -415,21 +450,65 @@
     </div>
   </div>
 
-  <!-- MODAL: PAREAMENTO VIA QR CODE & CONFIGURAÇÃO DA API -->
+  <!-- MODAL: PAREAMENTO MULTI-WHATSAPP VIA QR CODE & CONFIGURAÇÃO DA API -->
   <div class="modal fade" id="whatsappConnectModal" tabindex="-1" aria-labelledby="whatsappConnectModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
       <div class="modal-content border-0 shadow">
-        <div class="modal-header bg-success text-white">
+        <div class="modal-header bg-primary text-white">
           <div class="d-flex align-items-center gap-2">
-            <i class="ti ti-brand-whatsapp fs-6"></i>
-            <h5 class="modal-title fw-bold text-white mb-0" id="whatsappConnectModalLabel">Conectar WhatsApp da Empresa</h5>
+            <i class="ti ti-brand-whatsapp fs-6" aria-hidden="true"></i>
+            <h5 class="modal-title fw-bold text-white mb-0" id="whatsappConnectModalLabel">Canais &amp; Conexões de WhatsApp</h5>
           </div>
-          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
         </div>
 
         <div class="modal-body p-4">
+          <!-- GERENCIADOR DE MÚLTIPLOS WHATSAPPS -->
+          <div class="mb-4 pb-3 border-bottom">
+            <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+              <div>
+                <h6 class="fw-bold mb-0 text-dark">Números Conectados &amp; Canais</h6>
+                <small class="text-muted">Adicione vários números (Comercial, Suporte, SDR) e alterne entre eles por abas.</small>
+              </div>
+              <button type="button" class="btn btn-sm btn-outline-primary" onclick="window.whatsAppManager.toggleAddAccountForm()">
+                <i class="ti ti-plus me-1" aria-hidden="true"></i> Adicionar Outro WhatsApp
+              </button>
+            </div>
+
+            <!-- Form para adicionar nova conta WhatsApp -->
+            <form id="add-wa-account-form" class="card bg-light border p-3 mb-3 d-none" onsubmit="window.whatsAppManager.handleCreateAccount(event)">
+              <div class="row g-2 align-items-end">
+                <div class="col-sm-7">
+                  <label for="new-wa-account-label" class="form-label small fw-semibold mb-1">Nome do Canal *</label>
+                  <input type="text" id="new-wa-account-label" class="form-control form-control-sm" placeholder="Ex: Comercial, Suporte, SDR 2" required>
+                </div>
+                <div class="col-sm-2">
+                  <label for="new-wa-account-color" class="form-label small fw-semibold mb-1">Cor</label>
+                  <input type="color" id="new-wa-account-color" class="form-control form-control-sm form-control-color w-100" value="#1D4ED8">
+                </div>
+                <div class="col-sm-3 d-grid">
+                  <button type="submit" class="btn btn-sm btn-primary">
+                    <i class="ti ti-qrcode me-1" aria-hidden="true"></i> Criar &amp; Parear
+                  </button>
+                </div>
+              </div>
+            </form>
+
+            <div id="whatsapp-accounts-manager-list" class="d-flex flex-column gap-2">
+              <!-- Lista de canais renderizada via JS -->
+            </div>
+          </div>
+
+          <!-- BANNER DE IDENTIFICAÇÃO DA CONTA EM PAREAMENTO -->
+          <div id="pairing-account-banner" class="alert bg-light border d-flex align-items-center justify-content-between flex-wrap gap-2 py-2 px-3 mb-4">
+            <div class="d-flex align-items-center gap-2">
+              <span id="pairing-account-dot" class="wa-status-dot wa-status-dot--offline"></span>
+              <span class="small fw-semibold text-dark">Pareando canal: <strong id="pairing-account-label">WhatsApp Principal</strong></span>
+            </div>
+            <span id="pairing-account-badge" class="badge bg-light text-muted border">Desconectado</span>
+          </div>
+
           <div class="row g-4 align-items-center">
-            
             <!-- Coluna 1: Instruções Passo a Passo -->
             <div class="col-md-6">
               <h6 class="fw-bold fs-4 text-dark mb-3">Como parear com o celular:</h6>
@@ -456,14 +535,14 @@
                 <li class="d-flex align-items-start gap-3">
                   <div class="rounded-circle bg-light-primary text-primary fw-bold d-flex align-items-center justify-content-center" style="width: 32px; height: 32px; min-width: 32px;">4</div>
                   <div>
-                    <strong>Aponte a câmera</strong> do celular para o código QR ao lado para validar o acesso.
+                    <strong>Aponte a câmera</strong> do celular para o código QR ao lado para validar o acesso deste canal.
                   </div>
                 </li>
               </ol>
 
-              <div class="alert alert-info border-0 d-flex align-items-center gap-2 py-2 small mb-0">
-                <i class="ti ti-shield-check fs-6 text-info"></i>
-                <span>Suas conversas permanecem criptografadas e sincronizadas diretamente com a base de Leads do CRM.</span>
+              <div class="alert bg-light border d-flex align-items-center gap-2 py-2 small mb-0">
+                <i class="ti ti-shield-check fs-6 text-primary" aria-hidden="true"></i>
+                <span>Cada canal mantém sessão independente e sincroniza direto com a base de Leads do CRM.</span>
               </div>
             </div>
 
@@ -477,8 +556,8 @@
               </div>
 
               <div class="d-grid gap-2">
-                <button type="button" class="btn btn-outline-success d-flex align-items-center justify-content-center gap-2 shadow-sm" onclick="window.whatsAppManager.openConnectModal()">
-                  <i class="ti ti-refresh fs-5"></i>
+                <button type="button" class="btn btn-outline-primary d-flex align-items-center justify-content-center gap-2" onclick="window.whatsAppManager.refreshPairingQRCode()">
+                  <i class="ti ti-refresh fs-5" aria-hidden="true"></i>
                   <span>Atualizar QR Code</span>
                 </button>
               </div>
@@ -489,32 +568,36 @@
           <!-- Seção Expansível: Integração Avançada com Evolution API (Docker / VPS) -->
           <div class="mt-4 pt-3 border-top">
             <button type="button" class="btn btn-link p-0 w-100 text-decoration-none small fw-semibold text-secondary d-flex align-items-center justify-content-between" data-bs-toggle="collapse" data-bs-target="#evolutionApiConfigCollapse" aria-expanded="false" aria-controls="evolutionApiConfigCollapse">
-              <span><i class="ti ti-server me-1" aria-hidden="true"></i> Configurações Avançadas de Servidor (Evolution API / Docker VPS)</span>
+              <span><i class="ti ti-server me-1" aria-hidden="true"></i> Servidor Externo deste Canal (Evolution API / Docker VPS)</span>
               <i class="ti ti-chevron-down" aria-hidden="true"></i>
             </button>
 
             <div class="collapse mt-3" id="evolutionApiConfigCollapse">
               <div class="card card-body bg-light border p-3">
                 <div class="row g-2 mb-2">
-                  <div class="col-md-6">
-                    <label for="evo-server-url" class="form-label small fw-semibold">URL da Evolution API (VPS ou Servidor)</label>
+                  <div class="col-md-4">
+                    <label for="evo-instance-name" class="form-label small fw-semibold">Nome da Instância</label>
+                    <input type="text" id="evo-instance-name" class="form-control form-control-sm" placeholder="ex: metrifiquese-comercial" spellcheck="false">
+                  </div>
+                  <div class="col-md-4">
+                    <label for="evo-server-url" class="form-label small fw-semibold">URL da Evolution API</label>
                     <input type="url" id="evo-server-url" class="form-control form-control-sm" placeholder="ex: https://api-wpp.suaempresa.com.br" spellcheck="false" autocomplete="url">
                   </div>
-                  <div class="col-md-6">
-                    <label for="evo-api-key" class="form-label small fw-semibold">Global API Key</label>
-                    <input type="password" id="evo-api-key" class="form-control form-control-sm" placeholder="Chave de autenticação da Evolution API" autocomplete="off">
+                  <div class="col-md-4">
+                    <label for="evo-api-key" class="form-label small fw-semibold">API Key</label>
+                    <input type="password" id="evo-api-key" class="form-control form-control-sm" placeholder="Chave da Evolution API" autocomplete="off">
                   </div>
                 </div>
 
                 <div class="mb-2">
-                  <label for="evo-webhook-url" class="form-label small fw-semibold">URL de Webhook do Metrifique-se (Para registrar na Evolution API)</label>
+                  <label for="evo-webhook-url" class="form-label small fw-semibold">URL de Webhook do Metrifique-se (Registrar na Evolution API)</label>
                   <input type="url" id="evo-webhook-url" class="form-control form-control-sm bg-white" readonly value="https://metrifiquese.vercel.app/api/v1/whatsapp/webhook" spellcheck="false">
                   <span class="form-text small" style="font-size: 11px;">A Evolution API enviará eventos de mensagens e status de conexão para esta URL.</span>
                 </div>
 
                 <div class="text-end">
-                  <button type="button" class="btn btn-sm btn-dark" onclick="window.whatsAppManager.saveEvolutionApiSettings()">
-                    Salvar Configurações de API
+                  <button type="button" class="btn btn-sm btn-primary" onclick="window.whatsAppManager.saveEvolutionApiSettings()">
+                    Salvar Configurações deste Canal
                   </button>
                 </div>
               </div>
@@ -524,7 +607,7 @@
         </div>
 
         <div class="modal-footer bg-light py-2">
-          <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Fechar</button>
+          <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Fechar</button>
         </div>
       </div>
     </div>

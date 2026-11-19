@@ -1,7 +1,7 @@
 /**
- * Metrifique-se CRM - Real WhatsApp Baileys Engine
- * Runs a real WhatsApp Multi-Device WebSocket client, generates authentic QR codes,
- * and synchronizes messages and contacts in real time with the CRM.
+ * Metrifique-se CRM - Multi-Instance WhatsApp Baileys Engine
+ * Runs multiple concurrent WhatsApp Multi-Device WebSocket sessions,
+ * generates authentic QR codes per account, and synchronizes messages in real time.
  */
 
 const http = require('http');
@@ -12,52 +12,108 @@ const pino = require('pino');
 const QRCode = require('qrcode');
 
 const PORT = process.env.WHATSAPP_PORT || 8006;
-const AUTH_DIR = path.join(__dirname, '../.whatsapp_auth');
+const DEFAULT_AUTH_DIR = path.join(__dirname, '../.whatsapp_auth');
+const SESSIONS_ROOT = path.join(__dirname, '../.whatsapp_auth_sessions');
 
-// In-memory state
-let sock = null;
-let connectionState = {
-  status: 'disconnected', // 'disconnected', 'connecting', 'qrcode', 'connected'
-  qr: null,
-  qrRaw: null,
-  user: null,
-  lastError: null,
-  updatedAt: new Date().toISOString()
-};
+// Multi-instance registry keyed by sanitized accountId
+const instances = new Map();
 
-const chatsMap = new Map();
+function sanitizeAccountId(raw) {
+  const cleaned = String(raw || 'default').replace(/[^a-zA-Z0-9_-]/g, '');
+  return cleaned || 'default';
+}
 
-async function startWhatsApp() {
-  if (sock && connectionState.status === 'connected') {
-    return;
+function getAuthDir(accountId) {
+  return accountId === 'default' ? DEFAULT_AUTH_DIR : path.join(SESSIONS_ROOT, accountId);
+}
+
+function createInitialState(accountId, label) {
+  return {
+    accountId,
+    label: label || (accountId === 'default' ? 'WhatsApp Principal' : accountId),
+    status: 'disconnected', // 'disconnected', 'connecting', 'qrcode', 'connected'
+    qr: null,
+    qrRaw: null,
+    user: null,
+    lastError: null,
+    updatedAt: new Date().toISOString()
+  };
+}
+
+function getOrCreateInstance(rawAccountId = 'default', label = '') {
+  const accountId = sanitizeAccountId(rawAccountId);
+  let inst = instances.get(accountId);
+  if (!inst) {
+    inst = {
+      id: accountId,
+      label: label || (accountId === 'default' ? 'WhatsApp Principal' : accountId),
+      authDir: getAuthDir(accountId),
+      sock: null,
+      starting: false,
+      reconnectTimer: null,
+      state: createInitialState(accountId, label),
+      chatsMap: new Map()
+    };
+    instances.set(accountId, inst);
+  } else if (label && label.trim()) {
+    inst.label = label.trim();
+    inst.state.label = inst.label;
+  }
+  return inst;
+}
+
+function serializeAccountSummary(inst) {
+  return {
+    id: inst.id,
+    label: inst.label,
+    status: inst.state.status,
+    qr: inst.state.qr,
+    user: inst.state.user,
+    lastError: inst.state.lastError,
+    updatedAt: inst.state.updatedAt,
+    chatsCount: inst.chatsMap.size
+  };
+}
+
+async function startWhatsApp(rawAccountId = 'default', label = '') {
+  const inst = getOrCreateInstance(rawAccountId, label);
+  if ((inst.sock && inst.state.status === 'connected') || inst.starting) {
+    return inst;
   }
 
-  connectionState.status = 'connecting';
-  connectionState.updatedAt = new Date().toISOString();
+  if (inst.reconnectTimer) {
+    clearTimeout(inst.reconnectTimer);
+    inst.reconnectTimer = null;
+  }
 
-  if (!fs.existsSync(AUTH_DIR)) {
-    fs.mkdirSync(AUTH_DIR, { recursive: true });
+  inst.starting = true;
+  inst.state.status = 'connecting';
+  inst.state.lastError = null;
+  inst.state.updatedAt = new Date().toISOString();
+
+  if (!fs.existsSync(inst.authDir)) {
+    fs.mkdirSync(inst.authDir, { recursive: true });
   }
 
   try {
-    const { state, saveCreds } = await useMultiFileAuthState(AUTH_DIR);
+    const { state, saveCreds } = await useMultiFileAuthState(inst.authDir);
     const { version } = await fetchLatestBaileysVersion().catch(() => ({ version: [2, 3000, 1015901307] }));
 
     if (state.creds && state.creds.me) {
       const me = state.creds.me;
       const phone = (me.id || '').split(':')[0] || (me.id || '').split('@')[0];
-      connectionState.status = 'connected';
-      connectionState.qr = null;
-      connectionState.qrRaw = null;
-      connectionState.user = {
+      inst.state.status = 'connected';
+      inst.state.qr = null;
+      inst.state.qrRaw = null;
+      inst.state.user = {
         id: me.id,
         phone: `+${phone}`,
-        name: me.name || 'WhatsApp Conectado'
+        name: me.name || inst.label || 'WhatsApp Conectado'
       };
-      console.log(`[Baileys] Sessão autenticada carregada: +${phone} (${connectionState.user.name})`);
+      console.log(`[Baileys:${inst.id}] Sessao autenticada carregada: +${phone} (${inst.state.user.name})`);
     }
 
-    sock = makeWASocket({
+    const sock = makeWASocket({
       version,
       logger: pino({ level: 'silent' }),
       printQRInTerminal: false,
@@ -66,87 +122,90 @@ async function startWhatsApp() {
       syncFullHistory: false
     });
 
+    inst.sock = sock;
+    inst.starting = false;
+
     sock.ev.on('creds.update', saveCreds);
 
     sock.ev.on('connection.update', async (update) => {
       const { connection, lastDisconnect, qr } = update;
 
-      // Se temos dados do usuário em creds ou sock.user, já está conectado!
       if (sock.user || state.creds?.me) {
         const me = sock.user || state.creds?.me;
         const phone = (me.id || '').split(':')[0] || (me.id || '').split('@')[0];
-        connectionState.status = 'connected';
-        connectionState.qr = null;
-        connectionState.qrRaw = null;
-        connectionState.user = {
+        inst.state.status = 'connected';
+        inst.state.qr = null;
+        inst.state.qrRaw = null;
+        inst.state.user = {
           id: me.id,
           phone: `+${phone}`,
-          name: me.name || 'WhatsApp Conectado'
+          name: me.name || inst.label || 'WhatsApp Conectado'
         };
-        connectionState.updatedAt = new Date().toISOString();
+        inst.state.updatedAt = new Date().toISOString();
       }
 
       if (qr && !state.creds?.me && !sock.user) {
-        connectionState.status = 'qrcode';
-        connectionState.qrRaw = qr;
+        inst.state.status = 'qrcode';
+        inst.state.qrRaw = qr;
         try {
-          connectionState.qr = await QRCode.toDataURL(qr, {
+          inst.state.qr = await QRCode.toDataURL(qr, {
             width: 280,
             margin: 2,
             color: {
-              dark: '#111827',
+              dark: '#09090B',
               light: '#FFFFFF'
             }
           });
         } catch (err) {
-          console.error('[Baileys] Erro ao renderizar QR code para dataURL:', err);
+          console.error(`[Baileys:${inst.id}] Erro ao renderizar QR code:`, err);
         }
-        connectionState.updatedAt = new Date().toISOString();
-        console.log('[Baileys] Novo QR Code real gerado pronto para leitura no celular!');
+        inst.state.updatedAt = new Date().toISOString();
+        console.log(`[Baileys:${inst.id}] Novo QR Code real gerado pronto para leitura!`);
       }
 
       if (connection === 'open') {
         const userId = sock.user?.id || state.creds?.me?.id || '';
         const phone = userId.split(':')[0] || userId.split('@')[0];
-        const name = sock.user?.name || state.creds?.me?.name || 'WhatsApp Metrifique-se';
+        const name = sock.user?.name || state.creds?.me?.name || inst.label || 'WhatsApp Metrifique-se';
 
-        connectionState.status = 'connected';
-        connectionState.qr = null;
-        connectionState.qrRaw = null;
-        connectionState.user = {
+        inst.state.status = 'connected';
+        inst.state.qr = null;
+        inst.state.qrRaw = null;
+        inst.state.user = {
           id: userId,
           phone: `+${phone}`,
-          name: name
+          name
         };
-        connectionState.updatedAt = new Date().toISOString();
-        console.log(`[Baileys] CONECTADO COM SUCESSO! Telefone: +${phone} (${name})`);
+        inst.state.updatedAt = new Date().toISOString();
+        console.log(`[Baileys:${inst.id}] CONECTADO! Telefone: +${phone} (${name})`);
       }
 
       if (connection === 'close') {
         const statusCode = lastDisconnect?.error?.output?.statusCode;
         const shouldReconnect = statusCode !== DisconnectReason.loggedOut;
-        console.log(`[Baileys] Conexão encerrada. Motivo: ${statusCode}. Reconectar? ${shouldReconnect}`);
+        console.log(`[Baileys:${inst.id}] Conexao encerrada. Motivo: ${statusCode}. Reconectar? ${shouldReconnect}`);
 
         if (statusCode === DisconnectReason.loggedOut) {
-          connectionState.status = 'disconnected';
-          connectionState.user = null;
-          connectionState.qr = null;
-          connectionState.qrRaw = null;
-          // Limpa sessão local
+          inst.sock = null;
+          inst.state.status = 'disconnected';
+          inst.state.user = null;
+          inst.state.qr = null;
+          inst.state.qrRaw = null;
           try {
-            fs.rmSync(AUTH_DIR, { recursive: true, force: true });
+            fs.rmSync(inst.authDir, { recursive: true, force: true });
           } catch (e) {}
-        } else {
-          connectionState.status = 'connecting';
-          setTimeout(() => {
-            startWhatsApp();
+        } else if (instances.has(inst.id)) {
+          inst.sock = null;
+          inst.state.status = 'connecting';
+          inst.reconnectTimer = setTimeout(() => {
+            startWhatsApp(inst.id, inst.label);
           }, 3000);
         }
-        connectionState.updatedAt = new Date().toISOString();
+        inst.state.updatedAt = new Date().toISOString();
       }
     });
 
-    sock.ev.on('messages.upsert', async ({ messages, type }) => {
+    sock.ev.on('messages.upsert', async ({ messages }) => {
       if (!messages || messages.length === 0) return;
 
       for (const m of messages) {
@@ -164,11 +223,12 @@ async function startWhatsApp() {
         const isMe = key.fromMe === true;
         const pushName = m.pushName || (isMe ? 'Eu' : `+${phone}`);
 
-        let chat = chatsMap.get(jid);
+        let chat = inst.chatsMap.get(jid);
         if (!chat) {
           chat = {
-            id: `chat-${phone}`,
-            jid: jid,
+            id: inst.id === 'default' ? `chat-${phone}` : `chat-${inst.id}-${phone}`,
+            account_id: inst.id,
+            jid,
             phone: `+${phone}`,
             name: pushName,
             avatar: '../assets/images/profile/user-1.jpg',
@@ -177,7 +237,7 @@ async function startWhatsApp() {
             unread_count: isMe ? 0 : 1,
             messages: []
           };
-          chatsMap.set(jid, chat);
+          inst.chatsMap.set(jid, chat);
         }
 
         if (text) {
@@ -188,13 +248,12 @@ async function startWhatsApp() {
           chat.messages.push({
             id: key.id || 'msg-' + Date.now(),
             from_me: isMe,
-            text: text,
+            text,
             time: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
             status: isMe ? 'delivered' : 'read',
             sender_name: isMe ? 'Atendente' : pushName
           });
 
-          // Mantém as últimas 100 mensagens
           if (chat.messages.length > 100) {
             chat.messages.shift();
           }
@@ -202,67 +261,75 @@ async function startWhatsApp() {
       }
     });
 
+    return inst;
   } catch (err) {
-    console.error('[Baileys Error]', err);
-    connectionState.status = 'disconnected';
-    connectionState.lastError = err.message;
-    connectionState.updatedAt = new Date().toISOString();
+    console.error(`[Baileys:${inst.id} Error]`, err);
+    inst.starting = false;
+    inst.sock = null;
+    inst.state.status = 'disconnected';
+    inst.state.lastError = err.message;
+    inst.state.updatedAt = new Date().toISOString();
+    return inst;
   }
 }
 
-async function resolveWhatsAppJid(rawNumber) {
+async function resolveWhatsAppJid(inst, rawNumber) {
   let clean = (rawNumber || '').replace(/\D/g, '');
   if (!clean) return null;
 
-  // Se tiver 10 ou 11 dígitos, é celular brasileiro (DDD + número): adiciona 55!
   if (clean.length === 10 || clean.length === 11) {
     clean = '55' + clean;
   } else if (clean.length === 8 || clean.length === 9) {
-    // Se tiver 8 ou 9 dígitos, usa DDD 48 (Florianópolis) ou o DDD do usuário conectado
-    const myDdd = (connectionState.user?.phone || '5548').slice(2, 4) || '48';
+    const myDdd = (inst.state.user?.phone || '5548').slice(2, 4) || '48';
     clean = '55' + myDdd + clean;
   }
 
-  // Tenta verificar existência no WhatsApp via sock.onWhatsApp
-  if (sock) {
+  if (inst.sock) {
     try {
-      // 1. Tenta com o número exato
-      const check1 = await sock.onWhatsApp(clean);
+      const check1 = await inst.sock.onWhatsApp(clean);
       if (check1 && check1.length > 0 && check1[0].exists) {
-        console.log(`[Baileys JID Check] Número ${clean} validado: ${check1[0].jid}`);
         return check1[0].jid;
       }
 
-      // 2. Se for número brasileiro com 9º dígito (13 dígitos: 55 + DDD + 9 + 8 dígitos), tenta sem o 9
       if (clean.startsWith('55') && clean.length === 13 && clean[4] === '9') {
         const without9 = clean.slice(0, 4) + clean.slice(5);
-        const check2 = await sock.onWhatsApp(without9);
+        const check2 = await inst.sock.onWhatsApp(without9);
         if (check2 && check2.length > 0 && check2[0].exists) {
-          console.log(`[Baileys JID Check] Número validado sem o 9º dígito: ${check2[0].jid}`);
           return check2[0].jid;
         }
       }
 
-      // 3. Se for número brasileiro sem 9º dígito (12 dígitos: 55 + DDD + 8 dígitos), tenta com o 9
       if (clean.startsWith('55') && clean.length === 12) {
         const with9 = clean.slice(0, 4) + '9' + clean.slice(4);
-        const check3 = await sock.onWhatsApp(with9);
+        const check3 = await inst.sock.onWhatsApp(with9);
         if (check3 && check3.length > 0 && check3[0].exists) {
-          console.log(`[Baileys JID Check] Número validado com o 9º dígito: ${check3[0].jid}`);
           return check3[0].jid;
         }
       }
     } catch (err) {
-      console.warn('[Baileys onWhatsApp Check Failed]', err);
+      console.warn(`[Baileys:${inst.id}] onWhatsApp check failed:`, err);
     }
   }
 
   return `${clean}@s.whatsapp.net`;
 }
 
-// Inicia servidor HTTP
+function readJsonBody(req) {
+  return new Promise((resolve) => {
+    let bodyStr = '';
+    req.on('data', chunk => { bodyStr += chunk; });
+    req.on('end', () => {
+      try {
+        resolve(bodyStr ? JSON.parse(bodyStr) : {});
+      } catch (e) {
+        resolve({});
+      }
+    });
+  });
+}
+
+// HTTP API server
 const server = http.createServer(async (req, res) => {
-  // Configuração CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, DELETE');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, apikey');
@@ -274,126 +341,172 @@ const server = http.createServer(async (req, res) => {
 
   const url = new URL(req.url, `http://${req.headers.host}`);
   const pathname = url.pathname;
+  const queryAccountId = url.searchParams.get('accountId');
 
-  // ROTA 1: Status e QR Code
-  if (pathname === '/api/whatsapp/status' || pathname === '/status') {
+  // ROUTE 0: List all WhatsApp instances
+  if (pathname === '/api/whatsapp/accounts' || pathname === '/accounts') {
+    getOrCreateInstance('default');
     res.setHeader('Content-Type', 'application/json');
     res.statusCode = 200;
-    return res.end(JSON.stringify(connectionState));
+    return res.end(JSON.stringify(Array.from(instances.values()).map(serializeAccountSummary)));
   }
 
-  // ROTA 2: Solicitar Conexão / Gerar QR Code
+  // ROUTE 1: Status and QR Code for a specific accountId
+  if (pathname === '/api/whatsapp/status' || pathname === '/status') {
+    const inst = getOrCreateInstance(queryAccountId || 'default');
+    res.setHeader('Content-Type', 'application/json');
+    res.statusCode = 200;
+    return res.end(JSON.stringify(inst.state));
+  }
+
+  // ROUTE 2: Start connection / generate QR code for accountId
   if (pathname === '/api/whatsapp/connect' || pathname === '/connect') {
-    if (connectionState.status !== 'connected') {
-      startWhatsApp();
-    }
+    const body = req.method === 'POST' ? await readJsonBody(req) : {};
+    const targetId = body.accountId || queryAccountId || 'default';
+    const label = body.label || url.searchParams.get('label') || '';
+    const inst = await startWhatsApp(targetId, label);
+
     res.setHeader('Content-Type', 'application/json');
     res.statusCode = 200;
     return res.end(JSON.stringify({
-      message: 'Iniciando conexão com WhatsApp...',
-      state: connectionState
+      message: `Iniciando conexao com WhatsApp (${inst.id})...`,
+      state: inst.state
     }));
   }
 
-  // ROTA 3: Desconectar
+  // ROUTE 3: Disconnect / remove instance
   if (pathname === '/api/whatsapp/disconnect' || pathname === '/disconnect') {
-    if (sock) {
+    const body = req.method === 'POST' ? await readJsonBody(req) : {};
+    const targetId = sanitizeAccountId(body.accountId || queryAccountId || 'default');
+    const shouldRemove = body.remove === true || url.searchParams.get('remove') === '1';
+    const inst = instances.get(targetId);
+
+    if (inst) {
+      if (inst.reconnectTimer) {
+        clearTimeout(inst.reconnectTimer);
+        inst.reconnectTimer = null;
+      }
+      if (inst.sock) {
+        try {
+          await inst.sock.logout();
+        } catch (e) {}
+        try {
+          inst.sock.end();
+        } catch (e) {}
+      }
       try {
-        await sock.logout();
+        fs.rmSync(inst.authDir, { recursive: true, force: true });
       } catch (e) {}
+
+      inst.sock = null;
+      inst.starting = false;
+      inst.chatsMap.clear();
+      inst.state = createInitialState(inst.id, inst.label);
+
+      if (shouldRemove && inst.id !== 'default') {
+        instances.delete(inst.id);
+      }
     }
-    try {
-      fs.rmSync(AUTH_DIR, { recursive: true, force: true });
-    } catch (e) {}
-
-    sock = null;
-    connectionState = {
-      status: 'disconnected',
-      qr: null,
-      qrRaw: null,
-      user: null,
-      lastError: null,
-      updatedAt: new Date().toISOString()
-    };
-    chatsMap.clear();
 
     res.setHeader('Content-Type', 'application/json');
     res.statusCode = 200;
-    return res.end(JSON.stringify({ success: true, message: 'WhatsApp desconectado com sucesso.' }));
+    return res.end(JSON.stringify({
+      success: true,
+      accountId: targetId,
+      message: `WhatsApp (${targetId}) desconectado com sucesso.`
+    }));
   }
 
-  // ROTA 4: Listar Chats
+  // ROUTE 4: List chats (specific accountId or all)
   if (pathname === '/api/whatsapp/chats' || pathname === '/chats') {
+    const filterId = queryAccountId;
+    let allChats = [];
+    if (filterId && filterId !== 'all') {
+      const inst = instances.get(sanitizeAccountId(filterId));
+      allChats = inst ? Array.from(inst.chatsMap.values()) : [];
+    } else {
+      for (const inst of instances.values()) {
+        allChats.push(...inst.chatsMap.values());
+      }
+    }
     res.setHeader('Content-Type', 'application/json');
     res.statusCode = 200;
-    return res.end(JSON.stringify(Array.from(chatsMap.values())));
+    return res.end(JSON.stringify(allChats));
   }
 
-  // ROTA 5: Enviar Mensagem Real
+  // ROUTE 5: Send real WhatsApp message using target accountId
   if (pathname === '/api/whatsapp/send' || pathname === '/send') {
     if (req.method !== 'POST') {
       res.statusCode = 405;
       return res.end(JSON.stringify({ error: 'Use POST' }));
     }
 
-    let bodyStr = '';
-    req.on('data', chunk => { bodyStr += chunk; });
-    req.on('end', async () => {
-      try {
-        const body = JSON.parse(bodyStr || '{}');
-        const phone = (body.phone || body.number || '').replace(/\D/g, '');
-        const text = body.text || body.message || '';
+    const body = await readJsonBody(req);
+    try {
+      const targetId = sanitizeAccountId(body.accountId || queryAccountId || 'default');
+      const phone = (body.phone || body.number || '').replace(/\D/g, '');
+      const text = body.text || body.message || '';
 
-        if (!phone || !text) {
-          res.statusCode = 400;
-          return res.end(JSON.stringify({ error: 'phone e text são obrigatórios.' }));
-        }
-
-        if (!sock || connectionState.status !== 'connected') {
-          res.statusCode = 503;
-          return res.end(JSON.stringify({ error: 'WhatsApp não está conectado no momento.' }));
-        }
-
-        const targetJid = await resolveWhatsAppJid(phone);
-        console.log(`[Baileys Send] Enviando mensagem para JID: ${targetJid} (Entrada: ${phone}) | Texto: "${text}"`);
-
-        const sent = await sock.sendMessage(targetJid, { text: text });
-        console.log(`[Baileys Send] Mensagem entregue com sucesso! ID: ${sent.key.id}`);
-
-        // Atualiza chat local
-        let chat = chatsMap.get(targetJid);
-        if (chat) {
-          chat.last_message = text;
-          chat.last_message_time = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-          chat.messages.push({
-            id: sent.key.id || 'msg-' + Date.now(),
-            from_me: true,
-            text: text,
-            time: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
-            status: 'delivered',
-            sender_name: 'Atendente'
-          });
-        }
-
-        res.setHeader('Content-Type', 'application/json');
-        res.statusCode = 200;
-        return res.end(JSON.stringify({ success: true, messageId: sent.key.id }));
-      } catch (err) {
-        console.error('[Send Error]', err);
-        res.statusCode = 500;
-        return res.end(JSON.stringify({ error: err.message }));
+      if (!phone || !text) {
+        res.statusCode = 400;
+        return res.end(JSON.stringify({ error: 'phone e text sao obrigatorios.' }));
       }
-    });
-    return;
+
+      const inst = instances.get(targetId);
+      if (!inst || !inst.sock || inst.state.status !== 'connected') {
+        res.statusCode = 503;
+        return res.end(JSON.stringify({ error: `WhatsApp (${targetId}) nao esta conectado no momento.` }));
+      }
+
+      const targetJid = await resolveWhatsAppJid(inst, phone);
+      console.log(`[Baileys:${inst.id}] Enviando mensagem para JID: ${targetJid}`);
+
+      const sent = await inst.sock.sendMessage(targetJid, { text });
+
+      const chat = inst.chatsMap.get(targetJid);
+      if (chat) {
+        chat.last_message = text;
+        chat.last_message_time = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+        chat.messages.push({
+          id: sent.key.id || 'msg-' + Date.now(),
+          from_me: true,
+          text,
+          time: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
+          status: 'delivered',
+          sender_name: 'Atendente'
+        });
+      }
+
+      res.setHeader('Content-Type', 'application/json');
+      res.statusCode = 200;
+      return res.end(JSON.stringify({ success: true, accountId: inst.id, messageId: sent.key.id }));
+    } catch (err) {
+      console.error('[Send Error]', err);
+      res.statusCode = 500;
+      return res.end(JSON.stringify({ error: err.message }));
+    }
   }
 
   res.statusCode = 404;
-  res.end(JSON.stringify({ error: 'Rota não encontrada' }));
+  res.end(JSON.stringify({ error: 'Rota nao encontrada' }));
 });
 
 server.listen(PORT, () => {
-  console.log(`[Metrifique-se WhatsApp Server] Rodando na porta ${PORT}`);
-  // Inicia Baileys imediatamente para já preparar QR code se não estiver conectado
-  startWhatsApp();
-});
+  console.log(`[Metrifique-se WhatsApp Multi-Instance Server] Rodando na porta ${PORT}`);
+  startWhatsApp('default', 'WhatsApp Principal');
 
+  // Auto-restore secondary paired sessions
+  try {
+    if (fs.existsSync(SESSIONS_ROOT)) {
+      const dirs = fs.readdirSync(SESSIONS_ROOT, { withFileTypes: true }).filter(d => d.isDirectory());
+      dirs.forEach(d => {
+        const credsPath = path.join(SESSIONS_ROOT, d.name, 'creds.json');
+        if (fs.existsSync(credsPath)) {
+          startWhatsApp(d.name);
+        }
+      });
+    }
+  } catch (e) {
+    console.warn('[WhatsApp Server] Erro ao restaurar sessoes secundarias:', e);
+  }
+});
