@@ -177,6 +177,89 @@ input, button, select, textarea {
 }
 
 /* 1. CRM TOP NAVBAR HEADER */
+
+/* -------------------------------------------------------------------
+   Material‑UI‑style button overrides (bold, clean, brand‑green accent)
+   ------------------------------------------------------------------- */
+:root {
+  /* Brand colors */
+  --brand-green: #0A5F2A;               /* dark brand green */
+  --brand-green-light: #2F7A4B;         /* lighter shade for hover */
+  --brand-green-dark: #0A3B1F;          /* darker shade for active */
+  --mq-primary-main: var(--brand-green);
+  --mq-primary-light: var(--brand-green-light);
+  --mq-primary-dark: var(--brand-green-dark);
+  --mq-primary-contrast: #FFFFFF;
+}
+
+/* Base button style – replaces Bootstrap btn */
+.btn {
+  display: inline‑flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  border: none;
+  border-radius: 8px;
+  padding: 0.5rem 1rem;
+  font-weight: 600;
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter‑spacing: 0.05em;
+  background-color: var(--mq-primary-main);
+  color: var(--mq-primary-contrast);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+  transition: background 0.2s, box‑shadow 0.2s, transform 0.1s;
+}
+.btn:hover {
+  background-color: var(--mq-primary-light);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.12);
+}
+.btn:active {
+  background-color: var(--mq-primary-dark);
+  transform: scale(0.97);
+}
+
+/* Secondary button (outline) */
+.btn.btn-outline {
+  background: transparent;
+  border: 2px solid var(--mq-primary-main);
+  color: var(--mq-primary-main);
+}
+.btn.btn-outline:hover {
+  background: var(--mq-primary-light);
+  color: var(--mq-primary-contrast);
+}
+
+/* Card style – clean surface with subtle elevation */
+.card {
+  background: var(--mq-surface);
+  border-radius: 12px;
+  border: 1px solid var(--mq-border);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.07);
+  padding: 1rem;
+}
+.card:hover {
+  box-shadow: 0 4px 12px rgba(0,0,0,0.10);
+}
+
+/* Input / textarea – consistent look */
+input, textarea, select {
+  border: 1px solid var(--mq-border);
+  border-radius: 6px;
+  padding: 0.5rem 0.75rem;
+  background: var(--mq-surface);
+  color: var(--mq-text);
+}
+input:focus, textarea:focus, select:focus {
+  outline: 2px solid var(--mq-primary-main);
+  outline-offset: 2px;
+}
+
+/* End of Material UI overrides */
+
+/* -------------------------------------------------------------------
+   1. CRM TOP NAVBAR HEADER (original styles continue below)
+   ------------------------------------------------------------------- */
 .app-header.hs-header {
   background-color: var(--mq-surface) !important;
   border-bottom: 1px solid var(--mq-border) !important;
