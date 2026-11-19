@@ -1,9 +1,10 @@
 <!doctype html>
-<html lang="pt-BR">
+<html lang="pt-BR" data-fixed-theme="dark">
 
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="color-scheme" content="dark">
   <title>Metrifique-se | O CRM de Vendas e Qualificação de Leads Mais Potente do Mercado</title>
   <link rel="shortcut icon" type="image/png" href="./src/assets/images/logos/icon.png" />
   <link rel="stylesheet" href="./src/assets/css/styles.min.css" />
@@ -165,41 +166,50 @@
         line-height: 1.25 !important;
       }
     }
+
+    @media (prefers-reduced-motion: reduce) {
+      .feature-card-dark:hover, .btn-emerald-lg:hover {
+        transform: none;
+      }
+    }
   </style>
 </head>
 
 <body>
+  <a class="skip-link" href="#main-content">Pular para o conteúdo principal</a>
+
   <!-- NAVIGATION NAVBAR -->
-  <nav class="navbar navbar-expand-lg fixed-top py-3" style="background-color: rgba(18, 18, 20, 0.95); backdrop-filter: blur(12px); border-bottom: 1px solid var(--brand-border);">
+  <nav class="navbar navbar-expand-lg fixed-top py-3" aria-label="Navegação principal" style="background-color: rgba(18, 18, 20, 0.95); backdrop-filter: blur(12px); border-bottom: 1px solid var(--brand-border);">
     <div class="container">
       <a class="navbar-brand d-flex align-items-center gap-2 text-decoration-none" href="./index.html">
         <img src="./src/assets/images/logos/logowhite.png" height="36" alt="Metrifique-se Logo" class="hs-brand-logo">
       </a>
       
-      <button class="navbar-toggler text-white border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navHome">
-        <i class="ti ti-menu-2 fs-7"></i>
+      <button class="navbar-toggler text-white border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navHome" aria-controls="navHome" aria-expanded="false" aria-label="Abrir menu de navegação">
+        <i class="ti ti-menu-2 fs-7" aria-hidden="true"></i>
       </button>
 
       <div class="collapse navbar-collapse" id="navHome">
         <ul class="navbar-nav mx-auto mb-2 mb-lg-0 fw-semibold">
           <li class="nav-item"><a class="nav-link text-zinc-300 px-3" href="#recursos" style="color: #D4D4D8;">Recursos</a></li>
           <li class="nav-item"><a class="nav-link text-zinc-300 px-3" href="#demonstracao" style="color: #D4D4D8;">Demonstração</a></li>
-          <li class="nav-item"><a class="nav-link text-zinc-300 px-3" href="#planos" style="color: #D4D4D8;">Planos & Preços</a></li>
-          <li class="nav-item"><a class="nav-link text-emerald px-3" href="https://wa.me/5548910570005" target="_blank" rel="noopener"><i class="ti ti-brand-whatsapp me-1"></i>Contato Comercial</a></li>
+          <li class="nav-item"><a class="nav-link text-zinc-300 px-3" href="#planos" style="color: #D4D4D8;">Planos &amp; Preços</a></li>
+          <li class="nav-item"><a class="nav-link text-emerald px-3" href="https://wa.me/5548910570005" target="_blank" rel="noopener noreferrer"><i class="ti ti-brand-whatsapp me-1" aria-hidden="true"></i>Contato Comercial</a></li>
         </ul>
 
         <div class="d-flex align-items-center gap-2">
           <a href="./src/html/login.html" class="btn btn-outline-brand px-4 py-2" style="padding: 8px 20px !important;">
-            <i class="ti ti-lock me-1"></i> Fazer Login
+            <i class="ti ti-lock me-1" aria-hidden="true"></i> Fazer Login
           </a>
-          <a href="./src/html/index.html" class="btn btn-emerald-lg px-4 py-2" style="padding: 8px 22px !important; color: #000 !important;">
-            <i class="ti ti-layout-dashboard me-1"></i> Acessar CRM
+          <a href="./src/html/dashboard.html" class="btn btn-emerald-lg px-4 py-2" style="padding: 8px 22px !important; color: #000 !important;">
+            <i class="ti ti-layout-dashboard me-1" aria-hidden="true"></i> Acessar CRM
           </a>
         </div>
       </div>
     </div>
   </nav>
 
+  <main id="main-content" tabindex="-1">
   <!-- HERO SECTION -->
   <section class="hero-section-dark">
     <div class="container pt-5">
@@ -222,7 +232,7 @@
               <i class="ti ti-rocket fs-5"></i>
               <span>Entrar no Metrifique-se CRM</span>
             </a>
-            <a href="https://wa.me/5548910570005?text=Ol%C3%A1%21+Tenho+interesse+no+Metrifique-se+CRM+e+gostaria+de+saber+mais." target="_blank" rel="noopener" class="btn btn-outline-brand d-inline-flex align-items-center gap-2" style="border-color: #25D366 !important; color: #25D366 !important;">
+            <a href="https://wa.me/5548910570005?text=Ol%C3%A1%21+Tenho+interesse+no+Metrifique-se+CRM+e+gostaria+de+saber+mais." target="_blank" rel="noopener noreferrer" class="btn btn-outline-brand d-inline-flex align-items-center gap-2" style="border-color: #25D366 !important; color: #25D366 !important;">
               <i class="ti ti-brand-whatsapp fs-5"></i>
               <span>Falar com Consultor</span>
             </a>
@@ -400,7 +410,7 @@
           <span class="badge bg-emerald text-dark fw-bold px-3 py-2 fs-2 mb-3"><i class="ti ti-brand-whatsapp me-1"></i> ATENDIMENTO DIRETO NO WHATSAPP</span>
           <h2 class="fw-black display-6 text-white mb-3">Quer o Metrifique-se CRM na Sua Empresa?</h2>
           <p class="text-zinc-400 fs-4 mb-4" style="color: #A1A1AA;">Fale agora com nosso especialista comercial. Configuramos o ambiente para sua empresa em minutos.</p>
-          <a href="https://wa.me/5548910570005?text=Ol%C3%A1%21+Tenho+interesse+no+Metrifique-se+CRM+e+gostaria+de+saber+mais." target="_blank" rel="noopener" class="btn btn-emerald-lg px-5 py-3 fs-4 shadow-lg d-inline-flex align-items-center gap-2" style="background: #25D366 !important; color: #FFFFFF !important;">
+          <a href="https://wa.me/5548910570005?text=Ol%C3%A1%21+Tenho+interesse+no+Metrifique-se+CRM+e+gostaria+de+saber+mais." target="_blank" rel="noopener noreferrer" class="btn btn-emerald-lg px-5 py-3 fs-4 shadow-lg d-inline-flex align-items-center gap-2" style="background: #25D366 !important; color: #FFFFFF !important;">
             <i class="ti ti-brand-whatsapp fs-3"></i>
             <span>Iniciar Conversa no WhatsApp</span>
           </a>
@@ -463,7 +473,7 @@
               <li class="mb-2"><i class="ti ti-check text-emerald me-2"></i> Webhooks & Forms de Captura</li>
             </ul>
 
-            <a href="https://wa.me/5548910570005?text=Ol%C3%A1%21+Tenho+interesse+no+Plano+Profissional+do+Metrifique-se+CRM+e+gostaria+de+contratar." target="_blank" rel="noopener" class="btn btn-emerald-lg w-100 py-3 fw-bold d-inline-flex align-items-center justify-content-center gap-2">
+            <a href="https://wa.me/5548910570005?text=Ol%C3%A1%21+Tenho+interesse+no+Plano+Profissional+do+Metrifique-se+CRM+e+gostaria+de+contratar." target="_blank" rel="noopener noreferrer" class="btn btn-emerald-lg w-100 py-3 fw-bold d-inline-flex align-items-center justify-content-center gap-2">
               <i class="ti ti-brand-whatsapp fs-5"></i>
               <span>Contratar via WhatsApp</span>
             </a>
@@ -485,7 +495,7 @@
               <li class="mb-2"><i class="ti ti-check text-emerald me-2"></i> Suporte Prioritário VIP 24/7</li>
             </ul>
 
-            <a href="https://wa.me/5548910570005?text=Ol%C3%A1%21+Tenho+interesse+no+Plano+Enterprise+do+Metrifique-se+CRM+e+gostaria+de+contratar." target="_blank" rel="noopener" class="btn btn-emerald-lg w-100 py-3 fw-bold d-inline-flex align-items-center justify-content-center gap-2">
+            <a href="https://wa.me/5548910570005?text=Ol%C3%A1%21+Tenho+interesse+no+Plano+Enterprise+do+Metrifique-se+CRM+e+gostaria+de+contratar." target="_blank" rel="noopener noreferrer" class="btn btn-emerald-lg w-100 py-3 fw-bold d-inline-flex align-items-center justify-content-center gap-2">
               <i class="ti ti-brand-whatsapp fs-5"></i>
               <span>Contratar Enterprise via WhatsApp</span>
             </a>
@@ -494,6 +504,7 @@
       </div>
     </div>
   </section>
+  </main>
 
   <!-- FOOTER -->
   <footer class="py-5 border-top" style="background-color: #0E0E10; border-color: #27272A !important;">
@@ -505,8 +516,8 @@
         </div>
         <div class="col-md-6 text-md-end">
           <a href="./src/html/login.html" class="btn btn-outline-brand px-4 me-2">Fazer Login</a>
-          <a href="https://wa.me/5548910570005?text=Ol%C3%A1%21+Gostaria+de+saber+mais+sobre+o+Metrifique-se+CRM." target="_blank" rel="noopener" class="btn btn-emerald-lg px-4" style="background: #25D366 !important; color: #FFF !important;">
-            <i class="ti ti-brand-whatsapp me-1"></i> WhatsApp
+          <a href="https://wa.me/5548910570005?text=Ol%C3%A1%21+Gostaria+de+saber+mais+sobre+o+Metrifique-se+CRM." target="_blank" rel="noopener noreferrer" class="btn btn-emerald-lg px-4" style="background: #25D366 !important; color: #FFF !important;">
+            <i class="ti ti-brand-whatsapp me-1" aria-hidden="true"></i> WhatsApp
           </a>
         </div>
       </div>
@@ -517,7 +528,7 @@
     </div>
   </footer>
 
-  <script src="./src/assets/libs/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+  <script defer src="./src/assets/libs/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 
 </html>

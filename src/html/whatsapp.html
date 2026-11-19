@@ -3,36 +3,41 @@
 
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>WhatsApp Web & Atendimento | Metrifique-se CRM</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="color-scheme" content="light dark">
+  <title>WhatsApp Web &amp; Atendimento | Metrifique-se CRM</title>
   <link rel="shortcut icon" type="image/png" href="../assets/images/logos/icon.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
   <link rel="stylesheet" href="../assets/css/styles.min.css" />
   <link rel="stylesheet" href="../assets/css/metrifiquese-theme.css" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
   
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="../assets/js/supabase-client.js"></script>
-  <script src="../assets/js/whitelabel-theme.js"></script>
-  <script src="../assets/js/notifications-manager.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script defer src="../assets/js/ui-toolkit.js"></script>
+  <script defer src="../assets/js/supabase-client.js"></script>
+  <script defer src="../assets/js/whitelabel-theme.js"></script>
+  <script defer src="../assets/js/notifications-manager.js"></script>
 
   <style>
     .chat-container-card {
-      height: calc(100vh - 120px);
-      min-height: 600px;
+      height: calc(100dvh - 115px);
+      min-height: 520px;
       overflow: hidden;
     }
     .chat-sidebar-col {
       width: 340px;
       min-width: 300px;
       max-width: 380px;
-      border-right: 1px solid #e5e7eb;
+      border-right: 1px solid var(--mq-border, #e5e7eb);
       display: flex;
       flex-direction: column;
-      background: #ffffff;
+      background: var(--mq-surface, #ffffff);
     }
     .chat-messages-area {
-      background-color: #f0f2f5;
-      background-image: radial-gradient(#d1d5db 0.75px, transparent 0.75px);
+      background-color: var(--mq-surface-subtle, #f0f2f5);
+      background-image: radial-gradient(rgba(148, 163, 184, 0.28) 0.75px, transparent 0.75px);
       background-size: 16px 16px;
       overflow-y: auto;
       flex-grow: 1;
@@ -40,60 +45,99 @@
     .chat-lead-col {
       width: 320px;
       min-width: 290px;
-      border-left: 1px solid #e5e7eb;
-      background: #ffffff;
-      transition: all 0.2s ease-in-out;
+      border-left: 1px solid var(--mq-border, #e5e7eb);
+      background: var(--mq-surface, #ffffff);
+      transition: background-color 0.2s ease, border-color 0.2s ease;
     }
     .hover-bg-light:hover {
-      background-color: #f8fafc;
+      background-color: var(--mq-surface-hover, #f8fafc);
     }
     .spin-animate {
       animation: spin 1.5s linear infinite;
     }
+    #chat-message-input {
+      field-sizing: content;
+      height: auto;
+      width: 100%;
+      min-block-size: 2.65rem;
+      max-block-size: 120px;
+      resize: none;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .spin-animate { animation: none; }
+    }
     @keyframes spin {
       100% { transform: rotate(360deg); }
+    }
+    @media (max-width: 767.98px) {
+      .chat-container-card {
+        height: calc(100dvh - 96px);
+        min-height: 460px;
+      }
+      .chat-sidebar-col {
+        width: 100%;
+        max-width: none;
+        min-width: 0;
+        border-right: 0;
+      }
+      #whatsapp-shell:not(.mobile-chat-open) .chat-thread-col {
+        display: none !important;
+      }
+      #whatsapp-shell.mobile-chat-open .chat-sidebar-col {
+        display: none !important;
+      }
     }
   </style>
 </head>
 
 <body>
+  <a class="skip-link" href="#main-content">Pular para o conteúdo principal</a>
+
   <!-- TOP NAVBAR HEADER -->
   <header class="app-header hs-header d-flex align-items-center justify-content-between px-3">
     <div class="d-flex align-items-center gap-2">
       <a href="./dashboard.html" class="navbar-brand me-1">
-        <img src="../assets/images/logos/logoblack.png" height="30" alt="Logo" class="hs-brand-logo" />
+        <img src="../assets/images/logos/logoblack.png" height="30" alt="Logo Metrifique-se" class="hs-brand-logo" />
       </a>
-      <button class="btn btn-light text-secondary border-0 rounded-circle p-2 sidebartoggler" id="sidebarCollapseToggle" title="Recolher / Expandir Menu Lateral">
-        <i class="ti ti-layout-sidebar-left-collapse fs-5"></i>
+      <button type="button" class="btn btn-light text-secondary border-0 rounded-circle p-2 sidebartoggler" id="sidebarCollapseToggle" title="Recolher / Expandir Menu Lateral" aria-label="Recolher ou expandir menu lateral">
+        <i class="ti ti-layout-sidebar-left-collapse fs-5" aria-hidden="true"></i>
       </button>
     </div>
 
-    <div class="d-flex align-items-center gap-3">
+    <div class="d-flex align-items-center gap-2 gap-md-3">
       <!-- WhatsApp Status Header Pill -->
-      <div id="whatsapp-status-pill" class="badge bg-secondary-subtle text-secondary border px-3 py-2 d-inline-flex align-items-center gap-2">
-        <i id="whatsapp-status-icon" class="ti ti-circle-filled fs-3"></i>
-        <span id="whatsapp-status-text" class="fw-semibold">Verificando WhatsApp...</span>
+      <div id="whatsapp-status-pill" class="badge bg-secondary-subtle text-secondary border px-2 px-md-3 py-2 d-inline-flex align-items-center gap-2">
+        <i id="whatsapp-status-icon" class="ti ti-circle-filled fs-3" aria-hidden="true"></i>
+        <span id="whatsapp-status-text" class="fw-semibold d-none d-sm-inline">Verificando WhatsApp...</span>
       </div>
 
-      <button id="whatsapp-connect-btn" class="btn btn-sm btn-success d-flex align-items-center gap-1 shadow-sm" onclick="window.whatsAppManager.openConnectModal()">
-        <i class="ti ti-qrcode"></i>
-        <span>Conectar WhatsApp</span>
+      <button type="button" id="whatsapp-connect-btn" class="btn btn-sm btn-success d-flex align-items-center gap-1 shadow-sm" onclick="window.whatsAppManager.openConnectModal()">
+        <i class="ti ti-qrcode" aria-hidden="true"></i>
+        <span class="d-none d-md-inline">Conectar WhatsApp</span>
       </button>
 
-      <a href="./configuracoes-whitelabel.html" class="text-secondary fs-5" title="Configurações Whitelabel"><i class="ti ti-settings"></i></a>
-      <a href="#" class="text-secondary fs-5 position-relative" title="Notificações" onclick="window.notificationsManager && window.notificationsManager.markAllRead(); alert('Todas as notificações foram lidas.');"><i class="ti ti-bell"></i></a>
+      <button type="button" class="btn btn-light text-secondary border-0 rounded-circle p-2 d-none d-md-inline-flex align-items-center justify-content-center" data-global-search-trigger title="Busca global (Ctrl/Cmd + K)" aria-label="Abrir busca global no CRM">
+        <i class="ti ti-search fs-5" aria-hidden="true"></i>
+      </button>
+
+      <button type="button" class="btn btn-light text-secondary border-0 rounded-circle p-2 d-inline-flex align-items-center justify-content-center" data-theme-toggle title="Alternar tema claro/escuro" aria-label="Alternar tema claro/escuro">
+        <i class="ti ti-moon fs-5" aria-hidden="true"></i>
+      </button>
+
+      <a href="./configuracoes-whitelabel.html" class="text-secondary fs-5" title="Configurações Whitelabel" aria-label="Configurações Whitelabel"><i class="ti ti-settings" aria-hidden="true"></i></a>
+      <button type="button" class="btn btn-link p-1 text-secondary fs-5 position-relative text-decoration-none" title="Notificações" aria-label="Notificações"><i class="ti ti-bell" aria-hidden="true"></i></button>
 
       <div class="dropdown">
-        <a href="#" class="d-flex align-items-center text-dark text-decoration-none dropdown-toggle" data-bs-toggle="dropdown">
-          <img src="../assets/images/profile/user-1.jpg" width="30" height="30" class="rounded-circle me-2 header-user-avatar">
+        <a href="#" class="d-flex align-items-center text-dark text-decoration-none dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+          <img src="../assets/images/profile/user-1.jpg" alt="" width="30" height="30" class="rounded-circle me-2 header-user-avatar">
           <span class="d-none d-md-inline fs-2 fw-semibold header-user-name">Guilherme Garcia</span>
         </a>
         <ul class="dropdown-menu dropdown-menu-end">
-          <li><a class="dropdown-item" href="./perfil.html"><i class="ti ti-user me-2"></i>Meu Perfil</a></li>
-          <li><a class="dropdown-item" href="./admin-tenants.html"><i class="ti ti-building-store me-2"></i>Gestão de Empresas</a></li>
-          <li><a class="dropdown-item" href="./configuracoes-whitelabel.html"><i class="ti ti-palette me-2"></i>Painel Whitelabel</a></li>
+          <li><a class="dropdown-item" href="./perfil.html"><i class="ti ti-user me-2" aria-hidden="true"></i>Meu Perfil</a></li>
+          <li><a class="dropdown-item" href="./admin-tenants.html"><i class="ti ti-building-store me-2" aria-hidden="true"></i>Gestão de Empresas</a></li>
+          <li><a class="dropdown-item" href="./configuracoes-whitelabel.html"><i class="ti ti-palette me-2" aria-hidden="true"></i>Painel Whitelabel</a></li>
           <li><hr class="dropdown-divider"></li>
-          <li><a class="dropdown-item text-danger" href="./login.html" onclick="event.preventDefault(); window.crmStore.logout();"><i class="ti ti-logout me-2"></i>Sair</a></li>
+          <li><a class="dropdown-item text-danger" href="./login.html" onclick="event.preventDefault(); window.crmStore.logout();"><i class="ti ti-logout me-2" aria-hidden="true"></i>Sair</a></li>
         </ul>
       </div>
     </div>
@@ -105,7 +149,7 @@
     <!-- LEFT SIDEBAR -->
     <aside class="left-sidebar">
       <div>
-        <nav class="sidebar-nav scroll-sidebar" data-simplebar="">
+        <nav class="sidebar-nav scroll-sidebar" aria-label="Menu principal" data-simplebar="">
           <ul id="sidebarnav">
             <li class="nav-small-cap">
               <i class="ti ti-dots nav-small-cap-icon fs-4"></i>
@@ -136,9 +180,9 @@
               </a>
             </li>
             <li class="sidebar-item selected">
-              <a class="sidebar-link active text-success fw-bold" href="./whatsapp.html">
-                <span><i class="ti ti-brand-whatsapp fs-5"></i></span>
-                <span class="hide-menu">WhatsApp & Chat</span>
+              <a class="sidebar-link active text-success fw-bold" href="./whatsapp.html" aria-current="page">
+                <span><i class="ti ti-brand-whatsapp fs-5" aria-hidden="true"></i></span>
+                <span class="hide-menu">WhatsApp &amp; Chat</span>
               </a>
             </li>
             <li class="sidebar-item">
@@ -172,42 +216,43 @@
 
     <!-- MAIN BODY -->
     <div class="body-wrapper">
-      <div class="container-fluid p-3">
+      <main id="main-content" class="container-fluid p-2 p-md-3" tabindex="-1">
 
         <!-- WHATSAPP WEB WORKSPACE CARD -->
         <div class="card shadow-sm border-0 mb-0 chat-container-card">
-          <div class="d-flex h-100 w-100 overflow-hidden">
+          <div id="whatsapp-shell" class="d-flex h-100 w-100 overflow-hidden">
 
             <!-- 1. COLUNA ESQUERDA: LISTA DE CONVERSAS -->
             <div class="chat-sidebar-col">
               <!-- Top Search and Header -->
               <div class="p-3 border-bottom bg-light">
                 <div class="d-flex align-items-center justify-content-between mb-2">
-                  <h5 class="mb-0 fw-bold fs-4 d-flex align-items-center gap-2">
-                    <i class="ti ti-brand-whatsapp text-success fs-6"></i> WhatsApp
-                  </h5>
+                  <h1 class="mb-0 fw-bold fs-4 d-flex align-items-center gap-2">
+                    <i class="ti ti-brand-whatsapp text-success fs-6" aria-hidden="true"></i> WhatsApp
+                  </h1>
                   <div class="d-flex align-items-center gap-1">
-                    <button class="btn btn-sm btn-primary py-1 px-2 d-flex align-items-center gap-1 shadow-sm" title="Iniciar Nova Conversa" onclick="window.whatsAppManager.openNewChatModal()">
-                      <i class="ti ti-message-plus fs-4"></i>
+                    <button type="button" class="btn btn-sm btn-primary py-1 px-2 d-flex align-items-center gap-1 shadow-sm" title="Iniciar Nova Conversa" onclick="window.whatsAppManager.openNewChatModal()">
+                      <i class="ti ti-message-plus fs-4" aria-hidden="true"></i>
                       <span class="fs-2 fw-semibold">Novo</span>
                     </button>
-                    <button class="btn btn-sm btn-outline-secondary py-1 px-2 d-flex align-items-center gap-1" title="Gerenciar Aparelho / QR Code" onclick="window.whatsAppManager.openConnectModal()">
-                      <i class="ti ti-qrcode fs-4"></i>
+                    <button type="button" class="btn btn-sm btn-outline-secondary py-1 px-2 d-flex align-items-center gap-1" title="Gerenciar Aparelho / QR Code" aria-label="Gerenciar pareamento e QR Code do WhatsApp" onclick="window.whatsAppManager.openConnectModal()">
+                      <i class="ti ti-qrcode fs-4" aria-hidden="true"></i>
                     </button>
                   </div>
                 </div>
 
                 <!-- Campo de busca -->
                 <div class="input-group input-group-sm mb-2">
-                  <span class="input-group-text bg-white border-end-0 text-muted"><i class="ti ti-search"></i></span>
-                  <input type="text" id="search-chats-input" class="form-control border-start-0 ps-0" placeholder="Buscar conversas ou telefone...">
+                  <label for="search-chats-input" class="visually-hidden">Buscar conversas ou telefone</label>
+                  <span class="input-group-text bg-white border-end-0 text-muted"><i class="ti ti-search" aria-hidden="true"></i></span>
+                  <input type="search" id="search-chats-input" class="form-control border-start-0 ps-0" placeholder="Buscar conversas ou telefone..." enterkeyhint="search">
                 </div>
 
                 <!-- Filtros rápidos -->
-                <div class="d-flex gap-1">
-                  <button class="btn btn-xs btn-primary rounded-pill px-2 py-1 fs-1 flex-grow-1 active" data-chat-filter="all">Todas</button>
-                  <button class="btn btn-xs btn-light-secondary rounded-pill px-2 py-1 fs-1 flex-grow-1" data-chat-filter="unread">Não Lidas</button>
-                  <button class="btn btn-xs btn-light-secondary rounded-pill px-2 py-1 fs-1 flex-grow-1" data-chat-filter="leads">Leads CRM</button>
+                <div class="d-flex gap-1" role="group" aria-label="Filtrar conversas">
+                  <button type="button" class="btn btn-xs btn-primary rounded-pill px-2 py-1 fs-1 flex-grow-1 active" data-chat-filter="all">Todas</button>
+                  <button type="button" class="btn btn-xs btn-light-secondary rounded-pill px-2 py-1 fs-1 flex-grow-1" data-chat-filter="unread">Não Lidas</button>
+                  <button type="button" class="btn btn-xs btn-light-secondary rounded-pill px-2 py-1 fs-1 flex-grow-1" data-chat-filter="leads">Leads CRM</button>
                 </div>
               </div>
 
@@ -223,7 +268,7 @@
             </div>
 
             <!-- 2. COLUNA CENTRAL: CHAT ATIVO & MENSAGENS -->
-            <div class="d-flex flex-column flex-grow-1 bg-white overflow-hidden">
+            <div class="chat-thread-col d-flex flex-column flex-grow-1 bg-white overflow-hidden">
               <!-- Header do Chat Ativo -->
               <div id="chat-active-header">
                 <!-- Preenchido via JS -->
@@ -239,33 +284,34 @@
                 <!-- Respostas Rápidas / Templates -->
                 <div class="d-flex align-items-center gap-2 mb-2 overflow-auto pb-1" style="white-space: nowrap;">
                   <span class="badge bg-light text-muted border d-flex align-items-center gap-1" style="font-size: 11px;">
-                    <i class="ti ti-bolt text-warning"></i> Resposta Rápida:
+                    <i class="ti ti-bolt text-warning" aria-hidden="true"></i> Resposta Rápida:
                   </span>
-                  <button class="btn btn-xs btn-outline-secondary rounded-pill px-2 py-1" style="font-size: 11px;"
+                  <button type="button" class="btn btn-xs btn-outline-secondary rounded-pill px-2 py-1" style="font-size: 11px;"
                           data-quick-template="Olá! Sou do time Metrifique-se. Como posso te ajudar hoje?">
                     👋 Apresentação
                   </button>
-                  <button class="btn btn-xs btn-outline-secondary rounded-pill px-2 py-1" style="font-size: 11px;"
+                  <button type="button" class="btn btn-xs btn-outline-secondary rounded-pill px-2 py-1" style="font-size: 11px;"
                           data-quick-template="Olá! Acabei de gerar sua proposta comercial personalizada. Podemos conversar 5 minutinhos?">
                     📄 Envio de Proposta
                   </button>
-                  <button class="btn btn-xs btn-outline-secondary rounded-pill px-2 py-1" style="font-size: 11px;"
+                  <button type="button" class="btn btn-xs btn-outline-secondary rounded-pill px-2 py-1" style="font-size: 11px;"
                           data-quick-template="Que tal marcarmos 15 minutos amanhã para eu te mostrar a plataforma na prática?">
                     📅 Agendar Demo
                   </button>
-                  <button class="btn btn-xs btn-outline-secondary rounded-pill px-2 py-1" style="font-size: 11px;"
+                  <button type="button" class="btn btn-xs btn-outline-secondary rounded-pill px-2 py-1" style="font-size: 11px;"
                           data-quick-template="Muito obrigado pela preferência! Ficamos à total disposição caso precise de algo.">
                     ✅ Agradecimento
                   </button>
                 </div>
 
                 <!-- Formulário de Mensagem -->
-                <form id="chat-message-form" class="d-flex align-items-center gap-2">
-                  <div class="input-group">
-                    <input type="text" id="chat-message-input" class="form-control" placeholder="Digite uma mensagem (Pressione Enter para enviar)..." autocomplete="off">
+                <form id="chat-message-form" class="d-flex align-items-end gap-2">
+                  <div class="flex-grow-1">
+                    <label for="chat-message-input" class="visually-hidden">Mensagem do WhatsApp</label>
+                    <textarea id="chat-message-input" rows="1" enterkeyhint="send" class="form-control" placeholder="Digite uma mensagem (Enter envia, Shift+Enter quebra linha)..." autocomplete="off"></textarea>
                   </div>
-                  <button type="submit" class="btn btn-success px-3 d-flex align-items-center gap-1 shadow-sm">
-                    <i class="ti ti-send fs-5"></i>
+                  <button type="submit" class="btn btn-success px-3 d-flex align-items-center gap-1 shadow-sm" aria-label="Enviar mensagem">
+                    <i class="ti ti-send fs-5" aria-hidden="true"></i>
                     <span class="d-none d-md-inline">Enviar</span>
                   </button>
                 </form>
@@ -282,7 +328,7 @@
           </div>
         </div>
 
-      </div>
+      </main>
     </div>
   </div>
 
@@ -317,21 +363,21 @@
             <div class="tab-pane fade show active" id="tab-direct-number" role="tabpanel">
               <form id="new-chat-direct-form" onsubmit="window.whatsAppManager.handleDirectNewChat(event)">
                 <div class="mb-3">
-                  <label class="form-label fw-semibold">Número do WhatsApp (com DDD)</label>
+                  <label for="new-chat-phone" class="form-label fw-semibold">Número do WhatsApp (com DDD)</label>
                   <div class="input-group">
-                    <span class="input-group-text bg-light"><i class="ti ti-brand-whatsapp text-success fs-5"></i></span>
-                    <input type="text" id="new-chat-phone" class="form-control form-control-lg fs-4" placeholder="(DDD) 9XXXX-XXXX ou 5548999999999" required autocomplete="off" autofocus>
+                    <span class="input-group-text bg-light"><i class="ti ti-brand-whatsapp text-success fs-5" aria-hidden="true"></i></span>
+                    <input type="tel" inputmode="tel" autocomplete="tel" id="new-chat-phone" class="form-control form-control-lg fs-4" placeholder="(DDD) 9XXXX-XXXX ou 5548999999999" required enterkeyhint="next">
                   </div>
                   <div class="form-text small">Exemplos: <code>(48) 98888-7777</code>, <code>48988887777</code> ou <code>5548988887777</code>.</div>
                 </div>
 
                 <div class="mb-3">
-                  <label class="form-label fw-semibold">Nome do Contato ou Empresa (Opcional)</label>
-                  <input type="text" id="new-chat-name" class="form-control" placeholder="ex: João Silva / Loja Central">
+                  <label for="new-chat-name" class="form-label fw-semibold">Nome do Contato ou Empresa (Opcional)</label>
+                  <input type="text" id="new-chat-name" class="form-control" placeholder="ex: João Silva / Loja Central" autocomplete="name">
                 </div>
 
                 <div class="mb-3">
-                  <label class="form-label fw-semibold">Primeira Mensagem (Opcional)</label>
+                  <label for="new-chat-msg" class="form-label fw-semibold">Primeira Mensagem (Opcional)</label>
                   <textarea id="new-chat-msg" class="form-control" rows="2" placeholder="Digite uma mensagem para enviar imediatamente ou deixe em branco para apenas abrir a conversa..."></textarea>
                 </div>
 
@@ -354,8 +400,9 @@
             <!-- ABA 2: PUXAR LEADS DO CRM -->
             <div class="tab-pane fade" id="tab-crm-leads" role="tabpanel">
               <div class="input-group input-group-sm mb-3">
-                <span class="input-group-text bg-white"><i class="ti ti-search"></i></span>
-                <input type="text" id="modal-leads-search" class="form-control" placeholder="Buscar lead por nome, telefone ou empresa..." oninput="window.whatsAppManager.filterModalLeads(this.value)">
+                <label for="modal-leads-search" class="visually-hidden">Buscar lead</label>
+                <span class="input-group-text bg-white"><i class="ti ti-search" aria-hidden="true"></i></span>
+                <input type="search" id="modal-leads-search" class="form-control" placeholder="Buscar lead por nome, telefone ou empresa..." oninput="window.whatsAppManager.filterModalLeads(this.value)">
               </div>
 
               <div id="modal-leads-list" class="overflow-auto border rounded" style="max-height: 340px;">
@@ -441,27 +488,27 @@
 
           <!-- Seção Expansível: Integração Avançada com Evolution API (Docker / VPS) -->
           <div class="mt-4 pt-3 border-top">
-            <a class="text-decoration-none small fw-semibold text-secondary d-flex align-items-center justify-content-between" data-bs-toggle="collapse" href="#evolutionApiConfigCollapse" role="button">
-              <span><i class="ti ti-server me-1"></i> Configurações Avançadas de Servidor (Evolution API / Docker VPS)</span>
-              <i class="ti ti-chevron-down"></i>
-            </a>
+            <button type="button" class="btn btn-link p-0 w-100 text-decoration-none small fw-semibold text-secondary d-flex align-items-center justify-content-between" data-bs-toggle="collapse" data-bs-target="#evolutionApiConfigCollapse" aria-expanded="false" aria-controls="evolutionApiConfigCollapse">
+              <span><i class="ti ti-server me-1" aria-hidden="true"></i> Configurações Avançadas de Servidor (Evolution API / Docker VPS)</span>
+              <i class="ti ti-chevron-down" aria-hidden="true"></i>
+            </button>
 
             <div class="collapse mt-3" id="evolutionApiConfigCollapse">
               <div class="card card-body bg-light border p-3">
                 <div class="row g-2 mb-2">
                   <div class="col-md-6">
-                    <label class="form-label small fw-semibold">URL da Evolution API (VPS ou Servidor)</label>
-                    <input type="text" id="evo-server-url" class="form-control form-control-sm" placeholder="ex: https://api-wpp.suaempresa.com.br">
+                    <label for="evo-server-url" class="form-label small fw-semibold">URL da Evolution API (VPS ou Servidor)</label>
+                    <input type="url" id="evo-server-url" class="form-control form-control-sm" placeholder="ex: https://api-wpp.suaempresa.com.br" spellcheck="false" autocomplete="url">
                   </div>
                   <div class="col-md-6">
-                    <label class="form-label small fw-semibold">Global API Key</label>
-                    <input type="password" id="evo-api-key" class="form-control form-control-sm" placeholder="Chave de autenticação da Evolution API">
+                    <label for="evo-api-key" class="form-label small fw-semibold">Global API Key</label>
+                    <input type="password" id="evo-api-key" class="form-control form-control-sm" placeholder="Chave de autenticação da Evolution API" autocomplete="off">
                   </div>
                 </div>
 
                 <div class="mb-2">
-                  <label class="form-label small fw-semibold">URL de Webhook do Metrifique-se (Para registrar na Evolution API)</label>
-                  <input type="text" class="form-control form-control-sm bg-white" readonly value="https://metrifiquese.vercel.app/api/v1/whatsapp/webhook">
+                  <label for="evo-webhook-url" class="form-label small fw-semibold">URL de Webhook do Metrifique-se (Para registrar na Evolution API)</label>
+                  <input type="url" id="evo-webhook-url" class="form-control form-control-sm bg-white" readonly value="https://metrifiquese.vercel.app/api/v1/whatsapp/webhook" spellcheck="false">
                   <span class="form-text small" style="font-size: 11px;">A Evolution API enviará eventos de mensagens e status de conexão para esta URL.</span>
                 </div>
 
@@ -483,18 +530,19 @@
     </div>
   </div>
 
-  <script src="../assets/libs/jquery/dist/jquery.min.js"></script>
-  <script src="../assets/libs/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-  <script src="../assets/js/sidebarmenu.js"></script>
-  <script src="../assets/js/app.min.js"></script>
-  <script src="../assets/js/whatsapp-manager.js"></script>
+  <script defer src="../assets/libs/jquery/dist/jquery.min.js"></script>
+  <script defer src="../assets/libs/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+  <script defer src="../assets/js/sidebarmenu.js"></script>
+  <script defer src="../assets/js/app.min.js"></script>
+  <script defer src="../assets/js/whatsapp-manager.js"></script>
 
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       const user = window.crmStore ? window.crmStore.getUser() : null;
       if (user) {
-        document.querySelectorAll('.header-user-name').forEach(el => el.innerText = user.full_name);
-        document.querySelectorAll('.header-user-avatar').forEach(img => img.src = user.avatar_url);
+        document.querySelectorAll('.header-user-name').forEach(el => el.innerText = user.full_name || 'Usuário');
+        const safeAvatar = window.mqSecurity ? window.mqSecurity.safeUrl(user.avatar_url, '../assets/images/profile/user-1.jpg') : (user.avatar_url || '../assets/images/profile/user-1.jpg');
+        document.querySelectorAll('.header-user-avatar').forEach(img => { img.src = safeAvatar; });
       }
     });
   </script>

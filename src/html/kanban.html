@@ -3,51 +3,63 @@
 
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="color-scheme" content="light dark">
   <title>Funil de Vendas (Kanban) | Metrifique-se CRM</title>
   <link rel="shortcut icon" type="image/png" href="../assets/images/logos/icon.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
   <link rel="stylesheet" href="../assets/css/styles.min.css" />
   <link rel="stylesheet" href="../assets/css/metrifiquese-theme.css" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
   
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="../assets/js/supabase-client.js"></script>
-  <script src="../assets/js/whitelabel-theme.js"></script>
-  <script src="../assets/js/notifications-manager.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script defer src="../assets/js/ui-toolkit.js"></script>
+  <script defer src="../assets/js/supabase-client.js"></script>
+  <script defer src="../assets/js/whitelabel-theme.js"></script>
+  <script defer src="../assets/js/notifications-manager.js"></script>
 </head>
 
 <body>
+  <a class="skip-link" href="#main-content">Pular para o conteúdo principal</a>
+
   <!-- TOP NAVBAR HEADER -->
   <header class="app-header hs-header d-flex align-items-center justify-content-between px-3">
     <div class="d-flex align-items-center gap-2">
       <a href="./dashboard.html" class="navbar-brand me-1">
-        <img src="../assets/images/logos/logoblack.png" height="30" alt="Logo" class="hs-brand-logo" />
+        <img src="../assets/images/logos/logoblack.png" height="30" alt="Logo Metrifique-se" class="hs-brand-logo" />
       </a>
-      <button class="btn btn-light text-secondary border-0 rounded-circle p-2 sidebartoggler" id="sidebarCollapseToggle" title="Recolher / Expandir Menu Lateral">
-        <i class="ti ti-layout-sidebar-left-collapse fs-5"></i>
+      <button type="button" class="btn btn-light text-secondary border-0 rounded-circle p-2 sidebartoggler" id="sidebarCollapseToggle" title="Recolher / Expandir Menu Lateral" aria-label="Recolher ou expandir menu lateral">
+        <i class="ti ti-layout-sidebar-left-collapse fs-5" aria-hidden="true"></i>
       </button>
     </div>
 
-    <div class="d-flex align-items-center gap-3">
-      <div class="input-group input-group-sm d-none d-lg-flex" style="width: 240px;">
-        <span class="input-group-text bg-light border-0 text-muted"><i class="ti ti-search"></i></span>
-        <input type="text" class="form-control bg-light text-dark border-0" placeholder="Buscar global (CRM)...">
-      </div>
+    <div class="d-flex align-items-center gap-2 gap-md-3">
+      <button type="button" class="btn btn-light text-secondary border-0 rounded-pill px-3 py-1 d-none d-lg-inline-flex align-items-center gap-2 fs-2" data-global-search-trigger title="Busca global no CRM (Ctrl/Cmd + K)" aria-label="Abrir busca global no CRM">
+        <i class="ti ti-search" aria-hidden="true"></i>
+        <span>Buscar no CRM...</span>
+        <kbd class="ms-1 small">⌘K</kbd>
+      </button>
 
-      <a href="./configuracoes-whitelabel.html" class="text-secondary fs-5" title="Configurações Whitelabel"><i class="ti ti-settings"></i></a>
-      <a href="#" class="text-secondary fs-5 position-relative" title="Notificações" onclick="window.notificationsManager && window.notificationsManager.markAllRead(); alert('Todas as notificações foram lidas.');"><i class="ti ti-bell"></i></a>
+      <button type="button" class="btn btn-light text-secondary border-0 rounded-circle p-2 d-inline-flex align-items-center justify-content-center" data-theme-toggle title="Alternar tema claro/escuro" aria-label="Alternar tema claro/escuro">
+        <i class="ti ti-moon fs-5" aria-hidden="true"></i>
+      </button>
+
+      <a href="./configuracoes-whitelabel.html" class="text-secondary fs-5" title="Configurações Whitelabel" aria-label="Configurações Whitelabel"><i class="ti ti-settings" aria-hidden="true"></i></a>
+      <button type="button" class="btn btn-link p-1 text-secondary fs-5 position-relative text-decoration-none" title="Notificações" aria-label="Notificações"><i class="ti ti-bell" aria-hidden="true"></i></button>
 
       <div class="dropdown">
-        <a href="#" class="d-flex align-items-center text-dark text-decoration-none dropdown-toggle" data-bs-toggle="dropdown">
-          <img src="../assets/images/profile/user-1.jpg" width="30" height="30" class="rounded-circle me-2 header-user-avatar">
+        <a href="#" class="d-flex align-items-center text-dark text-decoration-none dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+          <img src="../assets/images/profile/user-1.jpg" alt="" width="30" height="30" class="rounded-circle me-2 header-user-avatar">
           <span class="d-none d-md-inline fs-2 fw-semibold header-user-name">Guilherme Garcia</span>
         </a>
         <ul class="dropdown-menu dropdown-menu-end">
-          <li><a class="dropdown-item" href="./perfil.html"><i class="ti ti-user me-2"></i>Meu Perfil</a></li>
-          <li><a class="dropdown-item" href="./admin-tenants.html"><i class="ti ti-building-store me-2"></i>Gestão de Empresas</a></li>
-          <li><a class="dropdown-item" href="./configuracoes-whitelabel.html"><i class="ti ti-palette me-2"></i>Painel Whitelabel</a></li>
+          <li><a class="dropdown-item" href="./perfil.html"><i class="ti ti-user me-2" aria-hidden="true"></i>Meu Perfil</a></li>
+          <li><a class="dropdown-item" href="./admin-tenants.html"><i class="ti ti-building-store me-2" aria-hidden="true"></i>Gestão de Empresas</a></li>
+          <li><a class="dropdown-item" href="./configuracoes-whitelabel.html"><i class="ti ti-palette me-2" aria-hidden="true"></i>Painel Whitelabel</a></li>
           <li><hr class="dropdown-divider"></li>
-          <li><a class="dropdown-item text-danger" href="./login.html" onclick="event.preventDefault(); window.crmStore.logout();"><i class="ti ti-logout me-2"></i>Sair</a></li>
+          <li><a class="dropdown-item text-danger" href="./login.html" onclick="event.preventDefault(); window.crmStore.logout();"><i class="ti ti-logout me-2" aria-hidden="true"></i>Sair</a></li>
         </ul>
       </div>
     </div>
@@ -58,7 +70,7 @@
     
     <aside class="left-sidebar">
       <div>
-        <nav class="sidebar-nav scroll-sidebar" data-simplebar="">
+        <nav class="sidebar-nav scroll-sidebar" aria-label="Menu principal" data-simplebar="">
           <ul id="sidebarnav">
             <li class="nav-small-cap">
               <i class="ti ti-dots nav-small-cap-icon fs-4"></i>
@@ -83,8 +95,8 @@
               </a>
             </li>
             <li class="sidebar-item selected">
-              <a class="sidebar-link" href="./kanban.html">
-                <span><i class="ti ti-columns"></i></span>
+              <a class="sidebar-link" href="./kanban.html" aria-current="page">
+                <span><i class="ti ti-columns" aria-hidden="true"></i></span>
                 <span class="hide-menu">Funil de Vendas (Kanban)</span>
               </a>
             </li>
@@ -124,33 +136,35 @@
     </aside>
 
     <div class="body-wrapper">
-      <div class="container-fluid pt-3">
+      <main id="main-content" class="container-fluid pt-3" tabindex="-1">
         <div class="card shadow-sm border-0 mb-4">
           <div class="card-body p-4">
             <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
               <div>
-                <h5 class="fw-bold mb-1 text-dark">Pipeline de Negócios (Deals)</h5>
-                <p class="text-muted fs-2 mb-0">Arraste as oportunidades entre as etapas do funil para atualizar o processo comercial.</p>
+                <h1 class="h4 fw-bold mb-1 text-dark">Pipeline de Negócios (Deals)</h1>
+                <p class="text-muted fs-2 mb-0">Arraste as oportunidades entre as etapas ou use o menu do cartão / setas ← →.</p>
               </div>
               <div class="d-flex gap-2 flex-wrap">
-                <button class="btn btn-outline-info fw-semibold" data-bs-toggle="modal" data-bs-target="#segmentTemplateModal">
-                  <i class="ti ti-layout-grid me-1"></i> Templates por Segmento
+                <button type="button" class="btn btn-outline-info fw-semibold" data-bs-toggle="modal" data-bs-target="#segmentTemplateModal">
+                  <i class="ti ti-layout-grid me-1" aria-hidden="true"></i> Templates por Segmento
                 </button>
-                <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#addStageModal">
-                  <i class="ti ti-plus me-1"></i> Nova Etapa
+                <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#addStageModal">
+                  <i class="ti ti-plus me-1" aria-hidden="true"></i> Nova Etapa
                 </button>
-                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addDealModal">
-                  <i class="ti ti-plus me-1"></i> Nova Oportunidade
+                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addDealModal">
+                  <i class="ti ti-plus me-1" aria-hidden="true"></i> Nova Oportunidade
                 </button>
               </div>
             </div>
           </div>
         </div>
 
-        <div class="row flex-nowrap overflow-auto pb-4" id="kanban-board-container" style="min-height: 550px;">
+        <div id="kanban-live-status" class="visually-hidden" aria-live="polite"></div>
+
+        <div class="row flex-nowrap overflow-auto pb-4 kanban-board-scroll" id="kanban-board-container" style="min-height: 550px;">
           <!-- Renderizado via kanban-manager.js -->
         </div>
-      </div>
+      </main>
     </div>
   </div>
 
@@ -160,91 +174,91 @@
       <div class="modal-content">
         <div class="modal-header">
           <div>
-            <h5 class="modal-title fw-bold text-dark"><i class="ti ti-layout-grid text-primary me-2"></i> Escolher Funil Pronto por Segmento</h5>
+            <h5 class="modal-title fw-bold text-dark"><i class="ti ti-layout-grid text-primary me-2" aria-hidden="true"></i> Escolher Funil Pronto por Segmento</h5>
             <small class="text-muted">Selecione o nicho da sua empresa para aplicar automaticamente a estrutura de etapas e metas ideal.</small>
           </div>
-          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
         </div>
         <div class="modal-body p-4">
           <div class="row g-3">
             
             <div class="col-md-6">
-              <div class="card border p-3 h-100 cursor-pointer shadow-sm hover-shadow" onclick="window.kanbanManager.applyTemplatePrompt('imobiliaria')">
+              <div class="card border p-3 h-100 shadow-sm">
                 <div class="d-flex align-items-center mb-2">
-                  <div class="p-2 bg-light-primary text-primary rounded-circle me-3">
+                  <div class="p-2 bg-light-primary text-primary rounded-circle me-3" aria-hidden="true">
                     <i class="ti ti-building-home fs-5"></i>
                   </div>
                   <div>
-                    <h6 class="fw-bold text-dark mb-0">Imobiliárias & Corretores</h6>
+                    <h6 class="fw-bold text-dark mb-0">Imobiliárias &amp; Corretores</h6>
                     <small class="text-muted">5 Etapas personalizadas</small>
                   </div>
                 </div>
-                <p class="fs-2 text-muted mb-2">Captação -> Perfil & Vistoria -> Visita Agendada -> Proposta & Crédito -> Contrato Fechado</p>
-                <button class="btn btn-sm btn-light-primary text-primary fw-bold w-100 mt-auto">Aplicar Este Funil</button>
+                <p class="fs-2 text-muted mb-2">Captação -&gt; Perfil &amp; Vistoria -&gt; Visita Agendada -&gt; Proposta &amp; Crédito -&gt; Contrato Fechado</p>
+                <button type="button" class="btn btn-sm btn-light-primary text-primary fw-bold w-100 mt-auto" onclick="window.kanbanManager.applyTemplatePrompt('imobiliaria')">Aplicar Este Funil</button>
               </div>
             </div>
 
             <div class="col-md-6">
-              <div class="card border p-3 h-100 cursor-pointer shadow-sm hover-shadow" onclick="window.kanbanManager.applyTemplatePrompt('clinica')">
+              <div class="card border p-3 h-100 shadow-sm">
                 <div class="d-flex align-items-center mb-2">
-                  <div class="p-2 bg-light-success text-success rounded-circle me-3">
+                  <div class="p-2 bg-light-success text-success rounded-circle me-3" aria-hidden="true">
                     <i class="ti ti-stethoscope fs-5"></i>
                   </div>
                   <div>
-                    <h6 class="fw-bold text-dark mb-0">Clínicas, Saúde & Estética</h6>
+                    <h6 class="fw-bold text-dark mb-0">Clínicas, Saúde &amp; Estética</h6>
                     <small class="text-muted">5 Etapas personalizadas</small>
                   </div>
                 </div>
-                <p class="fs-2 text-muted mb-2">Contato Inicial -> Avaliação Agendada -> Compareceu -> Orçamento -> Tratamento Fechado</p>
-                <button class="btn btn-sm btn-light-success text-success fw-bold w-100 mt-auto">Aplicar Este Funil</button>
+                <p class="fs-2 text-muted mb-2">Contato Inicial -&gt; Avaliação Agendada -&gt; Compareceu -&gt; Orçamento -&gt; Tratamento Fechado</p>
+                <button type="button" class="btn btn-sm btn-light-success text-success fw-bold w-100 mt-auto" onclick="window.kanbanManager.applyTemplatePrompt('clinica')">Aplicar Este Funil</button>
               </div>
             </div>
 
             <div class="col-md-6">
-              <div class="card border p-3 h-100 cursor-pointer shadow-sm hover-shadow" onclick="window.kanbanManager.applyTemplatePrompt('b2b')">
+              <div class="card border p-3 h-100 shadow-sm">
                 <div class="d-flex align-items-center mb-2">
-                  <div class="p-2 bg-light-info text-info rounded-circle me-3">
+                  <div class="p-2 bg-light-info text-info rounded-circle me-3" aria-hidden="true">
                     <i class="ti ti-briefcase fs-5"></i>
                   </div>
                   <div>
-                    <h6 class="fw-bold text-dark mb-0">Prestadores B2B & Agências</h6>
+                    <h6 class="fw-bold text-dark mb-0">Prestadores B2B &amp; Agências</h6>
                     <small class="text-muted">5 Etapas personalizadas</small>
                   </div>
                 </div>
-                <p class="fs-2 text-muted mb-2">Lead Qualificado (MQL) -> Diagnóstico -> Proposta -> Em Negociação -> Contrato Assinado</p>
-                <button class="btn btn-sm btn-light-info text-info fw-bold w-100 mt-auto">Aplicar Este Funil</button>
+                <p class="fs-2 text-muted mb-2">Lead Qualificado (MQL) -&gt; Diagnóstico -&gt; Proposta -&gt; Em Negociação -&gt; Contrato Assinado</p>
+                <button type="button" class="btn btn-sm btn-light-info text-info fw-bold w-100 mt-auto" onclick="window.kanbanManager.applyTemplatePrompt('b2b')">Aplicar Este Funil</button>
               </div>
             </div>
 
             <div class="col-md-6">
-              <div class="card border p-3 h-100 cursor-pointer shadow-sm hover-shadow" onclick="window.kanbanManager.applyTemplatePrompt('ecommerce')">
+              <div class="card border p-3 h-100 shadow-sm">
                 <div class="d-flex align-items-center mb-2">
-                  <div class="p-2 bg-light-warning text-warning rounded-circle me-3">
+                  <div class="p-2 bg-light-warning text-warning rounded-circle me-3" aria-hidden="true">
                     <i class="ti ti-shopping-cart fs-5"></i>
                   </div>
                   <div>
-                    <h6 class="fw-bold text-dark mb-0">E-commerce & D2C / Varejo</h6>
+                    <h6 class="fw-bold text-dark mb-0">E-commerce &amp; D2C / Varejo</h6>
                     <small class="text-muted">4 Etapas personalizadas</small>
                   </div>
                 </div>
-                <p class="fs-2 text-muted mb-2">Carrinho Abandonado -> Atendimento WhatsApp -> Cupom Enviado -> Pedido Concluído</p>
-                <button class="btn btn-sm btn-light-warning text-warning fw-bold w-100 mt-auto">Aplicar Este Funil</button>
+                <p class="fs-2 text-muted mb-2">Carrinho Abandonado -&gt; Atendimento WhatsApp -&gt; Cupom Enviado -&gt; Pedido Concluído</p>
+                <button type="button" class="btn btn-sm btn-light-warning text-warning fw-bold w-100 mt-auto" onclick="window.kanbanManager.applyTemplatePrompt('ecommerce')">Aplicar Este Funil</button>
               </div>
             </div>
 
             <div class="col-md-12">
-              <div class="card border p-3 cursor-pointer shadow-sm hover-shadow" onclick="window.kanbanManager.applyTemplatePrompt('infoprodutos')">
+              <div class="card border p-3 shadow-sm">
                 <div class="d-flex align-items-center mb-2">
-                  <div class="p-2 bg-light-danger text-danger rounded-circle me-3">
+                  <div class="p-2 bg-light-danger text-danger rounded-circle me-3" aria-hidden="true">
                     <i class="ti ti-school fs-5"></i>
                   </div>
                   <div>
-                    <h6 class="fw-bold text-dark mb-0">Infoprodutos & Mentorias</h6>
+                    <h6 class="fw-bold text-dark mb-0">Infoprodutos &amp; Mentorias</h6>
                     <small class="text-muted">4 Etapas personalizadas</small>
                   </div>
                 </div>
-                <p class="fs-2 text-muted mb-2">Inscrição / Lead Inbound -> Qualificação SDR -> Reunião de Aplicação -> Mentoria Vendida</p>
-                <button class="btn btn-sm btn-light-danger text-danger fw-bold w-100 mt-auto">Aplicar Este Funil</button>
+                <p class="fs-2 text-muted mb-2">Inscrição / Lead Inbound -&gt; Qualificação SDR -&gt; Reunião de Aplicação -&gt; Mentoria Vendida</p>
+                <button type="button" class="btn btn-sm btn-light-danger text-danger fw-bold w-100 mt-auto" onclick="window.kanbanManager.applyTemplatePrompt('infoprodutos')">Aplicar Este Funil</button>
               </div>
             </div>
 
@@ -260,45 +274,45 @@
       <div class="modal-content">
         <div class="modal-header bg-light-success border-bottom">
           <div>
-            <h5 class="modal-title fw-bold text-success"><i class="ti ti-brand-whatsapp me-2"></i> Envio Rápido via WhatsApp</h5>
+            <h5 class="modal-title fw-bold text-success"><i class="ti ti-brand-whatsapp me-2" aria-hidden="true"></i> Envio Rápido via WhatsApp</h5>
             <small class="text-muted" id="wa-modal-subtitle">Selecione um template pronto ou digite a mensagem</small>
           </div>
-          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
         </div>
         <div class="modal-body p-4">
           <input type="hidden" id="wa-deal-id">
           <input type="hidden" id="wa-lead-phone">
 
           <div class="mb-3">
-            <label class="form-label fw-semibold">Contato Destinatário</label>
+            <label for="wa-recipient-name" class="form-label fw-semibold">Contato Destinatário</label>
             <div class="input-group">
-              <span class="input-group-text bg-light"><i class="ti ti-user text-success"></i></span>
+              <span class="input-group-text bg-light"><i class="ti ti-user text-success" aria-hidden="true"></i></span>
               <input type="text" id="wa-recipient-name" class="form-control" readonly>
             </div>
           </div>
 
           <div class="mb-3">
-            <label class="form-label fw-semibold">Modelo de Mensagem Comercial (Template)</label>
+            <label for="wa-template-select" class="form-label fw-semibold">Modelo de Mensagem Comercial (Template)</label>
             <select id="wa-template-select" class="form-select fw-semibold" onchange="window.kanbanManager.onWhatsAppTemplateChange()">
               <option value="custom">-- Digitar Mensagem Personalizada --</option>
-              <option value="welcome">💬 1. Primeiro Contato & Apresentação</option>
-              <option value="proposal">📩 2. Envio & Follow-up de Proposta</option>
+              <option value="welcome">💬 1. Primeiro Contato &amp; Apresentação</option>
+              <option value="proposal">📩 2. Envio &amp; Follow-up de Proposta</option>
               <option value="meeting">⏰ 3. Lembrete de Reunião Agendada</option>
               <option value="reactivation">🔄 4. Reativação de Oportunidade Parada</option>
-              <option value="post_sale">🟢 5. Boas-Vindas Pós-Venda & Onboarding</option>
+              <option value="post_sale">🟢 5. Boas-Vindas Pós-Venda &amp; Onboarding</option>
             </select>
           </div>
 
           <div class="mb-3">
-            <label class="form-label fw-semibold">Conteúdo da Mensagem</label>
+            <label for="wa-message-text" class="form-label fw-semibold">Conteúdo da Mensagem</label>
             <textarea id="wa-message-text" class="form-control" rows="5" placeholder="Digite ou selecione um modelo acima..."></textarea>
-            <small class="text-muted mt-1 d-block"><i class="ti ti-info-circle me-1"></i>As variáveis dinâmicas {nome}, {empresa} e {valor} são aplicadas automaticamente.</small>
+            <small class="text-muted mt-1 d-block"><i class="ti ti-info-circle me-1" aria-hidden="true"></i>As variáveis dinâmicas {nome}, {empresa} e {valor} são aplicadas automaticamente.</small>
           </div>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
           <button type="button" class="btn btn-success fw-bold px-4" onclick="window.kanbanManager.sendWhatsAppMessage()">
-            <i class="ti ti-brand-whatsapp me-1 fs-5"></i> Abrir no WhatsApp
+            <i class="ti ti-brand-whatsapp me-1 fs-5" aria-hidden="true"></i> Abrir no WhatsApp
           </button>
         </div>
       </div>
@@ -310,33 +324,33 @@
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title fw-bold"><i class="ti ti-cash text-primary me-2"></i> Criar Nova Oportunidade</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          <h5 class="modal-title fw-bold"><i class="ti ti-cash text-primary me-2" aria-hidden="true"></i> Criar Nova Oportunidade</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
         </div>
         <form id="new-deal-form">
           <div class="modal-body">
             <div class="mb-3">
-              <label class="form-label">Título da Negociação *</label>
+              <label for="deal-title-input" class="form-label">Título da Negociação *</label>
               <input type="text" id="deal-title-input" class="form-control" placeholder="Ex: Contrato Anual CRM" required>
             </div>
             <div class="mb-3 position-relative">
-              <label class="form-label fw-semibold">Vincular a um Contato *</label>
+              <label for="deal-lead-search" class="form-label fw-semibold">Vincular a um Contato *</label>
               <input type="hidden" id="deal-lead-select" required>
               <div class="input-group">
-                <span class="input-group-text bg-light border-end-0 text-muted"><i class="ti ti-search"></i></span>
-                <input type="text" id="deal-lead-search" class="form-control border-start-0 ps-0" placeholder="Buscar por nome, empresa ou e-mail..." autocomplete="off">
-                <button class="btn btn-outline-secondary d-none" type="button" id="deal-lead-clear-btn" title="Limpar seleção"><i class="ti ti-x"></i></button>
+                <span class="input-group-text bg-light border-end-0 text-muted"><i class="ti ti-search" aria-hidden="true"></i></span>
+                <input type="search" id="deal-lead-search" class="form-control border-start-0 ps-0" placeholder="Buscar por nome, empresa ou e-mail..." autocomplete="off">
+                <button class="btn btn-outline-secondary d-none" type="button" id="deal-lead-clear-btn" title="Limpar seleção" aria-label="Limpar contato selecionado"><i class="ti ti-x" aria-hidden="true"></i></button>
               </div>
               <div id="deal-lead-results" class="list-group position-absolute start-0 end-0 shadow-lg border-0 rounded-3 mt-1 overflow-auto" style="max-height: 220px; z-index: 1060; display: none;">
               </div>
             </div>
             <div class="row">
               <div class="col-md-6 mb-3">
-                <label class="form-label">Valor Estimado (R$)</label>
-                <input type="number" step="0.01" id="deal-value-input" class="form-control" placeholder="5000.00">
+                <label for="deal-value-input" class="form-label">Valor Estimado (R$)</label>
+                <input type="number" step="0.01" inputmode="decimal" id="deal-value-input" class="form-control" placeholder="5000.00">
               </div>
               <div class="col-md-6 mb-3">
-                <label class="form-label">Etapa Inicial</label>
+                <label for="deal-stage-select" class="form-label">Etapa Inicial</label>
                 <select id="deal-stage-select" class="form-select">
                   <!-- Preenchido dinamicamente -->
                 </select>
@@ -357,17 +371,17 @@
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title fw-bold"><i class="ti ti-columns text-primary me-2"></i> Adicionar Coluna no Kanban</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          <h5 class="modal-title fw-bold"><i class="ti ti-columns text-primary me-2" aria-hidden="true"></i> Adicionar Coluna no Kanban</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
         </div>
         <form id="new-stage-form">
           <div class="modal-body">
             <div class="mb-3">
-              <label class="form-label">Nome da Nova Coluna / Etapa *</label>
+              <label for="stage-name-input" class="form-label">Nome da Nova Coluna / Etapa *</label>
               <input type="text" id="stage-name-input" class="form-control" placeholder="Ex: Qualificação de Agendamento" required>
             </div>
             <div class="mb-3">
-              <label class="form-label">Cor de Identificação</label>
+              <label for="stage-color-input" class="form-label">Cor de Identificação</label>
               <input type="color" id="stage-color-input" class="form-control form-control-color" value="#00A4BD">
             </div>
           </div>
@@ -380,18 +394,19 @@
     </div>
   </div>
 
-  <script src="../assets/libs/jquery/dist/jquery.min.js"></script>
-  <script src="../assets/libs/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-  <script src="../assets/js/sidebarmenu.js"></script>
-  <script src="../assets/js/app.min.js"></script>
-  <script src="../assets/js/kanban-manager.js"></script>
+  <script defer src="../assets/libs/jquery/dist/jquery.min.js"></script>
+  <script defer src="../assets/libs/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+  <script defer src="../assets/js/sidebarmenu.js"></script>
+  <script defer src="../assets/js/app.min.js"></script>
+  <script defer src="../assets/js/kanban-manager.js"></script>
 
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       const user = window.crmStore ? window.crmStore.getUser() : null;
       if (user) {
-        document.querySelectorAll('.header-user-name').forEach(el => el.innerText = user.full_name);
-        document.querySelectorAll('.header-user-avatar').forEach(img => img.src = user.avatar_url);
+        document.querySelectorAll('.header-user-name').forEach(el => el.innerText = user.full_name || 'Usuário');
+        const safeAvatar = window.mqSecurity ? window.mqSecurity.safeUrl(user.avatar_url, '../assets/images/profile/user-1.jpg') : (user.avatar_url || '../assets/images/profile/user-1.jpg');
+        document.querySelectorAll('.header-user-avatar').forEach(img => { img.src = safeAvatar; });
       }
     });
   </script>

@@ -48,12 +48,13 @@ class AnalyticsManager {
       }
     });
 
+    const esc = window.mqSecurity ? window.mqSecurity.escapeHtml : (v => String(v ?? ''));
     if (bottleneckStage && maxStageValue > 0) {
       insights.push({
         type: 'warning',
         icon: 'ti-alert-triangle',
         title: 'Alerta de Gargalo no Funil',
-        description: `A etapa <strong>"${bottleneckStage.name}"</strong> acumula R$ ${maxStageValue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} em oportunidades paradas. Dispare um follow-up rápido via WhatsApp para acelerar os fechamentos.`
+        description: `A etapa <strong>"${esc(bottleneckStage.name)}"</strong> acumula R$ ${maxStageValue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} em oportunidades paradas. Dispare um follow-up rápido via WhatsApp para acelerar os fechamentos.`
       });
     }
 
@@ -97,7 +98,7 @@ class AnalyticsManager {
         type: 'info',
         icon: 'ti-target-arrow',
         title: 'Canal de Maior Retorno (ROI)',
-        description: `A origem <strong>"${topSource}"</strong> gerou R$ ${topSourceVal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} em volume comercial. Reforce os investimentos de tráfego neste canal.`
+        description: `A origem <strong>"${esc(topSource)}"</strong> gerou R$ ${topSourceVal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} em volume comercial. Reforce os investimentos de tráfego neste canal.`
       });
     }
 

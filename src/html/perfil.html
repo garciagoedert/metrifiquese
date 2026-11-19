@@ -3,51 +3,63 @@
 
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="color-scheme" content="light dark">
   <title>Meu Perfil | Metrifique-se CRM Whitelabel</title>
   <link rel="shortcut icon" type="image/png" href="../assets/images/logos/favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
   <link rel="stylesheet" href="../assets/css/styles.min.css" />
   <link rel="stylesheet" href="../assets/css/metrifiquese-theme.css" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
   
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="../assets/js/supabase-client.js"></script>
-  <script src="../assets/js/whitelabel-theme.js"></script>
-  <script src="../assets/js/notifications-manager.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script defer src="../assets/js/ui-toolkit.js"></script>
+  <script defer src="../assets/js/supabase-client.js"></script>
+  <script defer src="../assets/js/whitelabel-theme.js"></script>
+  <script defer src="../assets/js/notifications-manager.js"></script>
 </head>
 
 <body>
+  <a class="skip-link" href="#main-content">Pular para o conteúdo principal</a>
+
   <!-- TOP NAVBAR HEADER -->
   <header class="app-header hs-header d-flex align-items-center justify-content-between px-3">
     <div class="d-flex align-items-center gap-2">
       <a href="./dashboard.html" class="navbar-brand me-1">
-        <img src="../assets/images/logos/logoblack.png" height="30" alt="Logo" class="hs-brand-logo" />
+        <img src="../assets/images/logos/logoblack.png" height="30" alt="Logo Metrifique-se" class="hs-brand-logo" />
       </a>
-      <button class="btn btn-light text-secondary border-0 rounded-circle p-2 sidebartoggler" id="sidebarCollapseToggle" title="Recolher / Expandir Menu Lateral">
-        <i class="ti ti-layout-sidebar-left-collapse fs-5"></i>
+      <button type="button" class="btn btn-light text-secondary border-0 rounded-circle p-2 sidebartoggler" id="sidebarCollapseToggle" title="Recolher / Expandir Menu Lateral" aria-label="Recolher ou expandir menu lateral">
+        <i class="ti ti-layout-sidebar-left-collapse fs-5" aria-hidden="true"></i>
       </button>
     </div>
 
-    <div class="d-flex align-items-center gap-3">
-      <div class="input-group input-group-sm d-none d-lg-flex" style="width: 240px;">
-        <span class="input-group-text bg-light border-0 text-muted"><i class="ti ti-search"></i></span>
-        <input type="text" class="form-control bg-light text-dark border-0" placeholder="Buscar global (CRM)...">
-      </div>
+    <div class="d-flex align-items-center gap-2 gap-md-3">
+      <button type="button" class="btn btn-light text-secondary border-0 rounded-pill px-3 py-1 d-none d-lg-inline-flex align-items-center gap-2 fs-2" data-global-search-trigger title="Busca global no CRM (Ctrl/Cmd + K)" aria-label="Abrir busca global no CRM">
+        <i class="ti ti-search" aria-hidden="true"></i>
+        <span>Buscar no CRM...</span>
+        <kbd class="ms-1 small">⌘K</kbd>
+      </button>
 
-      <a href="./configuracoes-whitelabel.html" class="text-secondary fs-5" title="Configurações Whitelabel"><i class="ti ti-settings"></i></a>
-      <a href="#" class="text-secondary fs-5 position-relative" title="Notificações" onclick="window.notificationsManager && window.notificationsManager.markAllRead(); alert('Todas as notificações foram lidas.');"><i class="ti ti-bell"></i></a>
+      <button type="button" class="btn btn-light text-secondary border-0 rounded-circle p-2 d-inline-flex align-items-center justify-content-center" data-theme-toggle title="Alternar tema claro/escuro" aria-label="Alternar tema claro/escuro">
+        <i class="ti ti-moon fs-5" aria-hidden="true"></i>
+      </button>
+
+      <a href="./configuracoes-whitelabel.html" class="text-secondary fs-5" title="Configurações Whitelabel" aria-label="Configurações Whitelabel"><i class="ti ti-settings" aria-hidden="true"></i></a>
+      <button type="button" class="btn btn-link p-1 text-secondary fs-5 position-relative text-decoration-none" title="Notificações" aria-label="Notificações"><i class="ti ti-bell" aria-hidden="true"></i></button>
 
       <div class="dropdown">
-        <a href="#" class="d-flex align-items-center text-dark text-decoration-none dropdown-toggle" data-bs-toggle="dropdown">
-          <img src="../assets/images/profile/user-1.jpg" width="30" height="30" class="rounded-circle me-2 header-user-avatar">
+        <a href="#" class="d-flex align-items-center text-dark text-decoration-none dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+          <img src="../assets/images/profile/user-1.jpg" alt="" width="30" height="30" class="rounded-circle me-2 header-user-avatar">
           <span class="d-none d-md-inline fs-2 fw-semibold header-user-name">Guilherme Garcia</span>
         </a>
         <ul class="dropdown-menu dropdown-menu-end">
-          <li><a class="dropdown-item" href="./admin-tenants.html"><i class="ti ti-building-store me-2"></i>Gestão de Empresas</a></li>
-          <li><a class="dropdown-item active" href="./perfil.html"><i class="ti ti-user me-2"></i>Meu Perfil</a></li>
-          <li><a class="dropdown-item" href="./configuracoes-whitelabel.html"><i class="ti ti-palette me-2"></i>Painel Whitelabel</a></li>
+          <li><a class="dropdown-item" href="./admin-tenants.html"><i class="ti ti-building-store me-2" aria-hidden="true"></i>Gestão de Empresas</a></li>
+          <li><a class="dropdown-item active" href="./perfil.html" aria-current="page"><i class="ti ti-user me-2" aria-hidden="true"></i>Meu Perfil</a></li>
+          <li><a class="dropdown-item" href="./configuracoes-whitelabel.html"><i class="ti ti-palette me-2" aria-hidden="true"></i>Painel Whitelabel</a></li>
           <li><hr class="dropdown-divider"></li>
-          <li><a class="dropdown-item text-danger" href="./login.html"><i class="ti ti-logout me-2"></i>Sair</a></li>
+          <li><a class="dropdown-item text-danger" href="./login.html" onclick="event.preventDefault(); window.crmStore && window.crmStore.logout();"><i class="ti ti-logout me-2" aria-hidden="true"></i>Sair</a></li>
         </ul>
       </div>
     </div>
@@ -58,7 +70,7 @@
     
     <aside class="left-sidebar">
       <div>
-        <nav class="sidebar-nav scroll-sidebar" data-simplebar="">
+        <nav class="sidebar-nav scroll-sidebar" aria-label="Menu principal" data-simplebar="">
           <ul id="sidebarnav">
             <li class="nav-small-cap">
               <i class="ti ti-dots nav-small-cap-icon fs-4"></i>
@@ -124,17 +136,17 @@
     </aside>
 
     <div class="body-wrapper">
-      <div class="container-fluid pt-3">
+      <main id="main-content" class="container-fluid pt-3" tabindex="-1">
         <div class="row justify-content-center">
           <div class="col-lg-8">
             <div class="card shadow-sm border-0 mb-4">
               <div class="card-body p-4">
                 <div class="d-flex align-items-center gap-4 mb-4 pb-3 border-bottom">
                   <div class="position-relative">
-                    <img src="../assets/images/profile/user-1.jpg" width="90" height="90" class="rounded-circle header-user-avatar border border-2 border-primary">
+                    <img src="../assets/images/profile/user-1.jpg" alt="" width="90" height="90" class="rounded-circle header-user-avatar border border-2 border-primary object-fit-cover">
                   </div>
                   <div>
-                    <h4 class="fw-bold mb-1 text-dark header-user-name">Guilherme Garcia</h4>
+                    <h1 class="h4 fw-bold mb-1 text-dark header-user-name">Guilherme Garcia</h1>
                     <span class="badge bg-light-primary text-primary px-3 py-1">Proprietário do Tenant (Admin)</span>
                     <p class="text-muted fs-2 mb-0 mt-1">Gerencie suas informações pessoais e credenciais de acesso.</p>
                   </div>
@@ -143,63 +155,74 @@
                 <form id="profile-form">
                   <div class="row">
                     <div class="col-md-6 mb-3">
-                      <label class="form-label fw-semibold">Nome Completo *</label>
-                      <input type="text" id="user-name-input" class="form-control" required>
+                      <label for="user-name-input" class="form-label fw-semibold">Nome Completo *</label>
+                      <input type="text" id="user-name-input" class="form-control" autocomplete="name" required>
                     </div>
 
                     <div class="col-md-6 mb-3">
-                      <label class="form-label fw-semibold">E-mail de Acesso *</label>
-                      <input type="email" id="user-email-input" class="form-control" required>
+                      <label for="user-email-input" class="form-label fw-semibold">E-mail de Acesso *</label>
+                      <input type="email" id="user-email-input" class="form-control" autocomplete="email" spellcheck="false" required>
                     </div>
                   </div>
 
                   <div class="row">
                     <div class="col-md-6 mb-3">
-                      <label class="form-label fw-semibold">Telefone / WhatsApp</label>
-                      <input type="text" id="user-phone-input" class="form-control">
+                      <label for="user-phone-input" class="form-label fw-semibold">Telefone / WhatsApp</label>
+                      <input type="tel" inputmode="tel" id="user-phone-input" class="form-control" autocomplete="tel" placeholder="(11) 99999-0000">
                     </div>
 
                     <div class="col-md-6 mb-3">
-                      <label class="form-label fw-semibold">Cargo / Função</label>
-                      <input type="text" id="user-role-input" class="form-control">
+                      <label for="user-role-input" class="form-label fw-semibold">Cargo / Função</label>
+                      <input type="text" id="user-role-input" class="form-control" autocomplete="organization-title">
                     </div>
                   </div>
 
                   <div class="mb-3">
-                    <label class="form-label fw-semibold">Foto de Perfil (Avatar)</label>
+                    <span class="form-label fw-semibold d-block">Foto de Perfil (Avatar)</span>
                     <div class="card p-3 border-dashed bg-light mb-2">
                       <div class="d-flex align-items-center gap-3">
-                        <img src="../assets/images/profile/user-1.jpg" width="60" height="60" class="rounded-circle header-user-avatar border border-2 border-primary object-fit-cover">
+                        <img src="../assets/images/profile/user-1.jpg" alt="" width="60" height="60" class="rounded-circle header-user-avatar border border-2 border-primary object-fit-cover">
                         <div class="flex-grow-1">
-                          <label class="form-label mb-1 fw-bold fs-2 text-dark">Enviar Imagem do Dispositivo</label>
+                          <label for="user-avatar-file-input" class="form-label mb-1 fw-bold fs-2 text-dark">Enviar Imagem do Dispositivo</label>
                           <input type="file" id="user-avatar-file-input" class="form-control form-control-sm" accept="image/*">
                           <small class="text-muted fs-1 mt-1 d-block">Formatações aceitas: JPG, PNG, WEBP. A imagem será otimizada para carregar em qualquer dispositivo.</small>
                         </div>
                       </div>
                     </div>
-                    <label class="form-label fw-semibold fs-2 text-muted">Ou Link / URL Direto da Imagem</label>
-                    <input type="text" id="user-avatar-input" class="form-control" placeholder="https://exemplo.com/sua-foto.jpg">
+                    <label for="user-avatar-input" class="form-label fw-semibold fs-2 text-muted">Ou Link / URL Direto da Imagem</label>
+                    <input type="url" id="user-avatar-input" class="form-control" placeholder="https://exemplo.com/sua-foto.jpg" spellcheck="false">
                   </div>
 
                   <hr class="my-4">
 
-                  <h5 class="fw-bold mb-3 text-dark"><i class="ti ti-lock text-primary me-2"></i> Alterar Senha</h5>
+                  <h5 class="fw-bold mb-3 text-dark"><i class="ti ti-lock text-primary me-2" aria-hidden="true"></i> Alterar Senha</h5>
 
                   <div class="row">
                     <div class="col-md-6 mb-3">
-                      <label class="form-label fw-semibold">Nova Senha</label>
-                      <input type="password" id="user-password-input" class="form-control" placeholder="Mínimo 6 caracteres">
+                      <label for="user-password-input" class="form-label fw-semibold">Nova Senha</label>
+                      <div class="input-group">
+                        <input type="password" id="user-password-input" class="form-control" placeholder="Mínimo 6 caracteres" autocomplete="new-password" minlength="6" aria-describedby="perfil-pw-toggle-hint">
+                        <button type="button" class="btn btn-outline-secondary js-toggle-password" data-target="user-password-input" aria-pressed="false" aria-label="Mostrar senha" title="Mostrar ou ocultar senha">
+                          <i class="ti ti-eye" aria-hidden="true"></i>
+                        </button>
+                      </div>
+                      <span id="perfil-pw-toggle-hint" class="visually-hidden">Cuidado ao revelar sua senha se outra pessoa puder ver sua tela.</span>
                     </div>
 
                     <div class="col-md-6 mb-3">
-                      <label class="form-label fw-semibold">Confirmar Nova Senha</label>
-                      <input type="password" id="user-password-confirm" class="form-control">
+                      <label for="user-password-confirm" class="form-label fw-semibold">Confirmar Nova Senha</label>
+                      <div class="input-group">
+                        <input type="password" id="user-password-confirm" class="form-control" autocomplete="new-password" minlength="6">
+                        <button type="button" class="btn btn-outline-secondary js-toggle-password" data-target="user-password-confirm" aria-pressed="false" aria-label="Mostrar confirmação de senha" title="Mostrar ou ocultar confirmação de senha">
+                          <i class="ti ti-eye" aria-hidden="true"></i>
+                        </button>
+                      </div>
                     </div>
                   </div>
 
                   <div class="pt-3 text-end">
                     <button type="submit" class="btn btn-primary px-4 py-2 fw-bold">
-                      <i class="ti ti-device-floppy me-1"></i> Salvar Alterações do Perfil
+                      <i class="ti ti-device-floppy me-1" aria-hidden="true"></i> Salvar Alterações do Perfil
                     </button>
                   </div>
                 </form>
@@ -207,30 +230,30 @@
             </div>
           </div>
         </div>
-      </div>
 
       <!-- Team Members Section (visible to admins only) -->
-      <div class="row mt-4" id="team-members-section" style="display:none;">
-        <div class="col-12">
+      <div class="row mt-4 justify-content-center" id="team-members-section" style="display:none;">
+        <div class="col-lg-10">
           <div class="card shadow-sm border-0">
             <div class="card-body p-4">
-              <div class="d-flex align-items-center justify-content-between mb-4">
+              <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
                 <div>
-                  <h5 class="fw-bold mb-1"><i class="ti ti-users text-primary me-2"></i>Membros da Equipe</h5>
+                  <h5 class="fw-bold mb-1"><i class="ti ti-users text-primary me-2" aria-hidden="true"></i>Membros da Equipe</h5>
                   <p class="text-muted fs-2 mb-0">Gerencie quem tem acesso ao CRM da sua empresa</p>
                 </div>
-                <button class="btn btn-primary d-inline-flex align-items-center gap-2 fw-bold" data-bs-toggle="modal" data-bs-target="#inviteUserModal" id="invite-user-btn" style="display:none!important;">
-                  <i class="ti ti-user-plus"></i> Convidar Usuário
+                <button type="button" class="btn btn-primary d-inline-flex align-items-center gap-2 fw-bold" data-bs-toggle="modal" data-bs-target="#inviteUserModal" id="invite-user-btn" style="display:none!important;">
+                  <i class="ti ti-user-plus" aria-hidden="true"></i> Convidar Usuário
                 </button>
               </div>
-              <div class="table-responsive">
+              <div class="table-responsive mq-table-wrapper" tabindex="0">
                 <table class="table table-hover align-middle mb-0">
+                  <caption class="visually-hidden">Membros da equipe com acesso ao CRM</caption>
                   <thead class="bg-light">
                     <tr>
-                      <th style="width:35%">Usuário</th>
-                      <th style="width:25%">E-mail</th>
-                      <th style="width:20%">Permissão</th>
-                      <th style="width:20%" class="text-end">Ações</th>
+                      <th scope="col" style="width:35%">Usuário</th>
+                      <th scope="col" style="width:25%">E-mail</th>
+                      <th scope="col" style="width:20%">Permissão</th>
+                      <th scope="col" style="width:20%" class="text-end">Ações</th>
                     </tr>
                   </thead>
                   <tbody id="team-members-table-body">
@@ -243,6 +266,7 @@
         </div>
       </div>
 
+      </main>
     </div>
   </div>
 
@@ -251,28 +275,28 @@
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title fw-bold"><i class="ti ti-user-plus text-primary me-2"></i> Convidar Usuário</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          <h5 class="modal-title fw-bold"><i class="ti ti-user-plus text-primary me-2" aria-hidden="true"></i> Convidar Usuário</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
         </div>
         <form id="invite-user-form">
           <div class="modal-body">
             <div class="mb-3">
-              <label class="form-label fw-semibold">Nome Completo *</label>
-              <input type="text" id="invite-name-input" class="form-control" placeholder="Ex: João Vendedor" required>
+              <label for="invite-name-input" class="form-label fw-semibold">Nome Completo *</label>
+              <input type="text" id="invite-name-input" class="form-control" placeholder="Ex: João Vendedor" required autocomplete="name">
             </div>
             <div class="mb-3">
-              <label class="form-label fw-semibold">E-mail *</label>
-              <input type="email" id="invite-email-input" class="form-control" placeholder="joao@empresa.com" required>
+              <label for="invite-email-input" class="form-label fw-semibold">E-mail *</label>
+              <input type="email" id="invite-email-input" class="form-control" placeholder="joao@empresa.com" required autocomplete="email" spellcheck="false">
             </div>
             <div class="mb-3">
-              <label class="form-label fw-semibold">Nível de Acesso *</label>
+              <label for="invite-role-select" class="form-label fw-semibold">Nível de Acesso *</label>
               <select id="invite-role-select" class="form-select">
                 <option value="vendedor">🔵 Vendedor — acessa leads e kanban</option>
                 <option value="admin">🔴 Administrador — acesso total ao tenant</option>
               </select>
             </div>
             <div class="alert alert-light border fs-2">
-              <i class="ti ti-info-circle me-1 text-primary"></i>
+              <i class="ti ti-info-circle me-1 text-primary" aria-hidden="true"></i>
               A senha padrão criada será <strong>senha123</strong>. O usuário deverá alterá-la no primeiro acesso em Meu Perfil.
             </div>
           </div>
@@ -285,13 +309,15 @@
     </div>
   </div>
 
-  <script src="../assets/libs/jquery/dist/jquery.min.js"></script>
-  <script src="../assets/libs/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-  <script src="../assets/js/sidebarmenu.js"></script>
-  <script src="../assets/js/app.min.js"></script>
+  <script defer src="../assets/libs/jquery/dist/jquery.min.js"></script>
+  <script defer src="../assets/libs/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+  <script defer src="../assets/js/sidebarmenu.js"></script>
+  <script defer src="../assets/js/app.min.js"></script>
 
   <script>
     document.addEventListener('DOMContentLoaded', () => {
+      const safeAvatarUrl = (url) => window.mqSecurity ? window.mqSecurity.safeUrl(url, '../assets/images/profile/user-1.jpg') : (url || '../assets/images/profile/user-1.jpg');
+
       const user = window.crmStore ? window.crmStore.getUser() : null;
       if (user) {
         document.getElementById('user-name-input').value = user.full_name || '';
@@ -301,12 +327,26 @@
         document.getElementById('user-avatar-input').value = user.avatar_url || '';
 
         document.querySelectorAll('.header-user-name').forEach(el => el.innerText = user.full_name || 'Usuário');
+        const safeUserAvatar = safeAvatarUrl(user.avatar_url);
         document.querySelectorAll('.header-user-avatar').forEach(img => {
           img.setAttribute('referrerpolicy', 'no-referrer');
           img.onerror = () => { img.src = '../assets/images/profile/user-1.jpg'; };
-          if (user.avatar_url) img.src = user.avatar_url;
+          img.src = safeUserAvatar;
         });
       }
+
+      document.querySelectorAll('.js-toggle-password').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const target = document.getElementById(btn.dataset.target);
+          if (!target) return;
+          const isHidden = target.type === 'password';
+          target.type = isHidden ? 'text' : 'password';
+          btn.setAttribute('aria-pressed', String(isHidden));
+          btn.setAttribute('aria-label', isHidden ? 'Ocultar senha' : 'Mostrar senha');
+          const icon = btn.querySelector('i');
+          if (icon) icon.className = isHidden ? 'ti ti-eye-off' : 'ti ti-eye';
+        });
+      });
 
       // Handle Image File Upload & Base64 Optimization
       const fileInput = document.getElementById('user-avatar-file-input');
@@ -360,9 +400,10 @@
       if (avatarUrlInput) {
         avatarUrlInput.addEventListener('input', (e) => {
           const val = e.target.value.trim();
-          if (val) {
+          const safe = safeAvatarUrl(val);
+          if (val && safe) {
             document.querySelectorAll('.header-user-avatar').forEach(previewImg => {
-              previewImg.src = val;
+              previewImg.src = safe;
             });
           }
         });
@@ -374,7 +415,8 @@
         const pass2 = document.getElementById('user-password-confirm').value;
 
         if (pass1 && pass1 !== pass2) {
-          alert('As senhas não coincidem!');
+          if (window.mqUI) window.mqUI.toast('As senhas não coincidem!', { type: 'warning' });
+          document.getElementById('user-password-confirm').focus();
           return;
         }
 
@@ -383,7 +425,7 @@
           email: document.getElementById('user-email-input').value,
           phone: document.getElementById('user-phone-input').value,
           role: document.getElementById('user-role-input').value,
-          avatar_url: document.getElementById('user-avatar-input').value
+          avatar_url: safeAvatarUrl(document.getElementById('user-avatar-input').value)
         };
 
         if (pass1) {
@@ -391,8 +433,8 @@
         }
 
         window.crmStore.updateUser(updated);
-        alert('Perfil e foto atualizados com sucesso!');
-        location.reload();
+        if (window.mqUI) window.mqUI.toast('Perfil e foto atualizados com sucesso!', { type: 'success' });
+        setTimeout(() => location.reload(), 750);
       });
 
       // ── TEAM MEMBERS SECTION ──────────────────────────────────────────
@@ -426,49 +468,70 @@
             : '<span class="badge bg-info-subtle text-info border border-info">Vendedor</span>';
         };
 
-        tbody.innerHTML = members.map(member => `
+        const esc = window.mqSecurity ? window.mqSecurity.escapeHtml : (v => String(v ?? ''));
+        const escAttr = window.mqSecurity ? window.mqSecurity.escapeAttr : esc;
+
+        tbody.innerHTML = members.map(member => {
+          const safeMemberId = escAttr(member.id);
+          const safeName = esc(member.full_name);
+          const safeAvatar = escAttr(safeAvatarUrl(member.avatar_url));
+          return `
           <tr>
-            <td>
+            <td data-label="Usuário">
               <div class="d-flex align-items-center gap-2">
-                <img src="${member.avatar_url || '../assets/images/profile/user-1.jpg'}" width="36" height="36" class="rounded-circle object-fit-cover border" onerror="this.src='../assets/images/profile/user-1.jpg'">
+                <img src="${safeAvatar}" alt="" width="36" height="36" class="rounded-circle object-fit-cover border" onerror="this.src='../assets/images/profile/user-1.jpg'">
                 <div>
-                  <div class="fw-semibold text-dark">${member.full_name}</div>
-                  <small class="text-muted">${member.phone || ''}</small>
+                  <div class="fw-semibold text-dark">${safeName}</div>
+                  <small class="text-muted">${esc(member.phone || '')}</small>
                 </div>
               </div>
             </td>
-            <td><small class="text-muted">${member.email}</small></td>
-            <td>${roleBadge(member)}</td>
-            <td class="text-end">
+            <td data-label="E-mail"><small class="text-muted">${esc(member.email)}</small></td>
+            <td data-label="Permissão">${roleBadge(member)}</td>
+            <td data-label="Ações" class="text-end">
               ${isAdmin && !member.is_super_admin && member.id !== (currentUser && currentUser.id) ? `
                 <div class="d-inline-flex gap-1">
-                  <select class="form-select form-select-sm" style="width:130px;" onchange="changeRole('${member.id}', this.value)">
+                  <select class="form-select form-select-sm" style="width:130px;" aria-label="Alterar permissão de ${escAttr(member.full_name)}" onchange="window.changeRole('${safeMemberId}', this.value)">
                     <option value="vendedor" ${(!member.crm_role || member.crm_role === 'vendedor') ? 'selected' : ''}>Vendedor</option>
                     <option value="admin" ${member.crm_role === 'admin' ? 'selected' : ''}>Admin</option>
                   </select>
-                  <button class="btn btn-sm btn-outline-danger" onclick="removeMember('${member.id}')" title="Remover acesso">
-                    <i class="ti ti-trash"></i>
+                  <button type="button" class="btn btn-sm btn-outline-danger" onclick="window.removeMember('${safeMemberId}')" title="Remover acesso" aria-label="Remover acesso de ${escAttr(member.full_name)}">
+                    <i class="ti ti-trash" aria-hidden="true"></i>
                   </button>
                 </div>
               ` : '<span class="text-muted fs-2">—</span>'}
             </td>
           </tr>
-        `).join('');
+        `;
+        }).join('');
       }
 
       function changeRole(userId, newRole) {
         if (window.crmStore) {
           window.crmStore.updateUserRole(userId, newRole);
           renderTeamMembers();
+          if (window.mqUI) window.mqUI.toast('Permissão do usuário atualizada.', { type: 'success' });
         }
       }
 
-      function removeMember(userId) {
-        if (confirm('Remover este usuário do tenant? Ele perderá o acesso ao CRM.')) {
+      async function removeMember(userId) {
+        const confirmed = window.mqUI
+          ? await window.mqUI.confirm({
+              title: 'Remover membro da equipe',
+              message: 'Remover este usuário do tenant? Ele perderá o acesso ao CRM.',
+              confirmLabel: 'Remover acesso',
+              danger: true
+            })
+          : false;
+        if (confirmed) {
           window.crmStore.deleteUserFromTenant(userId);
           renderTeamMembers();
+          if (window.mqUI) window.mqUI.toast('Usuário removido do tenant.', { type: 'success' });
         }
       }
+
+      window.changeRole = changeRole;
+      window.removeMember = removeMember;
 
       const inviteForm = document.getElementById('invite-user-form');
       if (inviteForm) {
@@ -484,9 +547,11 @@
             if (modalEl) { const inst = bootstrap.Modal.getInstance(modalEl); if (inst) inst.hide(); }
             inviteForm.reset();
             renderTeamMembers();
-            alert(`✅ Usuário ${fullName} convidado com sucesso!\nE-mail: ${email}\nSenha padrão: senha123`);
+            if (window.mqUI) {
+              window.mqUI.toast(`Usuário ${fullName} convidado (${email}) com senha padrão senha123.`, { type: 'success', duration: 6000 });
+            }
           } catch (err) {
-            alert('❌ ' + err.message);
+            if (window.mqUI) window.mqUI.toast(err.message || 'Erro ao convidar usuário.', { type: 'error' });
           }
         });
       }

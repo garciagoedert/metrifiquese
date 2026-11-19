@@ -3,20 +3,26 @@
 
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="color-scheme" content="light dark">
   <title>Formulário de Captura | Metrifique-se CRM</title>
   <link rel="shortcut icon" type="image/png" href="../assets/images/logos/favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
   <link rel="stylesheet" href="../assets/css/styles.min.css" />
+  <link rel="stylesheet" href="../assets/css/metrifiquese-theme.css" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
   
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="../assets/js/supabase-client.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script defer src="../assets/js/ui-toolkit.js"></script>
+  <script defer src="../assets/js/supabase-client.js"></script>
 
   <style>
     body {
       background-color: #F8FAFC;
       font-family: 'Plus Jakarta Sans', sans-serif;
-      min-height: 100vh;
+      min-height: 100dvh;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -31,7 +37,7 @@
       width: 100%;
       padding: 32px;
       border: 1px solid #E2E8F0;
-      transition: all 0.3s ease;
+      transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
     }
     .form-card.dark-mode {
       background: #1E293B;
@@ -49,6 +55,9 @@
     .pulse-animation {
       animation: pulseScale 1.8s infinite ease-in-out;
     }
+    @media (prefers-reduced-motion: reduce) {
+      .pulse-animation { animation: none; }
+    }
     @keyframes pulseScale {
       0% { transform: scale(1); }
       50% { transform: scale(1.08); }
@@ -58,42 +67,44 @@
 </head>
 
 <body>
+  <a class="skip-link" href="#main-content">Pular para o formulário</a>
 
-  <div class="form-card" id="form-card-container">
+  <main id="main-content" class="form-card" tabindex="-1">
+    <div id="form-card-container">
     <div class="text-center mb-4" id="form-logo-box">
       <img src="../assets/images/logos/logoblack.png" height="32" alt="Logo" id="tenant-logo-img">
     </div>
 
     <!-- FORMULÁRIO DE CAPTURA -->
     <div id="form-content-wrapper">
-      <h4 class="fw-bold mb-1 text-center" id="form-title">Solicitar Demonstração</h4>
+      <h1 class="h4 fw-bold mb-1 text-center" id="form-title">Solicitar Demonstração</h1>
       <p class="text-muted fs-2 mb-4 text-center" id="form-desc">Preencha seus dados para receber o contato de nossa equipe.</p>
 
       <form id="public-capture-form">
         <div id="form-fields-container">
           <!-- Campos iniciais pré-renderizados estaticamente -->
           <div class="mb-3" id="field-box-name">
-            <label class="form-label fs-2 fw-semibold">Nome Completo *</label>
-            <input type="text" id="lead-name-input" class="form-control py-2.5" placeholder="Seu nome completo" required>
+            <label for="lead-name-input" class="form-label fs-2 fw-semibold">Nome Completo *</label>
+            <input type="text" id="lead-name-input" class="form-control py-2.5" placeholder="Seu nome completo" autocomplete="name" required>
           </div>
 
           <div class="mb-3" id="field-box-email">
-            <label class="form-label fs-2 fw-semibold">E-mail Comercial *</label>
-            <input type="email" id="lead-email-input" class="form-control py-2.5" placeholder="seu@email.com" required>
+            <label for="lead-email-input" class="form-label fs-2 fw-semibold">E-mail Comercial *</label>
+            <input type="email" id="lead-email-input" class="form-control py-2.5" placeholder="seu@email.com" autocomplete="email" spellcheck="false" required>
           </div>
 
           <div class="mb-3" id="field-box-phone">
-            <label class="form-label fs-2 fw-semibold">WhatsApp / Telefone *</label>
-            <input type="tel" id="lead-phone-input" class="form-control py-2.5" placeholder="(00) 90000-0000" required>
+            <label for="lead-phone-input" class="form-label fs-2 fw-semibold">WhatsApp / Telefone *</label>
+            <input type="tel" inputmode="tel" id="lead-phone-input" class="form-control py-2.5" placeholder="(00) 90000-0000" autocomplete="tel" required>
           </div>
 
           <div class="mb-3" id="field-box-company">
-            <label class="form-label fs-2 fw-semibold">Nome da Empresa</label>
-            <input type="text" id="lead-company-input" class="form-control py-2.5" placeholder="Sua empresa">
+            <label for="lead-company-input" class="form-label fs-2 fw-semibold">Nome da Empresa</label>
+            <input type="text" id="lead-company-input" class="form-control py-2.5" placeholder="Sua empresa" autocomplete="organization">
           </div>
 
           <div class="mb-3 d-none" id="field-box-notes">
-            <label class="form-label fs-2 fw-semibold">Mensagem / Observação</label>
+            <label for="lead-notes-input" class="form-label fs-2 fw-semibold">Mensagem / Observação</label>
             <textarea id="lead-notes-input" class="form-control" rows="3" placeholder="Como podemos te ajudar?"></textarea>
           </div>
         </div>
@@ -131,9 +142,10 @@
         <i class="ti ti-reload me-1"></i> Enviar Nova Solicitação
       </button>
 
-      <small class="text-muted fs-1 d-block"><i class="ti ti-shield-check me-1 text-success"></i> Form Captura Powered by Metrifique-se CRM</small>
+      <small class="text-muted fs-1 d-block"><i class="ti ti-shield-check me-1 text-success" aria-hidden="true"></i> Form Captura Powered by Metrifique-se CRM</small>
     </div>
-  </div>
+    </div>
+  </main>
 
   <script>
     function renderCustomFields(fields) {
@@ -212,6 +224,7 @@
       }
 
       // Update UI Immediately (0ms)
+      const mainEl = document.getElementById('main-content');
       const formCard = document.getElementById('form-card-container');
       const formTitle = document.getElementById('form-title');
       const formDesc = document.getElementById('form-desc');
@@ -221,16 +234,19 @@
       if (formDesc && form.description) formDesc.innerText = form.description;
       if (submitBtn) {
         if (form.button_text) submitBtn.innerText = form.button_text;
-        if (form.button_color) submitBtn.style.backgroundColor = form.button_color;
+        if (form.button_color && /^#[0-9a-fA-F]{6}$/.test(form.button_color)) {
+          submitBtn.style.backgroundColor = form.button_color;
+        }
       }
-      if (form.theme_mode === 'dark' && formCard) {
-        formCard.classList.add('dark-mode');
+      if (form.theme_mode === 'dark') {
+        if (mainEl) mainEl.classList.add('dark-mode');
+        if (formCard) formCard.classList.add('dark-mode');
       }
 
       const logoImg = document.getElementById('tenant-logo-img');
       if (logoImg) {
         if (tenant && tenant.logo_url) {
-          logoImg.src = tenant.logo_url;
+          logoImg.src = window.mqSecurity ? window.mqSecurity.safeUrl(tenant.logo_url, '../assets/images/logos/logoblack.png') : tenant.logo_url;
         } else if (form.theme_mode === 'dark') {
           logoImg.src = '../assets/images/logos/logowhite.png';
         }
@@ -244,13 +260,17 @@
           !tenant && tenantId ? window.supabaseClient.from('tenants').select('*').eq('id', tenantId).maybeSingle() : Promise.resolve({ data: null }),
           !form && formId ? window.supabaseClient.from('tenant_forms').select('*').eq('id', formId).maybeSingle() : Promise.resolve({ data: null })
         ]).then(([tRes, fRes]) => {
-          if (tRes && tRes.data && logoImg) logoImg.src = tRes.data.logo_url;
+          if (tRes && tRes.data && logoImg && tRes.data.logo_url) {
+            logoImg.src = window.mqSecurity ? window.mqSecurity.safeUrl(tRes.data.logo_url, '../assets/images/logos/logoblack.png') : tRes.data.logo_url;
+          }
           if (fRes && fRes.data) {
             const cloudForm = fRes.data;
             if (formTitle && cloudForm.title) formTitle.innerText = cloudForm.title;
             if (formDesc && cloudForm.description) formDesc.innerText = cloudForm.description;
             if (submitBtn && cloudForm.button_text) submitBtn.innerText = cloudForm.button_text;
-            if (submitBtn && cloudForm.button_color) submitBtn.style.backgroundColor = cloudForm.button_color;
+            if (submitBtn && cloudForm.button_color && /^#[0-9a-fA-F]{6}$/.test(cloudForm.button_color)) {
+              submitBtn.style.backgroundColor = cloudForm.button_color;
+            }
             if (cloudForm.fields) renderCustomFields(cloudForm.fields);
             form = cloudForm;
           }
@@ -318,9 +338,14 @@
             }).catch(err => console.warn('[Lead Submit Supabase Exception]', err));
           }
 
-          // Handle Custom Redirect URL or Instant Default Thank You Screen (0ms)
-          if (form && form.redirect_url && form.redirect_url.trim().startsWith('http')) {
-            window.location.href = form.redirect_url.trim();
+          // Handle Custom Redirect URL (http/https validated) or Instant Default Thank You Screen
+          let safeRedirect = '';
+          if (form && form.redirect_url) {
+            const candidate = window.mqSecurity ? window.mqSecurity.safeUrl(form.redirect_url, '') : form.redirect_url.trim();
+            if (/^https?:\/\//i.test(candidate)) safeRedirect = candidate;
+          }
+          if (safeRedirect) {
+            window.location.href = safeRedirect;
           } else {
             const formContent = document.getElementById('form-content-wrapper');
             const successBox = document.getElementById('form-success-box');

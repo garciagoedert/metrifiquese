@@ -1029,6 +1029,42 @@ class LocalCRMStore {
     throw new Error('E-mail não encontrado. Verifique suas credenciais ou entre em contato com o administrador da sua conta.');
   }
 
+  async requestPasswordReset(email) {
+    const cleanEmail = String(email || '').trim().toLowerCase();
+    if (!cleanEmail || !cleanEmail.includes('@')) {
+      throw new Error('Informe um e-mail válido.');
+    }
+
+    if (supabaseClient) {
+      try {
+        const redirectUrl = `${window.location.origin}/src/html/login.html`;
+        const { error } = await supabaseClient.auth.resetPasswordForEmail(cleanEmail, { redirectTo: redirectUrl });
+        if (!error) {
+          return {
+            mode: 'supabase',
+            message: 'Se o e-mail estiver cadastrado, enviamos um link de redefinição para a sua caixa de entrada.'
+          };
+        }
+      } catch (e) {
+        console.warn('[Password Reset Warning]', e);
+      }
+    }
+
+    const data = this.getData();
+    const localMatch = (data.users || []).some(u => (u.email || '').toLowerCase() === cleanEmail);
+    if (localMatch) {
+      return {
+        mode: 'local',
+        message: 'Esta conta utiliza autenticação gerenciada pelo administrador. Solicite uma nova senha ao administrador da empresa ou atualize em Meu Perfil.'
+      };
+    }
+
+    return {
+      mode: 'unknown',
+      message: 'Solicitação registrada. Caso sua empresa use acesso gerenciado, procure o administrador para redefinir sua senha.'
+    };
+  }
+
   async signUpWithEmail(email, password, fullName) {
     const data = this.getData();
     const newTenantId = 'tenant-' + Date.now();
@@ -1474,7 +1510,9 @@ class LocalCRMStore {
     const tenantId = this.getActiveTenantId();
     const tenantStages = data.stages.filter(s => s.tenant_id === tenantId);
     if (tenantStages.length <= 1) {
-      alert('Você precisa ter pelo menos 1 etapa no Kanban.');
+      if (window.mqUI) {
+        window.mqUI.toast('Você precisa ter pelo menos 1 etapa no Kanban.', { type: 'warning' });
+      }
       return false;
     }
     data.stages = data.stages.filter(s => s.id !== stageId);
@@ -1614,6 +1652,18 @@ class LocalCRMStore {
     }
     this.saveData(data);
     return rule;
+  }
+
+  deleteAutomation(ruleId) {
+    const data = this.getData();
+    const tenantId = this.getActiveTenantId();
+    const before = (data.automations || []).length;
+    data.automations = (data.automations || []).filter(a => !(a.id === ruleId && (!a.tenant_id || a.tenant_id === tenantId)));
+    if (data.automations.length !== before) {
+      this.saveData(data);
+      return true;
+    }
+    return false;
   }
 
   getForms() {

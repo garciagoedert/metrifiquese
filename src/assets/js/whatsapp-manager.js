@@ -31,7 +31,7 @@ class WhatsAppManager {
 
       if (urlPhone) {
         this.startChatWithNumber(urlPhone, urlName || '', '', false, urlLeadId);
-      } else {
+      } else if (window.innerWidth >= 768) {
         const chats = window.crmStore ? window.crmStore.getWhatsAppChats() : [];
         if (chats.length > 0) {
           this.selectChat(chats[0].id);
@@ -42,10 +42,18 @@ class WhatsAppManager {
       this.checkRealWhatsAppStatus();
     });
 
-    // Polling periódica de status e novas mensagens reais do WhatsApp
-    setInterval(() => {
-      this.checkRealWhatsAppStatus();
+    // Polling periódico pausado quando a aba está oculta (economia de rede/bateria)
+    this._statusInterval = setInterval(() => {
+      if (!document.hidden) {
+        this.checkRealWhatsAppStatus();
+      }
     }, 2000);
+
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden) {
+        this.checkRealWhatsAppStatus();
+      }
+    });
 
     window.addEventListener('whatsapp-chats-updated', () => {
       this.renderChatList();
@@ -100,10 +108,12 @@ class WhatsAppManager {
       });
     }
 
-    // Input enter key
+    // Input IME-safe enter key (sizing handled via CSS field-sizing: content)
     const msgInput = document.getElementById('chat-message-input');
     if (msgInput) {
       msgInput.addEventListener('keydown', (e) => {
+        // Previne envio acidental durante composição IME (japonês/chinês/coreano/acento Safari)
+        if (e.isComposing || e.keyCode === 229) return;
         if (e.key === 'Enter' && !e.shiftKey) {
           e.preventDefault();
           this.handleSendMessage();
@@ -187,12 +197,17 @@ class WhatsAppManager {
     const qrContainer = document.getElementById('qrcode-container');
     const qrStatusMsg = document.getElementById('qrcode-status-message');
 
+    const esc = window.mqSecurity ? window.mqSecurity.escapeHtml : (v => String(v ?? ''));
+    const escAttr = window.mqSecurity ? window.mqSecurity.escapeAttr : esc;
+    const safeUrl = window.mqSecurity ? window.mqSecurity.safeUrl : (u => u);
+
     if (data.status === 'qrcode' && data.qr) {
       if (qrContainer) {
+        const safeQr = escAttr(safeUrl(data.qr, ''));
         qrContainer.innerHTML = `
           <div class="p-3 bg-white rounded border border-2 shadow-sm d-inline-block position-relative">
-            <img src="${data.qr}" width="260" height="260" class="d-block rounded shadow-sm" alt="QR Code WhatsApp" style="image-rendering: crisp-edges;" />
-            <div class="position-absolute top-50 start-50 translate-middle bg-white p-1 rounded-circle shadow-sm">
+            <img src="${safeQr}" width="260" height="260" class="d-block rounded shadow-sm" alt="QR Code WhatsApp" style="image-rendering: crisp-edges;" />
+            <div class="position-absolute top-50 start-50 translate-middle bg-white p-1 rounded-circle shadow-sm" aria-hidden="true">
               <i class="ti ti-brand-whatsapp text-success fs-7"></i>
             </div>
           </div>
@@ -200,7 +215,7 @@ class WhatsAppManager {
       }
       if (qrStatusMsg) {
         qrStatusMsg.innerHTML = `
-          <div class="text-success fw-bold fs-3 mb-1"><i class="ti ti-camera me-1"></i>QR Code Oficial Ativo!</div>
+          <div class="text-success fw-bold fs-3 mb-1"><i class="ti ti-camera me-1" aria-hidden="true"></i>QR Code Oficial Ativo!</div>
           <span class="text-muted small">Aponte a câmera do WhatsApp no seu celular agora.</span>
         `;
       }
@@ -237,18 +252,18 @@ class WhatsAppManager {
       if (qrContainer && qrContainer.innerHTML.includes('img')) {
         qrContainer.innerHTML = `
           <div class="text-center py-4">
-            <div class="rounded-circle bg-success text-white d-inline-flex align-items-center justify-content-center mb-3" style="width: 72px; height: 72px;">
+            <div class="rounded-circle bg-success text-white d-inline-flex align-items-center justify-content-center mb-3" style="width: 72px; height: 72px;" aria-hidden="true">
               <i class="ti ti-check fs-9"></i>
             </div>
             <h5 class="fw-bold text-dark">WhatsApp Pareado com Sucesso!</h5>
-            <p class="text-muted mb-2">Linha conectada: <strong>${phone}</strong></p>
-            <p class="text-success fw-semibold small"><i class="ti ti-circle-check me-1"></i>Sessão ativa e sincronizada em tempo real</p>
+            <p class="text-muted mb-2">Linha conectada: <strong>${esc(phone)}</strong></p>
+            <p class="text-success fw-semibold small"><i class="ti ti-circle-check me-1" aria-hidden="true"></i>Sessão ativa e sincronizada em tempo real</p>
             <div class="mt-4 d-flex justify-content-center gap-2">
-              <button class="btn btn-outline-danger btn-sm" onclick="window.whatsAppManager.disconnectSession()">
-                <i class="ti ti-power me-1"></i> Desconectar
+              <button type="button" class="btn btn-outline-danger btn-sm" onclick="window.whatsAppManager.disconnectSession()">
+                <i class="ti ti-power me-1" aria-hidden="true"></i> Desconectar
               </button>
-              <button class="btn btn-success btn-sm" data-bs-dismiss="modal">
-                <i class="ti ti-message-circle me-1"></i> Ir para as Mensagens
+              <button type="button" class="btn btn-success btn-sm" data-bs-dismiss="modal">
+                <i class="ti ti-message-circle me-1" aria-hidden="true"></i> Ir para as Mensagens
               </button>
             </div>
           </div>
@@ -312,7 +327,15 @@ class WhatsAppManager {
   }
 
   async disconnectSession() {
-    if (confirm('Deseja realmente desconectar esta sessão do WhatsApp?')) {
+    const confirmed = window.mqUI
+      ? await window.mqUI.confirm({
+          title: 'Desconectar WhatsApp',
+          message: 'Deseja realmente desconectar esta sessão do WhatsApp?',
+          confirmLabel: 'Desconectar',
+          danger: true
+        })
+      : false;
+    if (confirmed) {
       await this.fetchApi('/api/whatsapp/disconnect', { method: 'POST' });
 
       window.crmStore.saveWhatsAppConfig({
@@ -328,12 +351,13 @@ class WhatsAppManager {
         qrContainer.innerHTML = `
           <div class="p-4 text-center">
             <p class="text-muted mb-3">WhatsApp desconectado.</p>
-            <button class="btn btn-primary btn-sm" onclick="window.whatsAppManager.openConnectModal()">
-              <i class="ti ti-qrcode me-1"></i> Conectar Novamente
+            <button type="button" class="btn btn-primary btn-sm" onclick="window.whatsAppManager.openConnectModal()">
+              <i class="ti ti-qrcode me-1" aria-hidden="true"></i> Conectar Novamente
             </button>
           </div>
         `;
       }
+      if (window.mqUI) window.mqUI.toast('Sessão do WhatsApp desconectada.', { type: 'info' });
     }
   }
 
@@ -422,35 +446,39 @@ class WhatsAppManager {
     }
 
     const stages = window.crmStore.getStages();
+    const esc = window.mqSecurity ? window.mqSecurity.escapeHtml : (v => String(v ?? ''));
+    const escAttr = window.mqSecurity ? window.mqSecurity.escapeAttr : esc;
+    const safeUrl = window.mqSecurity ? window.mqSecurity.safeUrl : (u => u);
 
     container.innerHTML = leads.map(lead => {
       const stage = stages.find(s => s.id === lead.stage_id) || { name: 'Novo Lead' };
       const hasPhone = !!lead.phone;
+      const avatarSrc = escAttr(safeUrl(lead.avatar, '../assets/images/profile/user-1.jpg'));
 
       return `
         <div class="p-3 border-bottom d-flex align-items-center justify-content-between hover-bg-light">
           <div class="d-flex align-items-center gap-3">
-            <img src="${lead.avatar || '../assets/images/profile/user-1.jpg'}" width="42" height="42" class="rounded-circle object-fit-cover shadow-sm">
+            <img src="${avatarSrc}" alt="" width="42" height="42" class="rounded-circle object-fit-cover shadow-sm">
             <div>
               <div class="d-flex align-items-center gap-2">
-                <h6 class="mb-0 fw-bold fs-3 text-dark">${lead.name}</h6>
-                <span class="badge bg-light-primary text-primary" style="font-size: 10px;">${stage.name}</span>
+                <h6 class="mb-0 fw-bold fs-3 text-dark">${esc(lead.name)}</h6>
+                <span class="badge bg-light-primary text-primary" style="font-size: 10px;">${esc(stage.name)}</span>
               </div>
               <p class="mb-0 text-muted small">
-                <i class="ti ti-building me-1"></i>${lead.company || 'Empresa não informada'} 
-                ${hasPhone ? `<span class="mx-1">•</span> <i class="ti ti-phone me-1"></i><strong>${lead.phone}</strong>` : '<span class="text-danger ms-2">• Sem telefone</span>'}
+                <i class="ti ti-building me-1" aria-hidden="true"></i>${esc(lead.company || 'Empresa não informada')} 
+                ${hasPhone ? `<span class="mx-1">•</span> <i class="ti ti-phone me-1" aria-hidden="true"></i><strong>${esc(lead.phone)}</strong>` : '<span class="text-danger ms-2">• Sem telefone</span>'}
               </p>
             </div>
           </div>
 
           <div>
             ${hasPhone ? `
-              <button class="btn btn-sm btn-success d-flex align-items-center gap-1 shadow-sm px-3" 
-                      onclick="window.whatsAppManager.startChatWithLead('${lead.id}')">
-                <i class="ti ti-brand-whatsapp fs-4"></i> Conversar
+              <button type="button" class="btn btn-sm btn-success d-flex align-items-center gap-1 shadow-sm px-3" 
+                      onclick="window.whatsAppManager.startChatWithLead('${escAttr(lead.id)}')">
+                <i class="ti ti-brand-whatsapp fs-4" aria-hidden="true"></i> Conversar
               </button>
             ` : `
-              <button class="btn btn-sm btn-outline-secondary disabled" title="Lead sem telefone cadastrado">
+              <button type="button" class="btn btn-sm btn-outline-secondary" disabled title="Lead sem telefone cadastrado">
                 Sem telefone
               </button>
             `}
@@ -469,7 +497,7 @@ class WhatsAppManager {
     const leads = window.crmStore.getLeads();
     const lead = leads.find(l => l.id === leadId);
     if (!lead || !lead.phone) {
-      alert('Este lead não possui um telefone cadastrado.');
+      if (window.mqUI) window.mqUI.toast('Este lead não possui um telefone cadastrado.', { type: 'warning' });
       return;
     }
 
@@ -496,7 +524,7 @@ class WhatsAppManager {
     const createLead = createLeadInput ? createLeadInput.checked : true;
 
     if (!phone) {
-      alert('Por favor, informe o número do WhatsApp com DDD.');
+      if (window.mqUI) window.mqUI.toast('Por favor, informe o número do WhatsApp com DDD.', { type: 'warning' });
       return;
     }
 
@@ -673,30 +701,33 @@ class WhatsAppManager {
     if (!container) return;
 
     const chats = this.getFilteredChats();
+    const esc = window.mqSecurity ? window.mqSecurity.escapeHtml : (v => String(v ?? ''));
+    const escAttr = window.mqSecurity ? window.mqSecurity.escapeAttr : esc;
+    const safeUrl = window.mqSecurity ? window.mqSecurity.safeUrl : (u => u);
 
-    // Se o usuário digitou algo na busca que parece um número de telefone, exibe card para chamar direto
+    // Se o usuário digitou algo na busca que parece um número de telefone, exibe botão para chamar direto
     const searchDigits = (this.searchQuery || '').replace(/\D/g, '');
     let directCallCard = '';
     if (searchDigits.length >= 8) {
       directCallCard = `
-        <div class="p-3 bg-light-success border-bottom cursor-pointer hover-bg-light"
-             onclick="window.whatsAppManager.startChatWithNumber('${searchDigits}', '', '', true)">
+        <button type="button" class="w-100 text-start border-0 border-bottom p-3 bg-light-success hover-bg-light"
+                onclick="window.whatsAppManager.startChatWithNumber('${escAttr(searchDigits)}', '', '', true)">
           <div class="d-flex align-items-center gap-2 text-success fw-bold fs-3">
-            <i class="ti ti-message-plus fs-5"></i>
-            <span>Chamar no WhatsApp: ${this.searchQuery}</span>
+            <i class="ti ti-message-plus fs-5" aria-hidden="true"></i>
+            <span>Chamar no WhatsApp: ${esc(this.searchQuery)}</span>
           </div>
           <p class="text-muted small mb-0 mt-1">Toque para abrir a conversa e cadastrar no CRM</p>
-        </div>
+        </button>
       `;
     }
 
     if (chats.length === 0 && !directCallCard) {
       container.innerHTML = `
         <div class="text-center py-5 text-muted">
-          <i class="ti ti-messages-off fs-8 text-secondary mb-2"></i>
+          <i class="ti ti-messages-off fs-8 text-secondary mb-2" aria-hidden="true"></i>
           <p class="mb-0 small">Nenhuma conversa encontrada</p>
-          <button class="btn btn-sm btn-primary mt-3" onclick="window.whatsAppManager.openNewChatModal()">
-            <i class="ti ti-plus me-1"></i> Iniciar Nova Conversa
+          <button type="button" class="btn btn-sm btn-primary mt-3" onclick="window.whatsAppManager.openNewChatModal()">
+            <i class="ti ti-plus me-1" aria-hidden="true"></i> Iniciar Nova Conversa
           </button>
         </div>
       `;
@@ -709,35 +740,37 @@ class WhatsAppManager {
       const isVirtual = !!chat.is_virtual;
 
       const unreadBadge = chat.unread_count > 0 
-        ? `<span class="badge bg-success rounded-pill px-2 py-1 fs-1">${chat.unread_count}</span>` 
+        ? `<span class="badge bg-success rounded-pill px-2 py-1 fs-1">${Number(chat.unread_count)}</span>` 
         : '';
 
       const leadTag = isVirtual
-        ? `<span class="badge bg-success-subtle text-success border border-success-subtle" style="font-size: 10px;"><i class="ti ti-plus me-1"></i>Iniciar</span>`
+        ? `<span class="badge bg-success-subtle text-success border border-success-subtle" style="font-size: 10px;"><i class="ti ti-plus me-1" aria-hidden="true"></i>Iniciar</span>`
         : isLead 
         ? `<span class="badge bg-primary-subtle text-primary border border-primary-subtle" style="font-size: 10px;">Lead CRM</span>` 
         : `<span class="badge bg-light text-muted border" style="font-size: 10px;">Contato</span>`;
 
       const clickHandler = isVirtual 
-        ? `window.whatsAppManager.startChatWithLead('${chat.lead_id}')`
-        : `window.whatsAppManager.selectChat('${chat.id}')`;
+        ? `window.whatsAppManager.startChatWithLead('${escAttr(chat.lead_id)}')`
+        : `window.whatsAppManager.selectChat('${escAttr(chat.id)}')`;
+
+      const avatarSrc = escAttr(safeUrl(chat.avatar, '../assets/images/profile/user-1.jpg'));
 
       return `
-        <div class="chat-item p-3 border-bottom cursor-pointer ${isSelected ? 'bg-light-primary border-start border-4 border-primary' : 'hover-bg-light'}" 
-             onclick="${clickHandler}" style="transition: all 0.15s ease;">
+        <button type="button" class="chat-item w-100 text-start border-0 border-bottom p-3 ${isSelected ? 'bg-light-primary border-start border-4 border-primary' : 'bg-transparent hover-bg-light'}" 
+                onclick="${clickHandler}" style="transition: all 0.15s ease;">
           <div class="d-flex align-items-center gap-3">
-            <div class="position-relative">
-              <img src="${chat.avatar || '../assets/images/profile/user-1.jpg'}" width="46" height="46" class="rounded-circle object-fit-cover shadow-sm" alt="${chat.name}">
-              <span class="position-absolute bottom-0 end-0 p-1 ${isVirtual ? 'bg-secondary' : 'bg-success'} border border-white rounded-circle"></span>
+            <div class="position-relative flex-shrink-0">
+              <img src="${avatarSrc}" width="46" height="46" class="rounded-circle object-fit-cover shadow-sm" alt="">
+              <span class="position-absolute bottom-0 end-0 p-1 ${isVirtual ? 'bg-secondary' : 'bg-success'} border border-white rounded-circle" aria-hidden="true"></span>
             </div>
             <div class="flex-grow-1 overflow-hidden">
               <div class="d-flex align-items-center justify-content-between mb-1">
-                <h6 class="mb-0 fw-semibold text-truncate fs-3 text-dark">${chat.name}</h6>
-                <span class="text-muted" style="font-size: 11px;">${chat.last_message_time || ''}</span>
+                <h6 class="mb-0 fw-semibold text-truncate fs-3 text-dark">${esc(chat.name)}</h6>
+                <span class="text-muted" style="font-size: 11px;">${esc(chat.last_message_time || '')}</span>
               </div>
               <div class="d-flex align-items-center justify-content-between">
                 <p class="mb-0 text-muted text-truncate fs-2" style="max-width: 170px;">
-                  ${chat.last_message || 'Nenhuma mensagem'}
+                  ${esc(chat.last_message || 'Nenhuma mensagem')}
                 </p>
                 <div class="d-flex align-items-center gap-1">
                   ${leadTag}
@@ -746,7 +779,7 @@ class WhatsAppManager {
               </div>
             </div>
           </div>
-        </div>
+        </button>
       `;
     }).join('');
   }
@@ -755,6 +788,10 @@ class WhatsAppManager {
     this.currentChatId = chatId;
     const chat = window.crmStore.getWhatsAppChatById(chatId);
     if (!chat) return;
+
+    // Mobile master-detail drill-down
+    const shell = document.getElementById('whatsapp-shell');
+    if (shell) shell.classList.add('mobile-chat-open');
 
     // Reset unread count
     if (chat.unread_count > 0) {
@@ -767,9 +804,14 @@ class WhatsAppManager {
     this.renderMessages(chat);
     this.renderLeadPanel(chat);
 
-    // Focus input
+    // Focus composer only on tablet/desktop to avoid unprompted keyboard pop on mobile
     const input = document.getElementById('chat-message-input');
-    if (input) input.focus();
+    if (input && window.innerWidth >= 768) input.focus();
+  }
+
+  closeMobileChat() {
+    const shell = document.getElementById('whatsapp-shell');
+    if (shell) shell.classList.remove('mobile-chat-open');
   }
 
   renderChatHeader(chat) {
@@ -777,39 +819,49 @@ class WhatsAppManager {
     if (!headerEl) return;
 
     const isLead = !!chat.lead_id;
+    const esc = window.mqSecurity ? window.mqSecurity.escapeHtml : (v => String(v ?? ''));
+    const escAttr = window.mqSecurity ? window.mqSecurity.escapeAttr : esc;
+    const safeUrl = window.mqSecurity ? window.mqSecurity.safeUrl : (u => u);
+    const avatarSrc = escAttr(safeUrl(chat.avatar, '../assets/images/profile/user-1.jpg'));
+    const cleanWaDigits = (chat.phone || '').replace(/\D/g, '');
 
     headerEl.innerHTML = `
       <div class="d-flex align-items-center justify-content-between w-100 p-3 border-bottom bg-white">
-        <div class="d-flex align-items-center gap-3">
-          <div class="position-relative">
-            <img src="${chat.avatar || '../assets/images/profile/user-1.jpg'}" width="42" height="42" class="rounded-circle object-fit-cover shadow-sm">
-            <span class="position-absolute bottom-0 end-0 p-1 bg-success border border-white rounded-circle"></span>
+        <div class="d-flex align-items-center gap-2 gap-md-3 min-w-0">
+          <button type="button" class="btn btn-sm btn-light d-md-none flex-shrink-0" onclick="window.whatsAppManager.closeMobileChat()" aria-label="Voltar para a lista de conversas">
+            <i class="ti ti-arrow-left fs-5" aria-hidden="true"></i>
+          </button>
+          <div class="position-relative flex-shrink-0">
+            <img src="${avatarSrc}" alt="" width="42" height="42" class="rounded-circle object-fit-cover shadow-sm">
+            <span class="position-absolute bottom-0 end-0 p-1 bg-success border border-white rounded-circle" aria-hidden="true"></span>
           </div>
-          <div>
+          <div class="min-w-0">
             <div class="d-flex align-items-center gap-2">
-              <h6 class="mb-0 fw-bold fs-3 text-dark">${chat.name}</h6>
-              ${isLead ? '<span class="badge bg-success-subtle text-success border border-success-subtle" style="font-size: 11px;"><i class="ti ti-check me-1"></i>Lead Sincronizado</span>' : ''}
+              <h6 class="mb-0 fw-bold fs-3 text-dark text-truncate">${esc(chat.name)}</h6>
+              ${isLead ? '<span class="badge bg-success-subtle text-success border border-success-subtle d-none d-sm-inline-flex align-items-center" style="font-size: 11px;"><i class="ti ti-check me-1" aria-hidden="true"></i>Lead Sincronizado</span>' : ''}
             </div>
-            <p class="mb-0 text-muted fs-2">
-              <i class="ti ti-phone me-1"></i>${chat.phone} 
+            <p class="mb-0 text-muted fs-2 text-truncate">
+              <i class="ti ti-phone me-1" aria-hidden="true"></i>${esc(chat.phone)} 
               <span class="mx-1">•</span> 
-              <span class="text-success"><i class="ti ti-point-filled"></i>Online no WhatsApp</span>
+              <span class="text-success"><i class="ti ti-point-filled" aria-hidden="true"></i>Online no WhatsApp</span>
             </p>
           </div>
         </div>
 
-        <div class="d-flex align-items-center gap-2">
-          <button class="btn btn-sm btn-outline-secondary d-none d-md-flex align-items-center gap-1" 
-                  title="Abrir no WhatsApp Web Oficial"
-                  onclick="window.open('https://wa.me/${(chat.phone || '').replace(/\\D/g, '')}', '_blank')">
-            <i class="ti ti-external-link"></i>
+        <div class="d-flex align-items-center gap-2 flex-shrink-0">
+          <a class="btn btn-sm btn-outline-secondary d-none d-md-flex align-items-center gap-1" 
+             title="Abrir no WhatsApp Web Oficial"
+             href="https://wa.me/${encodeURIComponent(cleanWaDigits)}"
+             target="_blank"
+             rel="noopener noreferrer">
+            <i class="ti ti-external-link" aria-hidden="true"></i>
             <span class="d-none d-lg-inline">Abrir Externo</span>
-          </button>
+          </a>
           
-          <button class="btn btn-sm btn-light-primary text-primary d-flex align-items-center gap-1"
+          <button type="button" class="btn btn-sm btn-light-primary text-primary d-flex align-items-center gap-1"
                   onclick="window.whatsAppManager.toggleLeadDrawer()">
-            <i class="ti ti-user-check"></i>
-            <span>${isLead ? 'Ver Lead' : 'Cadastrar Lead'}</span>
+            <i class="ti ti-user-check" aria-hidden="true"></i>
+            <span class="d-none d-sm-inline">${isLead ? 'Ver Lead' : 'Cadastrar Lead'}</span>
           </button>
         </div>
       </div>
@@ -821,11 +873,12 @@ class WhatsAppManager {
     if (!container) return;
 
     const messages = chat.messages || [];
+    const esc = window.mqSecurity ? window.mqSecurity.escapeHtml : (v => String(v ?? ''));
 
     if (messages.length === 0) {
       container.innerHTML = `
         <div class="text-center py-5 text-muted my-auto">
-          <div class="bg-white rounded-circle p-3 d-inline-flex mb-3 shadow-sm">
+          <div class="bg-white rounded-circle p-3 d-inline-flex mb-3 shadow-sm" aria-hidden="true">
             <i class="ti ti-message-dots text-success fs-8"></i>
           </div>
           <h6>Nenhuma mensagem nesta conversa ainda</h6>
@@ -838,7 +891,7 @@ class WhatsAppManager {
     let html = `
       <div class="text-center my-3">
         <span class="badge bg-white text-muted shadow-sm px-3 py-1 fw-normal border" style="font-size: 11px;">
-          <i class="ti ti-lock me-1"></i> Mensagens protegidas de ponta a ponta pelo WhatsApp
+          <i class="ti ti-lock me-1" aria-hidden="true"></i> Mensagens protegidas de ponta a ponta pelo WhatsApp
         </span>
       </div>
     `;
@@ -846,17 +899,17 @@ class WhatsAppManager {
     messages.forEach(msg => {
       const isMe = msg.from_me;
       const checkIcon = isMe 
-        ? `<i class="ti ti-checks text-info ms-1" style="font-size: 13px;" title="Entregue e Lida"></i>` 
+        ? `<i class="ti ti-checks text-info ms-1" style="font-size: 13px;" title="Entregue e Lida" aria-label="Entregue"></i>` 
         : '';
 
       html += `
         <div class="d-flex mb-2 ${isMe ? 'justify-content-end' : 'justify-content-start'}">
           <div class="message-bubble p-2 px-3 rounded-3 shadow-sm ${isMe ? 'bg-success text-white' : 'bg-white text-dark border'}" 
                style="max-width: 72%; min-width: 110px; word-break: break-word;">
-            ${!isMe && msg.sender_name ? `<div class="fw-semibold mb-1 text-primary" style="font-size: 11px;">${msg.sender_name}</div>` : ''}
-            <div class="fs-2 mb-1" style="line-height: 1.45;">${msg.text}</div>
-            <div class="text-end d-flex align-items-center justify-content-end" style="font-size: 10px; ${isMe ? 'color: rgba(255,255,255,0.85);' : 'color: #9ca3af;'}">
-              <span>${msg.time || ''}</span>
+            ${!isMe && msg.sender_name ? `<div class="fw-semibold mb-1 text-primary" style="font-size: 11px;">${esc(msg.sender_name)}</div>` : ''}
+            <div class="fs-2 mb-1" style="line-height: 1.45; white-space: pre-wrap;">${esc(msg.text)}</div>
+            <div class="text-end d-flex align-items-center justify-content-end" style="font-size: 10px; ${isMe ? 'color: rgba(255,255,255,0.85);' : 'color: #6b7280;'}">
+              <span>${esc(msg.time || '')}</span>
               ${checkIcon}
             </div>
           </div>
@@ -921,36 +974,40 @@ class WhatsAppManager {
 
     const leads = window.crmStore.getLeads();
     const lead = chat.lead_id ? leads.find(l => l.id === chat.lead_id) : null;
+    const esc = window.mqSecurity ? window.mqSecurity.escapeHtml : (v => String(v ?? ''));
+    const escAttr = window.mqSecurity ? window.mqSecurity.escapeAttr : esc;
+    const safeUrl = window.mqSecurity ? window.mqSecurity.safeUrl : (u => u);
 
     if (lead) {
       // Estágios de Kanban
       const stages = window.crmStore.getStages();
-      const currentStage = stages.find(s => s.id === lead.stage_id) || stages[0];
+      const avatarSrc = escAttr(safeUrl(lead.avatar || chat.avatar, '../assets/images/profile/user-1.jpg'));
+      const safeLeadId = escAttr(lead.id);
 
       panel.innerHTML = `
         <div class="p-3 border-bottom bg-light d-flex align-items-center justify-content-between">
           <h6 class="mb-0 fw-bold fs-3 text-dark">
-            <i class="ti ti-id me-1 text-primary"></i> Lead Vinculado
+            <i class="ti ti-id me-1 text-primary" aria-hidden="true"></i> Lead Vinculado
           </h6>
-          <span class="badge bg-primary px-2 py-1">${lead.lifecycle_stage ? lead.lifecycle_stage.toUpperCase() : 'LEAD'}</span>
+          <span class="badge bg-primary px-2 py-1">${esc(lead.lifecycle_stage ? lead.lifecycle_stage.toUpperCase() : 'LEAD')}</span>
         </div>
 
-        <div class="p-3 overflow-auto" style="max-height: calc(100vh - 220px);">
+        <div class="p-3 overflow-auto" style="max-height: calc(100dvh - 220px);">
           <div class="text-center mb-3">
-            <img src="${lead.avatar || chat.avatar || '../assets/images/profile/user-1.jpg'}" width="64" height="64" class="rounded-circle shadow-sm mb-2 object-fit-cover">
-            <h6 class="mb-0 fw-bold fs-4">${lead.name}</h6>
-            <p class="text-muted small mb-1">${lead.company || 'Empresa não informada'}</p>
+            <img src="${avatarSrc}" alt="" width="64" height="64" class="rounded-circle shadow-sm mb-2 object-fit-cover">
+            <h6 class="mb-0 fw-bold fs-4">${esc(lead.name)}</h6>
+            <p class="text-muted small mb-1">${esc(lead.company || 'Empresa não informada')}</p>
             <div class="d-inline-flex align-items-center gap-1 badge bg-warning-subtle text-warning border border-warning-subtle px-2 py-1">
-              <i class="ti ti-flame"></i> Score: ${lead.score || 30} pts
+              <i class="ti ti-flame" aria-hidden="true"></i> Score: ${Number(lead.score) || 30} pts
             </div>
           </div>
 
           <div class="mb-3">
-            <label class="form-label small fw-semibold text-muted mb-1">Mover Etapa no Funil</label>
-            <select class="form-select form-select-sm" onchange="window.whatsAppManager.handleUpdateLeadStage('${lead.id}', this.value)">
+            <label for="wa-stage-select" class="form-label small fw-semibold text-muted mb-1">Mover Etapa no Funil</label>
+            <select id="wa-stage-select" class="form-select form-select-sm" onchange="window.whatsAppManager.handleUpdateLeadStage('${safeLeadId}', this.value)">
               ${stages.map(s => `
-                <option value="${s.id}" ${s.id === (lead.stage_id || stages[0].id) ? 'selected' : ''}>
-                  ${s.name}
+                <option value="${escAttr(s.id)}" ${s.id === (lead.stage_id || stages[0].id) ? 'selected' : ''}>
+                  ${esc(s.name)}
                 </option>
               `).join('')}
             </select>
@@ -959,24 +1016,24 @@ class WhatsAppManager {
           <div class="list-group list-group-flush border rounded mb-3 small">
             <div class="list-group-item d-flex justify-content-between py-2">
               <span class="text-muted">Telefone:</span>
-              <span class="fw-semibold text-dark">${lead.phone || chat.phone}</span>
+              <span class="fw-semibold text-dark">${esc(lead.phone || chat.phone)}</span>
             </div>
             <div class="list-group-item d-flex justify-content-between py-2">
               <span class="text-muted">E-mail:</span>
-              <span class="fw-semibold text-dark text-truncate" style="max-width: 150px;">${lead.email || 'Não cadastrado'}</span>
+              <span class="fw-semibold text-dark text-truncate" style="max-width: 150px;">${esc(lead.email || 'Não cadastrado')}</span>
             </div>
             <div class="list-group-item d-flex justify-content-between py-2">
               <span class="text-muted">Origem:</span>
-              <span class="badge bg-light-primary text-primary">${lead.source || 'WhatsApp'}</span>
+              <span class="badge bg-light-primary text-primary">${esc(lead.source || 'WhatsApp')}</span>
             </div>
           </div>
 
           <div class="d-grid gap-2">
-            <a href="./leads.html" class="btn btn-outline-primary btn-sm d-flex align-items-center justify-content-center gap-1">
-              <i class="ti ti-external-link"></i> Abrir na Base de Leads
+            <a href="./leads.html?lead=${encodeURIComponent(lead.id)}" class="btn btn-outline-primary btn-sm d-flex align-items-center justify-content-center gap-1">
+              <i class="ti ti-external-link" aria-hidden="true"></i> Abrir na Base de Leads
             </a>
-            <button class="btn btn-outline-secondary btn-sm" onclick="window.whatsAppManager.showAddNoteModal('${lead.id}')">
-              <i class="ti ti-note me-1"></i> Anotar Observação
+            <button type="button" class="btn btn-outline-secondary btn-sm" onclick="window.whatsAppManager.showAddNoteModal('${safeLeadId}')">
+              <i class="ti ti-note me-1" aria-hidden="true"></i> Anotar Observação
             </button>
           </div>
 
@@ -986,11 +1043,11 @@ class WhatsAppManager {
           <div class="activities-timeline" style="font-size: 11px;">
             ${(lead.activities && lead.activities.length > 0) ? lead.activities.slice(0, 4).map(act => `
               <div class="d-flex gap-2 mb-2 pb-2 border-bottom">
-                <i class="ti ${act.type === 'whatsapp' ? 'ti-brand-whatsapp text-success' : 'ti-activity text-primary'} mt-1"></i>
+                <i class="ti ${act.type === 'whatsapp' ? 'ti-brand-whatsapp text-success' : 'ti-activity text-primary'} mt-1" aria-hidden="true"></i>
                 <div>
-                  <div class="fw-semibold text-dark">${act.title}</div>
-                  <div class="text-muted text-truncate" style="max-width: 180px;">${act.text}</div>
-                  <div class="text-muted" style="font-size: 10px;">${act.date || ''}</div>
+                  <div class="fw-semibold text-dark">${esc(act.title)}</div>
+                  <div class="text-muted text-truncate" style="max-width: 180px;">${esc(act.text || act.desc || '')}</div>
+                  <div class="text-muted" style="font-size: 10px;">${esc(act.date || '')}</div>
                 </div>
               </div>
             `).join('') : '<p class="text-muted small">Nenhuma atividade registrada ainda.</p>'}
@@ -1001,23 +1058,23 @@ class WhatsAppManager {
       panel.innerHTML = `
         <div class="p-3 border-bottom bg-light">
           <h6 class="mb-0 fw-bold fs-3 text-dark">
-            <i class="ti ti-user-plus me-1 text-warning"></i> Contato Não Cadastrado
+            <i class="ti ti-user-plus me-1 text-warning" aria-hidden="true"></i> Contato Não Cadastrado
           </h6>
         </div>
 
         <div class="p-4 text-center">
-          <div class="bg-warning-subtle text-warning rounded-circle p-3 d-inline-flex mb-3">
+          <div class="bg-warning-subtle text-warning rounded-circle p-3 d-inline-flex mb-3" aria-hidden="true">
             <i class="ti ti-user-exclamation fs-8"></i>
           </div>
-          <h6 class="fw-bold mb-1">${chat.name}</h6>
-          <p class="text-muted small mb-3">${chat.phone}</p>
+          <h6 class="fw-bold mb-1">${esc(chat.name)}</h6>
+          <p class="text-muted small mb-3">${esc(chat.phone)}</p>
           <div class="alert alert-warning text-start small mb-3" style="font-size: 12px;">
             Este contato ainda não possui ficha na sua Base de Leads do Metrifique-se.
           </div>
           
-          <button class="btn btn-primary w-100 py-2 d-flex align-items-center justify-content-center gap-2 shadow-sm"
-                  onclick="window.whatsAppManager.convertContactToLead('${chat.id}')">
-            <i class="ti ti-user-plus fs-5"></i>
+          <button type="button" class="btn btn-primary w-100 py-2 d-flex align-items-center justify-content-center gap-2 shadow-sm"
+                  onclick="window.whatsAppManager.convertContactToLead('${escAttr(chat.id)}')">
+            <i class="ti ti-user-plus fs-5" aria-hidden="true"></i>
             <span>Converter em Lead CRM</span>
           </button>
         </div>
@@ -1035,7 +1092,7 @@ class WhatsAppManager {
   convertContactToLead(chatId) {
     const newLead = window.crmStore.createLeadFromWhatsApp(chatId);
     if (newLead) {
-      alert(`Lead "${newLead.name}" criado e sincronizado com sucesso no CRM!`);
+      if (window.mqUI) window.mqUI.toast(`Lead "${newLead.name}" criado e sincronizado com sucesso no CRM!`, { type: 'success' });
       const chat = window.crmStore.getWhatsAppChatById(chatId);
       this.renderChatHeader(chat);
       this.renderLeadPanel(chat);
@@ -1060,7 +1117,7 @@ class WhatsAppManager {
         user: (window.crmStore.getUser() || {}).full_name || 'Atendente'
       });
 
-      alert('Etapa do Lead atualizada com sucesso!');
+      if (window.mqUI) window.mqUI.toast('Etapa do Lead atualizada com sucesso!', { type: 'success' });
       if (this.currentChatId) {
         const chat = window.crmStore.getWhatsAppChatById(this.currentChatId);
         this.renderLeadPanel(chat);
@@ -1068,8 +1125,17 @@ class WhatsAppManager {
     }
   }
 
-  showAddNoteModal(leadId) {
-    const note = prompt('Digite a anotação/observação para salvar na ficha deste Lead:');
+  async showAddNoteModal(leadId) {
+    const note = window.mqUI
+      ? await window.mqUI.prompt({
+          title: 'Anotar observação no Lead',
+          label: 'Observação para salvar na ficha deste contato',
+          placeholder: 'Ex: Cliente pediu proposta atualizada para sexta-feira...',
+          multiline: true,
+          confirmLabel: 'Salvar observação',
+          required: true
+        })
+      : null;
     if (note && note.trim()) {
       window.crmStore.addLeadActivity(leadId, {
         type: 'note',
@@ -1077,7 +1143,7 @@ class WhatsAppManager {
         text: note.trim(),
         user: (window.crmStore.getUser() || {}).full_name || 'Atendente'
       });
-      alert('Observação salva na timeline do Lead!');
+      if (window.mqUI) window.mqUI.toast('Observação salva na timeline do Lead!', { type: 'success' });
       if (this.currentChatId) {
         const chat = window.crmStore.getWhatsAppChatById(this.currentChatId);
         this.renderLeadPanel(chat);

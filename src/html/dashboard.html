@@ -3,51 +3,63 @@
 
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="color-scheme" content="light dark">
   <title>Dashboard | Metrifique-se CRM</title>
   <link rel="shortcut icon" type="image/png" href="../assets/images/logos/icon.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
   <link rel="stylesheet" href="../assets/css/styles.min.css" />
   <link rel="stylesheet" href="../assets/css/metrifiquese-theme.css" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
   
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="../assets/js/supabase-client.js"></script>
-  <script src="../assets/js/whitelabel-theme.js"></script>
-  <script src="../assets/js/notifications-manager.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script defer src="../assets/js/ui-toolkit.js"></script>
+  <script defer src="../assets/js/supabase-client.js"></script>
+  <script defer src="../assets/js/whitelabel-theme.js"></script>
+  <script defer src="../assets/js/notifications-manager.js"></script>
 </head>
 
 <body>
+  <a class="skip-link" href="#main-content">Pular para o conteúdo principal</a>
+
   <!-- TOP NAVBAR HEADER -->
   <header class="app-header hs-header d-flex align-items-center justify-content-between px-3">
     <div class="d-flex align-items-center gap-2">
       <a href="./dashboard.html" class="navbar-brand me-1">
-        <img src="../assets/images/logos/logoblack.png" height="30" alt="Logo" class="hs-brand-logo" />
+        <img src="../assets/images/logos/logoblack.png" height="30" alt="Logo Metrifique-se" class="hs-brand-logo" />
       </a>
-      <button class="btn btn-light text-secondary border-0 rounded-circle p-2 sidebartoggler" id="sidebarCollapseToggle" title="Recolher / Expandir Menu Lateral">
-        <i class="ti ti-layout-sidebar-left-collapse fs-5"></i>
+      <button type="button" class="btn btn-light text-secondary border-0 rounded-circle p-2 sidebartoggler" id="sidebarCollapseToggle" title="Recolher / Expandir Menu Lateral" aria-label="Recolher ou expandir menu lateral">
+        <i class="ti ti-layout-sidebar-left-collapse fs-5" aria-hidden="true"></i>
       </button>
     </div>
 
-    <div class="d-flex align-items-center gap-3">
-      <div class="input-group input-group-sm d-none d-lg-flex" style="width: 240px;">
-        <span class="input-group-text bg-light border-0 text-muted"><i class="ti ti-search"></i></span>
-        <input type="text" class="form-control bg-light text-dark border-0" placeholder="Buscar global (CRM)...">
-      </div>
+    <div class="d-flex align-items-center gap-2 gap-md-3">
+      <button type="button" class="btn btn-light text-secondary border-0 rounded-pill px-3 py-1 d-none d-lg-inline-flex align-items-center gap-2 fs-2" data-global-search-trigger title="Busca global no CRM (Ctrl/Cmd + K)" aria-label="Abrir busca global no CRM">
+        <i class="ti ti-search" aria-hidden="true"></i>
+        <span>Buscar no CRM...</span>
+        <kbd class="ms-1 small">⌘K</kbd>
+      </button>
 
-      <a href="./configuracoes-whitelabel.html" class="text-secondary fs-5" title="Configurações Whitelabel"><i class="ti ti-settings"></i></a>
-      <a href="#" class="text-secondary fs-5 position-relative" title="Notificações" onclick="window.notificationsManager && window.notificationsManager.markAllRead(); alert('Todas as notificações foram lidas.');"><i class="ti ti-bell"></i></a>
+      <button type="button" class="btn btn-light text-secondary border-0 rounded-circle p-2 d-inline-flex align-items-center justify-content-center" data-theme-toggle title="Alternar tema claro/escuro" aria-label="Alternar tema claro/escuro">
+        <i class="ti ti-moon fs-5" aria-hidden="true"></i>
+      </button>
+
+      <a href="./configuracoes-whitelabel.html" class="text-secondary fs-5" title="Configurações Whitelabel" aria-label="Configurações Whitelabel"><i class="ti ti-settings" aria-hidden="true"></i></a>
+      <button type="button" class="btn btn-link p-1 text-secondary fs-5 position-relative text-decoration-none" title="Notificações" aria-label="Notificações"><i class="ti ti-bell" aria-hidden="true"></i></button>
 
       <div class="dropdown">
-        <a href="#" class="d-flex align-items-center text-dark text-decoration-none dropdown-toggle" data-bs-toggle="dropdown">
-          <img src="../assets/images/profile/user-1.jpg" width="30" height="30" class="rounded-circle me-2 header-user-avatar">
+        <a href="#" class="d-flex align-items-center text-dark text-decoration-none dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+          <img src="../assets/images/profile/user-1.jpg" alt="" width="30" height="30" class="rounded-circle me-2 header-user-avatar">
           <span class="d-none d-md-inline fs-2 fw-semibold header-user-name">Guilherme Garcia</span>
         </a>
         <ul class="dropdown-menu dropdown-menu-end">
-          <li><a class="dropdown-item" href="./perfil.html"><i class="ti ti-user me-2"></i>Meu Perfil</a></li>
-          <li><a class="dropdown-item" href="./admin-tenants.html"><i class="ti ti-building-store me-2"></i>Gestão de Empresas</a></li>
-          <li><a class="dropdown-item" href="./configuracoes-whitelabel.html"><i class="ti ti-palette me-2"></i>Painel Whitelabel</a></li>
+          <li><a class="dropdown-item" href="./perfil.html"><i class="ti ti-user me-2" aria-hidden="true"></i>Meu Perfil</a></li>
+          <li><a class="dropdown-item" href="./admin-tenants.html"><i class="ti ti-building-store me-2" aria-hidden="true"></i>Gestão de Empresas</a></li>
+          <li><a class="dropdown-item" href="./configuracoes-whitelabel.html"><i class="ti ti-palette me-2" aria-hidden="true"></i>Painel Whitelabel</a></li>
           <li><hr class="dropdown-divider"></li>
-          <li><a class="dropdown-item text-danger" href="./login.html" onclick="event.preventDefault(); window.crmStore.logout();"><i class="ti ti-logout me-2"></i>Sair</a></li>
+          <li><a class="dropdown-item text-danger" href="./login.html" onclick="event.preventDefault(); window.crmStore && window.crmStore.logout();"><i class="ti ti-logout me-2" aria-hidden="true"></i>Sair</a></li>
         </ul>
       </div>
     </div>
@@ -58,21 +70,21 @@
     
     <aside class="left-sidebar">
       <div>
-        <nav class="sidebar-nav scroll-sidebar" data-simplebar="">
+        <nav class="sidebar-nav scroll-sidebar" aria-label="Menu principal" data-simplebar="">
           <ul id="sidebarnav">
             <li class="nav-small-cap">
-              <i class="ti ti-dots nav-small-cap-icon fs-4"></i>
+              <i class="ti ti-dots nav-small-cap-icon fs-4" aria-hidden="true"></i>
               <span class="hide-menu">CRM MENU</span>
             </li>
             <li class="sidebar-item">
               <a class="sidebar-link text-primary fw-bold" href="./admin-tenants.html">
-                <span><i class="ti ti-building-store"></i></span>
+                <span><i class="ti ti-building-store" aria-hidden="true"></i></span>
                 <span class="hide-menu">Gestão de Empresas</span>
               </a>
             </li>
             <li class="sidebar-item selected">
-              <a class="sidebar-link" href="./dashboard.html">
-                <span><i class="ti ti-layout-dashboard"></i></span>
+              <a class="sidebar-link" href="./dashboard.html" aria-current="page">
+                <span><i class="ti ti-layout-dashboard" aria-hidden="true"></i></span>
                 <span class="hide-menu">Dashboard</span>
               </a>
             </li>
@@ -124,21 +136,24 @@
     </aside>
 
     <div class="body-wrapper">
-      <div class="container-fluid pt-3">
+      <main id="main-content" class="container-fluid pt-3" tabindex="-1">
         <!-- Top Banner -->
         <div class="card shadow-sm border-0 mb-4 bg-white">
           <div class="card-body p-4">
             <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
               <div>
-                <h4 class="fw-bold mb-1 text-dark">Painel de Performance Comercial</h4>
+                <h1 class="h4 fw-bold mb-1 text-dark">Painel de Performance Comercial</h1>
                 <p class="text-muted mb-0">Visão integrada da sua base de contatos, funil de oportunidades e automações de marketing.</p>
               </div>
-              <div class="d-flex gap-2">
+              <div class="d-flex gap-2 flex-wrap">
+                <button type="button" id="onboarding-reopen-btn" class="btn btn-outline-secondary d-none" title="Reabrir Guia de Setup">
+                  <i class="ti ti-rocket me-1" aria-hidden="true"></i> Guia Inicial
+                </button>
                 <a href="./leads.html" class="btn btn-outline-primary">
-                  <i class="ti ti-users me-1"></i> Ver Contatos
+                  <i class="ti ti-users me-1" aria-hidden="true"></i> Ver Contatos
                 </a>
                 <a href="./kanban.html" class="btn btn-primary">
-                  <i class="ti ti-columns me-1"></i> Funil de Vendas
+                  <i class="ti ti-columns me-1" aria-hidden="true"></i> Funil de Vendas
                 </a>
               </div>
             </div>
@@ -147,11 +162,14 @@
 
         <!-- Style extra para interações do widget -->
         <style>
-          .hover-translate-y { transition: all 0.25s ease; }
+          .hover-translate-y { transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease; }
           .hover-translate-y:hover {
             transform: translateY(-4px);
             box-shadow: 0 10px 20px -5px rgba(93, 135, 255, 0.18) !important;
             border-color: #5D87FF !important;
+          }
+          @media (prefers-reduced-motion: reduce) {
+            .hover-translate-y:hover { transform: none; }
           }
         </style>
 
@@ -162,7 +180,7 @@
             <!-- Top Header & Progress Row -->
             <div class="d-flex align-items-center justify-content-between flex-wrap gap-3 mb-4 pb-3 border-bottom">
               <div class="d-flex align-items-center gap-3">
-                <div class="p-3 bg-primary bg-opacity-10 text-primary rounded-3 d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
+                <div class="p-3 bg-primary bg-opacity-10 text-primary rounded-3 d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;" aria-hidden="true">
                   <i class="ti ti-rocket fs-7"></i>
                 </div>
                 <div>
@@ -184,8 +202,8 @@
                     <div class="progress-bar rounded-pill" id="onboarding-bar-fill" style="width: 80%; background: linear-gradient(90deg, #5D87FF 0%, #13DEB9 100%);"></div>
                   </div>
                 </div>
-                <button class="btn btn-sm btn-light-danger text-danger p-2 rounded-circle hover-shadow" onclick="document.getElementById('onboarding-guide-widget').classList.add('d-none')" title="Ocultar Guia de Setup">
-                  <i class="ti ti-x fs-4"></i>
+                <button type="button" id="onboarding-dismiss-btn" class="btn btn-sm btn-light-danger text-danger p-2 rounded-circle hover-shadow" title="Ocultar Guia de Setup" aria-label="Ocultar guia de inicialização">
+                  <i class="ti ti-x fs-4" aria-hidden="true"></i>
                 </button>
               </div>
             </div>
@@ -389,24 +407,49 @@
           </div>
         </div>
 
-      </div>
+      </main>
     </div>
   </div>
 
-  <script src="../assets/libs/jquery/dist/jquery.min.js"></script>
-  <script src="../assets/libs/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-  <script src="../assets/libs/apexcharts/dist/apexcharts.min.js"></script>
-  <script src="../assets/js/sidebarmenu.js"></script>
-  <script src="../assets/js/app.min.js"></script>
-  <script src="../assets/js/analytics-manager.js"></script>
-  <script src="../assets/js/tasks-manager.js"></script>
+  <script defer src="../assets/libs/jquery/dist/jquery.min.js"></script>
+  <script defer src="../assets/libs/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+  <script defer src="../assets/libs/apexcharts/dist/apexcharts.min.js"></script>
+  <script defer src="../assets/js/sidebarmenu.js"></script>
+  <script defer src="../assets/js/app.min.js"></script>
+  <script defer src="../assets/js/analytics-manager.js"></script>
+  <script defer src="../assets/js/tasks-manager.js"></script>
 
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       const user = window.crmStore ? window.crmStore.getUser() : null;
       if (user) {
-        document.querySelectorAll('.header-user-name').forEach(el => el.innerText = user.full_name);
-        document.querySelectorAll('.header-user-avatar').forEach(img => img.src = user.avatar_url);
+        document.querySelectorAll('.header-user-name').forEach(el => el.innerText = user.full_name || 'Usuário');
+        const safeAvatar = window.mqSecurity ? window.mqSecurity.safeUrl(user.avatar_url, '../assets/images/profile/user-1.jpg') : (user.avatar_url || '../assets/images/profile/user-1.jpg');
+        document.querySelectorAll('.header-user-avatar').forEach(img => { img.src = safeAvatar; });
+      }
+
+      const guideEl = document.getElementById('onboarding-guide-widget');
+      const dismissBtn = document.getElementById('onboarding-dismiss-btn');
+      const reopenBtn = document.getElementById('onboarding-reopen-btn');
+      const syncGuideState = () => {
+        if (!guideEl || !reopenBtn) return;
+        const hidden = localStorage.getItem('mq_onboarding_dismissed') === '1';
+        guideEl.classList.toggle('d-none', hidden);
+        reopenBtn.classList.toggle('d-none', !hidden);
+      };
+      syncGuideState();
+      if (dismissBtn) {
+        dismissBtn.addEventListener('click', () => {
+          localStorage.setItem('mq_onboarding_dismissed', '1');
+          syncGuideState();
+          if (window.mqUI) window.mqUI.toast('Guia oculto. Você pode reabri-lo em "Guia Inicial".', { type: 'info' });
+        });
+      }
+      if (reopenBtn) {
+        reopenBtn.addEventListener('click', () => {
+          localStorage.removeItem('mq_onboarding_dismissed');
+          syncGuideState();
+        });
       }
     });
   </script>

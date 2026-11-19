@@ -69,27 +69,34 @@ class FormsManager {
       return;
     }
 
+    const esc = window.mqSecurity ? window.mqSecurity.escapeHtml : (v => String(v ?? ''));
+    const escAttr = window.mqSecurity ? window.mqSecurity.escapeAttr : esc;
+    const safeUrl = window.mqSecurity ? window.mqSecurity.safeUrl : (u => u);
+
     container.innerHTML = forms.map(f => {
       const publicLink = `${baseUrl}?${this.buildFormQueryParams(f)}`;
+      const safeHex = /^#[0-9a-fA-F]{6}$/.test(f.button_color || '') ? f.button_color : '#FF7A59';
+      const safeId = escAttr(f.id);
+      const safeTitle = esc(f.title || 'Formulário Sem Título');
       return `
         <div class="col-md-6 col-lg-4 mb-4">
           <div class="card border shadow-sm h-100 p-4 rounded-4 hover-shadow transition-all">
             <div class="d-flex align-items-center justify-content-between mb-3">
               <div class="d-flex align-items-center gap-2">
-                <div class="p-2-5 rounded-3" style="background-color: ${f.button_color || '#FF7A59'}20; color: ${f.button_color || '#FF7A59'};">
+                <div class="p-2-5 rounded-3" style="background-color: ${safeHex}20; color: ${safeHex};" aria-hidden="true">
                   <i class="ti ti-forms fs-6"></i>
                 </div>
                 <div>
-                  <h6 class="fw-bold text-dark mb-0 fs-3">${f.title || 'Formulário Sem Título'}</h6>
-                  <small class="text-muted fs-1">${f.source || 'Site / Landing Page'}</small>
+                  <h6 class="fw-bold text-dark mb-0 fs-3">${safeTitle}</h6>
+                  <small class="text-muted fs-1">${esc(f.source || 'Site / Landing Page')}</small>
                 </div>
               </div>
               <span class="badge bg-light-primary text-primary rounded-pill px-2.5 py-1 fs-1 fw-bold">
-                <i class="ti ti-users me-1"></i> ${f.submissions_count || 0} Leads
+                <i class="ti ti-users me-1" aria-hidden="true"></i> ${Number(f.submissions_count) || 0} Leads
               </span>
             </div>
 
-            <p class="text-muted fs-2 mb-3 line-clamp-2" style="min-height: 38px;">${f.description || 'Formulário de captura para website.'}</p>
+            <p class="text-muted fs-2 mb-3 line-clamp-2" style="min-height: 38px;">${esc(f.description || 'Formulário de captura para website.')}</p>
 
             <div class="d-flex align-items-center gap-1 mb-3 pt-2 border-top border-bottom py-2">
               <span class="badge bg-light text-dark border fs-1 me-1">Campos:</span>
@@ -100,17 +107,17 @@ class FormsManager {
             </div>
 
             <div class="d-flex gap-2 flex-wrap mt-auto">
-              <button class="btn btn-sm btn-primary flex-fill fw-bold" onclick="window.formsManager.openEmbedCodeModal('${f.id}')">
-                <i class="ti ti-code me-1"></i> Código Embed
+              <button type="button" class="btn btn-sm btn-primary flex-fill fw-bold" onclick="window.formsManager.openEmbedCodeModal('${safeId}')">
+                <i class="ti ti-code me-1" aria-hidden="true"></i> Código Embed
               </button>
-              <button class="btn btn-sm btn-outline-secondary" onclick="window.formsManager.openFormModal('${f.id}')" title="Editar Formulário">
-                <i class="ti ti-edit"></i>
+              <button type="button" class="btn btn-sm btn-outline-secondary" onclick="window.formsManager.openFormModal('${safeId}')" title="Editar Formulário" aria-label="Editar formulário ${escAttr(f.title || '')}">
+                <i class="ti ti-edit" aria-hidden="true"></i>
               </button>
-              <a href="${publicLink}" target="_blank" class="btn btn-sm btn-outline-info" title="Abrir Página Pública">
-                <i class="ti ti-external-link"></i>
+              <a href="${escAttr(safeUrl(publicLink, '#'))}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline-info" title="Abrir Página Pública" aria-label="Abrir página pública do formulário ${escAttr(f.title || '')}">
+                <i class="ti ti-external-link" aria-hidden="true"></i>
               </a>
-              <button class="btn btn-sm btn-outline-danger" onclick="window.formsManager.deleteFormPrompt('${f.id}')" title="Excluir">
-                <i class="ti ti-trash"></i>
+              <button type="button" class="btn btn-sm btn-outline-danger" onclick="window.formsManager.deleteFormPrompt('${safeId}')" title="Excluir" aria-label="Excluir formulário ${escAttr(f.title || '')}">
+                <i class="ti ti-trash" aria-hidden="true"></i>
               </button>
             </div>
           </div>
@@ -186,12 +193,13 @@ class FormsManager {
     const isDark = theme === 'dark';
     const bgClass = isDark ? 'bg-dark text-light border-secondary' : 'bg-white text-dark border';
 
+    const escPreview = window.mqSecurity ? window.mqSecurity.escapeHtml : (v => String(v ?? ''));
     previewContainer.innerHTML = `
       <div class="card ${bgClass} p-4 rounded-4 shadow-sm" style="max-width: 440px; margin: 0 auto;">
-        <h5 class="fw-bold mb-1 ${isDark ? 'text-white' : 'text-dark'}">${title}</h5>
-        <p class="${isDark ? 'text-zinc-400' : 'text-muted'} fs-2 mb-4">${desc}</p>
+        <h5 class="fw-bold mb-1 ${isDark ? 'text-white' : 'text-dark'}">${escPreview(title)}</h5>
+        <p class="${isDark ? 'text-zinc-400' : 'text-muted'} fs-2 mb-4">${escPreview(desc)}</p>
 
-        <form onsubmit="event.preventDefault(); alert('Modo Preview: O envio foi simulado com sucesso!');">
+        <form onsubmit="event.preventDefault(); window.mqUI && window.mqUI.toast('Modo Preview: o envio foi simulado com sucesso!', { type: 'info' });">
           ${hasName ? `
             <div class="mb-3">
               <label class="form-label fs-2 fw-semibold">Nome Completo *</label>
@@ -201,7 +209,7 @@ class FormsManager {
 
           ${hasEmail ? `
             <div class="mb-3">
-              <label class="form-label fs-2 fw-semibold">Seu Melhore E-mail *</label>
+              <label class="form-label fs-2 fw-semibold">Seu Melhor E-mail *</label>
               <input type="email" class="form-control ${isDark ? 'bg-zinc-800 text-light border-zinc-700' : ''}" placeholder="seu@email.com" required disabled>
             </div>
           ` : ''}
@@ -227,8 +235,8 @@ class FormsManager {
             </div>
           ` : ''}
 
-          <button type="submit" class="btn fw-bold w-100 py-2.5 mt-2" style="background-color: ${btnColor}; color: #FFF; border-color: ${btnColor};">
-            ${btnText}
+          <button type="submit" class="btn fw-bold w-100 py-2.5 mt-2" style="background-color: ${/^#[0-9a-fA-F]{6}$/.test(btnColor) ? btnColor : '#F25924'}; color: #FFF; border-color: ${/^#[0-9a-fA-F]{6}$/.test(btnColor) ? btnColor : '#F25924'};">
+            ${window.mqSecurity ? window.mqSecurity.escapeHtml(btnText) : btnText}
           </button>
         </form>
       </div>
@@ -255,7 +263,7 @@ class FormsManager {
     };
 
     if (!title.trim()) {
-      alert('Por favor, informe um título para o formulário.');
+      if (window.mqUI) window.mqUI.toast('Por favor, informe um título para o formulário.', { type: 'warning' });
       return;
     }
 
@@ -318,23 +326,53 @@ class FormsManager {
     }
   }
 
-  deleteFormPrompt(formId) {
-    if (confirm('Tem certeza que deseja excluir este formulário de captura? Os formulários embutidos em sites externos deixarão de responder.')) {
+  async deleteFormPrompt(formId) {
+    const confirmed = window.mqUI
+      ? await window.mqUI.confirm({
+          title: 'Excluir formulário de captura',
+          message: 'Tem certeza que deseja excluir este formulário? Os formulários embutidos em sites externos deixarão de responder.',
+          confirmLabel: 'Excluir formulário',
+          danger: true
+        })
+      : false;
+    if (confirmed) {
       window.crmStore.deleteForm(formId);
       this.renderFormsList();
+      if (window.mqUI) window.mqUI.toast('Formulário de captura excluído.', { type: 'success' });
     }
   }
 
-  copyToClipboard(inputId, msg = 'Copiado para a área de transferência!') {
+  copyToClipboard(inputId, msg = 'Copiado!', triggerBtn = null) {
     const input = document.getElementById(inputId);
-    if (input) {
-      input.select();
-      navigator.clipboard.writeText(input.value).then(() => {
-        alert(msg);
-      }).catch(() => {
-        document.execCommand('copy');
-        alert(msg);
+    if (!input) return;
+
+    const value = input.value !== undefined ? input.value : (input.textContent || '');
+    const finish = () => {
+      // Inline feedback tip or toast (no blocking alert)
+      const tipContainer = triggerBtn && triggerBtn.parentElement ? triggerBtn.parentElement : input.parentElement;
+      const tip = tipContainer ? tipContainer.querySelector('.mq-copy-tip') : null;
+      if (tip) {
+        tip.textContent = 'Copiado';
+        tip.classList.add('is-visible');
+        setTimeout(() => {
+          tip.textContent = '';
+          tip.classList.remove('is-visible');
+        }, 2000);
+      } else if (window.mqUI) {
+        window.mqUI.toast(msg, { type: 'success' });
+      }
+    };
+
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(value).then(finish).catch(() => {
+        if (input.select) input.select();
+        try { document.execCommand('copy'); } catch (e) {}
+        finish();
       });
+    } else {
+      if (input.select) input.select();
+      try { document.execCommand('copy'); } catch (e) {}
+      finish();
     }
   }
 }

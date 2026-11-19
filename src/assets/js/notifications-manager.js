@@ -25,21 +25,26 @@ class NotificationsManager {
   }
 
   setupDropdown() {
-    const bellIcons = document.querySelectorAll('.hs-header a[title="Notificações"], .hs-header .ti-bell');
+    const bellIcons = document.querySelectorAll('.hs-header button[aria-label="Notificações"], .hs-header a[title="Notificações"], .hs-header .ti-bell');
     bellIcons.forEach(bell => {
-      let anchor = bell.tagName === 'A' ? bell : bell.closest('a');
+      let anchor = bell.matches('a, button') ? bell : bell.closest('a, button');
       if (!anchor) return;
 
       if (anchor.dataset.notifSetup === 'true') return;
       anchor.dataset.notifSetup = 'true';
 
-      const parent = anchor.parentElement;
-      if (parent && !parent.classList.contains('dropdown')) {
-        parent.classList.add('dropdown');
+      let parent = anchor.parentElement;
+      if (!parent || !parent.classList.contains('dropdown')) {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'dropdown d-inline-flex position-relative';
+        anchor.parentNode.insertBefore(wrapper, anchor);
+        wrapper.appendChild(anchor);
+        parent = wrapper;
       }
 
       anchor.setAttribute('data-bs-toggle', 'dropdown');
       anchor.setAttribute('aria-expanded', 'false');
+      anchor.setAttribute('aria-label', 'Notificações');
       anchor.removeAttribute('onclick');
       anchor.style.cursor = 'pointer';
 
@@ -122,27 +127,30 @@ class NotificationsManager {
         return;
       }
 
+      const esc = window.mqSecurity ? window.mqSecurity.escapeHtml : (v => String(v ?? ''));
+      const escAttr = window.mqSecurity ? window.mqSecurity.escapeAttr : esc;
       let html = '';
       notifs.forEach(n => {
-        const bgStyle = n.is_read ? 'background-color: #ffffff;' : 'background-color: rgba(93, 135, 255, 0.06);';
-        const unreadIndicator = !n.is_read ? '<span class="badge bg-danger rounded-circle p-1 me-2" style="width: 8px; height: 8px; display: inline-block;"></span>' : '';
+        const bgStyle = n.is_read ? 'background-color: var(--mq-surface, #ffffff);' : 'background-color: rgba(93, 135, 255, 0.08);';
+        const unreadIndicator = !n.is_read ? '<span class="badge bg-danger rounded-circle p-1 me-2" style="width: 8px; height: 8px; display: inline-block;" aria-label="Não lida"></span>' : '';
+        const safeId = escAttr(n.id);
 
         html += `
-          <div class="dropdown-item px-3 py-2 border-bottom text-wrap d-flex align-items-start justify-content-between" style="${bgStyle} cursor: pointer;" onclick="window.notificationsManager.markRead('${n.id}');">
-            <div class="d-flex gap-2 align-items-start me-2">
-              <div class="bg-light-primary text-primary p-2 rounded-circle mt-1 d-flex align-items-center justify-content-center" style="width: 32px; height: 32px; flex-shrink: 0;">
+          <div class="dropdown-item px-3 py-2 border-bottom text-wrap d-flex align-items-start justify-content-between" style="${bgStyle}">
+            <button type="button" class="btn btn-link p-0 text-start text-decoration-none d-flex gap-2 align-items-start me-2 flex-grow-1" onclick="window.notificationsManager.markRead('${safeId}');">
+              <div class="bg-light-primary text-primary p-2 rounded-circle mt-1 d-flex align-items-center justify-content-center" style="width: 32px; height: 32px; flex-shrink: 0;" aria-hidden="true">
                 <i class="ti ti-bell-ringing fs-4"></i>
               </div>
               <div>
                 <div class="d-flex align-items-center">
                   ${unreadIndicator}
-                  <strong class="text-dark fs-2 mb-0">${n.title || 'Notificação'}</strong>
+                  <strong class="text-dark fs-2 mb-0">${esc(n.title || 'Notificação')}</strong>
                 </div>
-                <p class="mb-1 text-secondary fs-2 lh-sm">${n.message || ''}</p>
-                <small class="text-muted fs-1"><i class="ti ti-clock me-1"></i>${n.time || 'Agora'}</small>
+                <p class="mb-1 text-secondary fs-2 lh-sm">${esc(n.message || '')}</p>
+                <small class="text-muted fs-1"><i class="ti ti-clock me-1" aria-hidden="true"></i>${esc(n.time || 'Agora')}</small>
               </div>
-            </div>
-            ${!n.is_read ? `<button class="btn btn-sm text-primary p-0" title="Marcar como lida" onclick="event.stopPropagation(); window.notificationsManager.markRead('${n.id}');"><i class="ti ti-check fs-4"></i></button>` : ''}
+            </button>
+            ${!n.is_read ? `<button type="button" class="btn btn-sm text-primary p-1" title="Marcar como lida" aria-label="Marcar notificação como lida" onclick="event.stopPropagation(); window.notificationsManager.markRead('${safeId}');"><i class="ti ti-check fs-4" aria-hidden="true"></i></button>` : ''}
           </div>
         `;
       });

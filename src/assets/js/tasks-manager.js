@@ -65,7 +65,10 @@ class TasksManager {
     const desc   = document.getElementById('task-desc-input')?.value?.trim();
     const dueDate = document.getElementById('task-due-date-input')?.value;
 
-    if (!title) { alert('Informe o título da atividade.'); return; }
+    if (!title) {
+      if (window.mqUI) window.mqUI.toast('Informe o título da atividade.', { type: 'warning' });
+      return;
+    }
 
     const activity = {
       type,
@@ -155,15 +158,18 @@ class TasksManager {
     }
 
     const now = new Date();
+    const esc = window.mqSecurity ? window.mqSecurity.escapeHtml : (v => String(v ?? ''));
+    const escAttr = window.mqSecurity ? window.mqSecurity.escapeAttr : esc;
     container.innerHTML = `
       <div class="table-responsive">
         <table class="table table-hover align-middle mb-0">
+          <caption class="visually-hidden">Lista de tarefas pendentes vinculadas aos contatos do CRM</caption>
           <thead class="bg-light">
             <tr>
-              <th style="width:40%">Tarefa</th>
-              <th style="width:25%">Contato</th>
-              <th style="width:20%">Vencimento</th>
-              <th style="width:15%" class="text-end">Ação</th>
+              <th scope="col" style="width:40%">Tarefa</th>
+              <th scope="col" style="width:25%">Contato</th>
+              <th scope="col" style="width:20%">Vencimento</th>
+              <th scope="col" style="width:15%" class="text-end">Ação</th>
             </tr>
           </thead>
           <tbody>
@@ -175,24 +181,24 @@ class TasksManager {
                 const isToday   = dt.toDateString() === now.toDateString();
                 const fmt = dt.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
                 dueBadge = isOverdue
-                  ? `<span class="badge bg-danger-subtle text-danger fw-semibold">${fmt} <i class="ti ti-alert-circle ms-1"></i></span>`
+                  ? `<span class="badge bg-danger-subtle text-danger fw-semibold">${esc(fmt)} <i class="ti ti-alert-circle ms-1" aria-hidden="true"></i></span>`
                   : isToday
-                  ? `<span class="badge bg-warning-subtle text-warning fw-semibold">${fmt} <i class="ti ti-clock ms-1"></i></span>`
-                  : `<span class="badge bg-light text-dark border">${fmt}</span>`;
+                  ? `<span class="badge bg-warning-subtle text-warning fw-semibold">${esc(fmt)} <i class="ti ti-clock ms-1" aria-hidden="true"></i></span>`
+                  : `<span class="badge bg-light text-dark border">${esc(fmt)}</span>`;
               }
               return `
                 <tr>
                   <td>
-                    <div class="fw-semibold text-dark">${t.title}</div>
-                    <small class="text-muted">${t.desc || ''}</small>
+                    <div class="fw-semibold text-dark">${esc(t.title)}</div>
+                    <small class="text-muted">${esc(t.desc || '')}</small>
                   </td>
                   <td>
-                    <span class="fs-2 text-primary fw-semibold">${t.leadName}</span>
+                    <span class="fs-2 text-primary fw-semibold">${esc(t.leadName)}</span>
                   </td>
                   <td>${dueBadge}</td>
                   <td class="text-end">
-                    <button class="btn btn-sm btn-outline-success" onclick="window.tasksManager.markTaskDone('${t.leadId}', ${t.idx})" title="Marcar como concluída">
-                      <i class="ti ti-check"></i>
+                    <button type="button" class="btn btn-sm btn-outline-success" onclick="window.tasksManager.markTaskDone('${escAttr(t.leadId)}', ${Number(t.idx)})" title="Marcar como concluída" aria-label="Marcar tarefa ${escAttr(t.title)} como concluída">
+                      <i class="ti ti-check" aria-hidden="true"></i>
                     </button>
                   </td>
                 </tr>

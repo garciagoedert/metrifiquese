@@ -1,6 +1,6 @@
 /**
  * Metrifique-se CRM - Dynamic Whitelabel Theme & Super Admin Security Guard
- * Applies dynamic Tenant branding overrides (Logo, Primary Color, Title)
+ * Applies dynamic Tenant branding overrides (Logo, Primary Color, Contrast, Title)
  * and enforces strict Super Admin access protection.
  */
 
@@ -10,20 +10,49 @@ class WhitelabelThemeEngine {
   }
 
   initTheme() {
-    document.addEventListener('DOMContentLoaded', () => {
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', () => {
+        this.applyTenantTheme();
+        this.applyUserSecurityGuard();
+      });
+    } else {
       this.applyTenantTheme();
       this.applyUserSecurityGuard();
-    });
+    }
   }
 
-  applyTenantTheme() {
-    const tenant = window.crmStore ? window.crmStore.getTenant() : null;
-    const primaryColor = (tenant && tenant.primary_color) ? tenant.primary_color : '#FF7A59';
+  sanitizeHexColor(color, fallback = '#FF7A59') {
+    if (typeof color !== 'string') return fallback;
+    const trimmed = color.trim();
+    return /^#[0-9A-Fa-f]{3,8}$/.test(trimmed) ? trimmed : fallback;
+  }
+
+  computeContrastColor(hex) {
+    const clean = this.sanitizeHexColor(hex, '#FF7A59').slice(1);
+    let r, g, b;
+    if (clean.length === 3 || clean.length === 4) {
+      r = parseInt(clean[0] + clean[0], 16) / 255;
+      g = parseInt(clean[1] + clean[1], 16) / 255;
+      b = parseInt(clean[2] + clean[2], 16) / 255;
+    } else {
+      r = parseInt(clean.slice(0, 2), 16) / 255;
+      g = parseInt(clean.slice(2, 4), 16) / 255;
+      b = parseInt(clean.slice(4, 6), 16) / 255;
+    }
+    const toLinear = (c) => (c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4));
+    const luminance = 0.2126 * toLinear(r) + 0.7152 * toLinear(g) + 0.0722 * toLinear(b);
+    return luminance > 0.17913 ? '#0F172A' : '#FFFFFF';
+  }
+
+  applyThemeTokens(primaryColor, logoUrl, tenantName) {
+    const safeColor = this.sanitizeHexColor(primaryColor, '#FF7A59');
+    const fgColor = this.computeContrastColor(safeColor);
 
     const root = document.documentElement;
-    root.style.setProperty('--bs-primary', primaryColor);
-    root.style.setProperty('--theme-primary', primaryColor);
-    root.style.setProperty('--hs-orange', primaryColor);
+    root.style.setProperty('--bs-primary', safeColor);
+    root.style.setProperty('--theme-primary', safeColor);
+    root.style.setProperty('--hs-orange', safeColor);
+    root.style.setProperty('--theme-primary-fg', fgColor);
 
     let customStyleEl = document.getElementById('whitelabel-custom-styles');
     if (!customStyleEl) {
@@ -32,42 +61,42 @@ class WhitelabelThemeEngine {
       document.head.appendChild(customStyleEl);
     }
 
-    customStyleEl.innerHTML = `
+    customStyleEl.textContent = `
       .btn-primary, .bg-primary, .badge.bg-primary {
-        background-color: ${primaryColor} !important;
-        border-color: ${primaryColor} !important;
-        color: #FFFFFF !important;
+        background-color: var(--theme-primary) !important;
+        border-color: var(--theme-primary) !important;
+        color: var(--theme-primary-fg) !important;
       }
       .btn-outline-primary {
-        color: ${primaryColor} !important;
-        border-color: ${primaryColor} !important;
+        color: var(--theme-primary) !important;
+        border-color: var(--theme-primary) !important;
       }
       .btn-outline-primary:hover {
-        background-color: ${primaryColor} !important;
-        color: #FFFFFF !important;
+        background-color: var(--theme-primary) !important;
+        color: var(--theme-primary-fg) !important;
       }
       .text-primary, a.text-primary {
-        color: ${primaryColor} !important;
+        color: var(--theme-primary) !important;
       }
       .hs-action-pill:hover {
-        border-color: ${primaryColor} !important;
-        color: ${primaryColor} !important;
+        border-color: var(--theme-primary) !important;
+        color: var(--theme-primary) !important;
         background-color: rgba(255, 122, 89, 0.08) !important;
       }
       .sidebar-nav ul .sidebar-item.selected > .sidebar-link {
-        background-color: ${primaryColor} !important;
-        color: #ffffff !important;
+        background-color: var(--theme-primary) !important;
+        color: var(--theme-primary-fg) !important;
         border-radius: 8px;
       }
       .hs-nav-tabs .nav-link.active {
-        color: ${primaryColor} !important;
-        border-bottom-color: ${primaryColor} !important;
+        color: var(--theme-primary) !important;
+        border-bottom-color: var(--theme-primary) !important;
       }
 
       /* Enhanced Sidebar Aesthetic & Collapsed State */
       .left-sidebar {
-        background-color: #FFFFFF !important;
-        border-right: 1px solid #E2E8F0 !important;
+        background-color: var(--mq-surface, #FFFFFF) !important;
+        border-right: 1px solid var(--mq-border, #E2E8F0) !important;
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03) !important;
         transition: width 0.25s ease, left 0.25s ease !important;
       }
@@ -79,37 +108,41 @@ class WhitelabelThemeEngine {
         align-items: center;
         gap: 12px;
         padding: 10px 14px;
-        color: #475569 !important;
+        color: var(--mq-muted, #475569) !important;
         font-weight: 600;
         font-size: 0.88rem;
         border-radius: 10px !important;
-        transition: all 0.2s ease;
+        transition: background-color 0.2s ease, color 0.2s ease;
         text-decoration: none;
       }
       .sidebar-nav ul .sidebar-link i {
         font-size: 1.25rem;
-        color: #64748B;
+        color: var(--mq-muted, #64748B);
         transition: transform 0.2s ease, color 0.2s ease;
       }
       .sidebar-nav ul .sidebar-link:hover {
-        background-color: #F1F5F9 !important;
-        color: #0F172A !important;
+        background-color: var(--mq-surface-subtle, #F1F5F9) !important;
+        color: var(--mq-heading, #0F172A) !important;
       }
       .sidebar-nav ul .sidebar-link:hover i {
-        color: ${primaryColor} !important;
-        transform: translateX(3px);
+        color: var(--theme-primary) !important;
+      }
+      @media (prefers-reduced-motion: no-preference) {
+        .sidebar-nav ul .sidebar-link:hover i {
+          transform: translateX(3px);
+        }
       }
       .sidebar-nav ul .sidebar-item.selected > .sidebar-link {
-        background: linear-gradient(135deg, ${primaryColor} 0%, #FF5252 100%) !important;
-        color: #FFFFFF !important;
+        background: var(--theme-primary) !important;
+        color: var(--theme-primary-fg) !important;
         box-shadow: 0 4px 12px rgba(255, 122, 89, 0.25) !important;
       }
       .sidebar-nav ul .sidebar-item.selected > .sidebar-link i {
-        color: #FFFFFF !important;
+        color: var(--theme-primary-fg) !important;
       }
       .nav-small-cap {
         padding: 16px 14px 6px 14px !important;
-        color: #94A3B8 !important;
+        color: var(--mq-muted, #94A3B8) !important;
         font-size: 0.68rem !important;
         font-weight: 800 !important;
         letter-spacing: 0.08em;
@@ -142,19 +175,31 @@ class WhitelabelThemeEngine {
       }
     `;
 
+    const safeLogo = window.mqSecurity ? window.mqSecurity.safeUrl(logoUrl, '') : logoUrl;
     const logoImgs = document.querySelectorAll('.logo-img img, .brand-logo img, .hs-brand-logo');
-    logoImgs.forEach(img => {
-      if (tenant && tenant.logo_url) {
-        img.src = tenant.logo_url;
+    logoImgs.forEach((img) => {
+      if (safeLogo) {
+        img.src = safeLogo;
       }
-      if (tenant && tenant.name) {
-        img.alt = tenant.name;
+      if (tenantName) {
+        img.alt = tenantName;
       }
     });
 
-    if (tenant && tenant.name) {
-      document.title = `${tenant.name} | CRM Whitelabel de Leads`;
+    if (tenantName) {
+      document.title = `${tenantName} | CRM Whitelabel de Leads`;
     }
+  }
+
+  applyTenantTheme() {
+    const tenant = window.crmStore ? window.crmStore.getTenant() : null;
+    const primaryColor = (tenant && tenant.primary_color) ? tenant.primary_color : '#FF7A59';
+    this.applyThemeTokens(primaryColor, tenant?.logo_url, tenant?.name);
+  }
+
+  previewTheme(primaryColor, logoUrl) {
+    const tenant = window.crmStore ? window.crmStore.getTenant() : null;
+    this.applyThemeTokens(primaryColor, logoUrl || tenant?.logo_url, tenant?.name);
   }
 
   applyUserSecurityGuard() {
@@ -181,7 +226,7 @@ class WhitelabelThemeEngine {
     const isSuperAdmin = window.crmStore.isSuperAdmin();
 
     // Hide admin-tenants from non super admins
-    document.querySelectorAll('a[href*="admin-tenants.html"]').forEach(link => {
+    document.querySelectorAll('a[href*="admin-tenants.html"]').forEach((link) => {
       const sidebarItem = link.closest('.sidebar-item');
       const li = link.closest('li');
       const show = isSuperAdmin;
@@ -191,7 +236,7 @@ class WhitelabelThemeEngine {
 
     // Hide whitelabel config from non admins
     if (!isAdmin) {
-      document.querySelectorAll('a[href*="configuracoes-whitelabel.html"]').forEach(link => {
+      document.querySelectorAll('a[href*="configuracoes-whitelabel.html"]').forEach((link) => {
         const sidebarItem = link.closest('.sidebar-item');
         if (sidebarItem) sidebarItem.style.display = 'none';
         const li = link.closest('li');
@@ -199,15 +244,15 @@ class WhitelabelThemeEngine {
       });
     }
 
-    // If vendedor tries to access admin-only pages, redirect
+    // Redirect unauthorized users cleanly with toast notice query flag
     if (!isSuperAdmin && window.location.pathname.includes('admin-tenants.html')) {
-      alert('Acesso negado: Esta área é restrita ao administrador master da plataforma.');
-      window.location.href = './dashboard.html';
+      window.location.href = './dashboard.html?notice=access_denied';
+      return;
     }
 
     if (!isAdmin && window.location.pathname.includes('configuracoes-whitelabel.html')) {
-      alert('Acesso negado: Configurações whitelabel são restritas a administradores.');
-      window.location.href = './dashboard.html';
+      window.location.href = './dashboard.html?notice=access_denied';
+      return;
     }
 
     // Show inspection banner for super admin viewing tenant
@@ -219,11 +264,12 @@ class WhitelabelThemeEngine {
     }
   }
 
-
   updateUserHeaderUI(user) {
     if (!user) return;
-    document.querySelectorAll('.header-user-name').forEach(el => el.innerText = user.full_name || 'Usuário');
-    document.querySelectorAll('.header-user-avatar').forEach(img => {
+    document.querySelectorAll('.header-user-name').forEach((el) => {
+      el.textContent = user.full_name || 'Usuário';
+    });
+    document.querySelectorAll('.header-user-avatar').forEach((img) => {
       img.setAttribute('referrerpolicy', 'no-referrer');
       img.onerror = () => {
         if (!img.dataset.hasFallback) {
@@ -233,64 +279,29 @@ class WhitelabelThemeEngine {
       };
       if (user.avatar_url && user.avatar_url.trim() !== '') {
         delete img.dataset.hasFallback;
-        img.src = user.avatar_url;
+        const safeAvatar = window.mqSecurity ? window.mqSecurity.safeUrl(user.avatar_url, '../assets/images/profile/user-1.jpg') : user.avatar_url;
+        img.src = safeAvatar;
       }
     });
-  }
-
-  applyUserSecurityGuardRef() {
-
-    // Check if logged in user is STRICTLY Super Admin
-    const isSuperAdminUser = Boolean(user && (user.is_super_admin === true || user.email === 'paulo@southsea.com.br'));
-    const isSuperAdminPage = window.location.pathname.includes('admin-tenants.html');
-
-    if (isSuperAdminUser) {
-      // EXIBIR menus Super Admin para o Dono Master
-      document.querySelectorAll('a[href*="admin-tenants.html"]').forEach(link => {
-        const sidebarItem = link.closest('.sidebar-item');
-        if (sidebarItem) sidebarItem.style.setProperty('display', 'block', 'important');
-        const dropdownLi = link.closest('li');
-        if (dropdownLi) dropdownLi.style.setProperty('display', 'block', 'important');
-      });
-
-      // Se estiver inspecionando uma empresa cliente, injeta o banner "Voltar ao Master Admin"
-      const activeTenantId = window.crmStore.getActiveTenantId();
-      if (activeTenantId !== 'tenant-demo-001' && !isSuperAdminPage) {
-        this.injectInspectionBanner();
-      }
-    } else {
-      // OCULTAR 100% os menus Super Admin para empresas clientes
-      document.querySelectorAll('a[href*="admin-tenants.html"]').forEach(link => {
-        const sidebarItem = link.closest('.sidebar-item');
-        if (sidebarItem) sidebarItem.style.setProperty('display', 'none', 'important');
-        const dropdownLi = link.closest('li');
-        if (dropdownLi) dropdownLi.style.setProperty('display', 'none', 'important');
-      });
-
-      // Se um usuário comum tentar abrir admin-tenants.html diretamente via URL, bloqueia e redireciona
-      if (isSuperAdminPage) {
-        alert('Acesso Negado: O Painel Super Admin é restrito exclusivamente ao administrador master da plataforma.');
-        window.location.href = './dashboard.html';
-      }
-    }
   }
 
   injectInspectionBanner() {
     if (document.getElementById('global-inspection-banner')) return;
     const tenant = window.crmStore.getTenant();
+    const esc = window.mqSecurity ? window.mqSecurity.escapeHtml : (s) => String(s || '');
     const banner = document.createElement('div');
     banner.id = 'global-inspection-banner';
     banner.className = 'alert alert-warning mb-0 py-2 px-3 rounded-0 border-0 border-bottom border-warning d-flex align-items-center justify-content-between text-dark fs-2 fw-semibold shadow-sm';
-    banner.style.zIndex = '9999';
+    banner.style.zIndex = '1040';
     banner.innerHTML = `
       <div>
-        <i class="ti ti-eye me-1"></i> Modo Inspeção Super Admin: Você está visualizando os dados da empresa <strong>${tenant ? tenant.name : 'Cliente'}</strong>
+        <i class="ti ti-eye me-1" aria-hidden="true"></i> Modo Inspeção Super Admin: Você está visualizando os dados da empresa <strong>${esc(tenant ? tenant.name : 'Cliente')}</strong>
       </div>
-      <button class="btn btn-sm btn-dark fw-bold px-3 py-1" onclick="window.crmStore.switchActiveTenant('tenant-demo-001'); window.location.reload();">
-        <i class="ti ti-arrow-left me-1"></i> Voltar ao Master Admin
+      <button type="button" class="btn btn-sm btn-dark fw-bold px-3 py-1" onclick="window.crmStore.switchActiveTenant('tenant-demo-001'); window.location.reload();">
+        <i class="ti ti-arrow-left me-1" aria-hidden="true"></i> Voltar ao Master Admin
       </button>
     `;
-    const bodyWrapper = document.querySelector('.body-wrapper') || document.body;
+    const bodyWrapper = document.querySelector('#main-content, .body-wrapper') || document.body;
     bodyWrapper.insertBefore(banner, bodyWrapper.firstChild);
   }
 }

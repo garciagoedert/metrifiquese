@@ -1,10 +1,11 @@
 <!doctype html>
-<html lang="pt-BR">
+<html lang="pt-BR" data-fixed-theme="dark">
 
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Login & Autenticação | Metrifique-se CRM</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="color-scheme" content="dark">
+  <title>Login &amp; Autenticação | Metrifique-se CRM</title>
   <link rel="shortcut icon" type="image/png" href="../assets/images/logos/icon.png" />
   <link rel="stylesheet" href="../assets/css/styles.min.css" />
   <link rel="stylesheet" href="../assets/css/metrifiquese-theme.css" />
@@ -15,9 +16,10 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="../assets/js/supabase-client.js"></script>
-  <script src="../assets/js/whitelabel-theme.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script defer src="../assets/js/ui-toolkit.js"></script>
+  <script defer src="../assets/js/supabase-client.js"></script>
+  <script defer src="../assets/js/whitelabel-theme.js"></script>
   
   <style>
     :root {
@@ -124,11 +126,16 @@
       background-color: transparent !important;
       color: #A1A1AA !important;
     }
+
+    @media (prefers-reduced-motion: reduce) {
+      .btn-emerald-lg:hover { transform: none; }
+    }
   </style>
 </head>
 
 <body>
-  <div class="login-wrapper d-flex align-items-stretch min-vh-100">
+  <a class="skip-link" href="#main-content">Pular para o formulário de acesso</a>
+  <main id="main-content" class="login-wrapper d-flex align-items-stretch min-vh-100" tabindex="-1">
     <div class="container-fluid p-0">
       <div class="row g-0 min-vh-100">
         
@@ -141,7 +148,7 @@
             
             <div class="mb-4">
               <span class="badge bg-magenta-pill px-3 py-2 fs-2 mb-3">
-                <i class="ti ti-shield-check me-1 text-emerald"></i> AUTENTICAÇÃO SEGURA SUPABASE
+                <i class="ti ti-shield-check me-1 text-emerald" aria-hidden="true"></i> AUTENTICAÇÃO SEGURA SUPABASE
               </span>
             </div>
 
@@ -157,7 +164,7 @@
           <!-- TESTEMUNHO COM ÍCONE DA MARCA -->
           <div class="p-4 rounded-4 border" style="background: rgba(39, 39, 42, 0.6); border-color: #27272A !important;">
             <div class="d-flex align-items-center mb-3">
-              <img src="../assets/images/logos/icon.png" width="44" height="44" alt="Icon Badge" class="me-3 rounded-circle border border-emerald">
+              <img src="../assets/images/logos/icon.png" width="44" height="44" alt="" class="me-3 rounded-circle border border-emerald">
               <div>
                 <h6 class="fw-bold mb-0 text-white">Guilherme Garcia</h6>
                 <small style="color: #A1A1AA;">Proprietário da Conta (Gestor Master)</small>
@@ -176,7 +183,7 @@
             <!-- HEADER MOBILE COM LOGO -->
             <div class="text-center mb-4 d-lg-none">
               <a href="../../index.html" class="d-inline-block text-decoration-none">
-                <img src="../assets/images/logos/logowhite.png" height="38" alt="Logo">
+                <img src="../assets/images/logos/logowhite.png" height="38" alt="Metrifique-se Logo">
               </a>
             </div>
 
@@ -184,52 +191,56 @@
               <div class="card-body p-2">
                 
                 <!-- TOGGLE ENTRAR / CRIAR CONTA -->
-                <div class="d-flex p-1 rounded-3 mb-4" style="background: #121214; border: 1px solid #27272A;" id="auth-mode-toggle">
-                  <button type="button" class="btn auth-tab-btn active w-50" id="btn-tab-signin">
+                <div class="d-flex p-1 rounded-3 mb-4" style="background: #121214; border: 1px solid #27272A;" id="auth-mode-toggle" role="tablist" aria-label="Modo de acesso">
+                  <button type="button" class="btn auth-tab-btn active w-50" id="btn-tab-signin" role="tab" aria-selected="true">
                     Fazer Login
                   </button>
-                  <button type="button" class="btn auth-tab-btn inactive w-50" id="btn-tab-signup">
+                  <button type="button" class="btn auth-tab-btn inactive w-50" id="btn-tab-signup" role="tab" aria-selected="false">
                     Criar Conta
                   </button>
                 </div>
 
                 <div class="mb-4 text-center">
                   <div class="d-inline-flex align-items-center justify-content-center mb-2">
-                    <img src="../assets/images/logos/icon.png" width="36" height="36" alt="Icon Badge">
+                    <img src="../assets/images/logos/icon.png" width="36" height="36" alt="">
                   </div>
-                  <h4 class="fw-bold text-white mb-1" id="auth-title">Acessar Metrifique-se CRM</h4>
+                  <h2 class="h4 fw-bold text-white mb-1" id="auth-title">Acessar Metrifique-se CRM</h2>
                   <p class="text-zinc-400 fs-2 mb-0" id="auth-subtitle" style="color: #A1A1AA;">Entre com suas credenciais salvas na nuvem</p>
                 </div>
 
-                <div id="auth-alert" class="alert alert-danger d-none py-2 fs-2 border-0 bg-danger bg-opacity-20 text-white"></div>
-                <div id="auth-success" class="alert alert-success d-none py-2 fs-2 border-0 bg-success bg-opacity-20 text-white"></div>
+                <div id="auth-alert" class="alert alert-danger d-none py-2 fs-2 border-0 bg-danger bg-opacity-20 text-white" role="alert"></div>
+                <div id="auth-success" class="alert alert-success d-none py-2 fs-2 border-0 bg-success bg-opacity-20 text-white" role="status"></div>
 
                 <form id="login-form">
                   <div class="mb-3 d-none" id="fullname-group">
-                    <label class="form-label fw-semibold text-white">Nome Completo</label>
+                    <label for="login-name" class="form-label fw-semibold text-white">Nome Completo</label>
                     <div class="input-group">
-                      <span class="input-group-text input-group-text-dark border-end-0"><i class="ti ti-user text-emerald"></i></span>
-                      <input type="text" id="login-name" class="form-control form-control-dark border-start-0" placeholder="Seu Nome Completo">
+                      <span class="input-group-text input-group-text-dark border-end-0"><i class="ti ti-user text-emerald" aria-hidden="true"></i></span>
+                      <input type="text" id="login-name" class="form-control form-control-dark border-start-0" placeholder="Seu Nome Completo" autocomplete="name">
                     </div>
                   </div>
 
                   <div class="mb-3">
-                    <label class="form-label fw-semibold text-white">E-mail de Acesso</label>
+                    <label for="login-email" class="form-label fw-semibold text-white">E-mail de Acesso</label>
                     <div class="input-group">
-                      <span class="input-group-text input-group-text-dark border-end-0"><i class="ti ti-mail text-emerald"></i></span>
-                      <input type="email" id="login-email" class="form-control form-control-dark border-start-0" placeholder="seu@email.com.br" required>
+                      <span class="input-group-text input-group-text-dark border-end-0"><i class="ti ti-mail text-emerald" aria-hidden="true"></i></span>
+                      <input type="email" id="login-email" class="form-control form-control-dark border-start-0" placeholder="seu@email.com.br" autocomplete="username" spellcheck="false" autocapitalize="none" enterkeyhint="next" required>
                     </div>
                   </div>
 
                   <div class="mb-3">
                     <div class="d-flex justify-content-between align-items-center mb-1">
-                      <label class="form-label fw-semibold text-white mb-0">Senha</label>
-                      <a href="#" class="fs-2 text-emerald text-decoration-none">Esqueceu a senha?</a>
+                      <label for="login-password" class="form-label fw-semibold text-white mb-0">Senha</label>
+                      <button type="button" id="btn-forgot-password" class="btn btn-link p-0 fs-2 text-emerald text-decoration-none">Esqueceu a senha?</button>
                     </div>
                     <div class="input-group">
-                      <span class="input-group-text input-group-text-dark border-end-0"><i class="ti ti-lock text-emerald"></i></span>
-                      <input type="password" id="login-password" class="form-control form-control-dark border-start-0" placeholder="••••••••" required>
+                      <span class="input-group-text input-group-text-dark border-end-0"><i class="ti ti-lock text-emerald" aria-hidden="true"></i></span>
+                      <input type="password" id="login-password" class="form-control form-control-dark border-start-0 border-end-0" placeholder="••••••••" autocomplete="current-password" enterkeyhint="go" required>
+                      <button type="button" id="toggle-login-password" class="btn input-group-text input-group-text-dark border-start-0" aria-pressed="false" aria-label="Mostrar senha" aria-describedby="login-pw-warning">
+                        <i class="ti ti-eye" aria-hidden="true"></i>
+                      </button>
                     </div>
+                    <span id="login-pw-warning" class="visually-hidden">Atenção: ao exibir sua senha, outra pessoa próxima pode vê-la na tela.</span>
                   </div>
 
                   <div class="form-check mb-4">
@@ -240,7 +251,7 @@
                   </div>
 
                   <button type="submit" id="btn-auth-submit" class="btn btn-emerald-lg w-100 py-3 mb-3 d-flex align-items-center justify-content-center gap-2">
-                    <i class="ti ti-login fs-5"></i>
+                    <i class="ti ti-login fs-5" aria-hidden="true"></i>
                     <span id="btn-submit-text">Entrar no CRM</span>
                   </button>
 
@@ -256,9 +267,35 @@
 
       </div>
     </div>
-  </div>
+  </main>
 
-  <script src="../assets/libs/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- Native Dialog: Recuperação de Senha -->
+  <dialog id="forgot-password-dialog" class="mq-dialog bg-dark text-white border border-secondary rounded-4 p-0" closedby="any" aria-labelledby="forgot-dialog-title">
+    <div class="p-4" style="background: #18181B; color: #F4F4F5;">
+      <div class="d-flex align-items-center justify-content-between mb-3 pb-2 border-bottom border-secondary border-opacity-25">
+        <h5 id="forgot-dialog-title" class="fw-bold text-white mb-0">
+          <i class="ti ti-key text-emerald me-2" aria-hidden="true"></i>Recuperar Acesso
+        </h5>
+        <button type="button" id="forgot-close-btn" class="btn-close btn-close-white" aria-label="Fechar"></button>
+      </div>
+      <p class="fs-2 text-zinc-400 mb-3" style="color: #A1A1AA;">
+        Informe seu e-mail cadastrado para receber o link de redefinição ou instruções da sua conta.
+      </p>
+      <form id="forgot-password-form">
+        <div class="mb-3">
+          <label for="forgot-email-input" class="form-label fw-semibold text-white">E-mail de Acesso *</label>
+          <input type="email" id="forgot-email-input" class="form-control form-control-dark" placeholder="seu@email.com.br" autocomplete="email" spellcheck="false" autocapitalize="none" required>
+        </div>
+        <div id="forgot-reset-feedback" role="status" class="alert d-none py-2 fs-2 mb-3"></div>
+        <div class="d-flex justify-content-end gap-2">
+          <button type="button" id="forgot-cancel-btn" class="btn btn-outline-light btn-sm px-3">Cancelar</button>
+          <button type="submit" id="forgot-submit-btn" class="btn btn-emerald-lg py-2 px-4 fs-2">Enviar instruções</button>
+        </div>
+      </form>
+    </div>
+  </dialog>
+
+  <script defer src="../assets/libs/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
 
   <script>
     document.addEventListener('DOMContentLoaded', () => {
@@ -271,12 +308,28 @@
       const submitBtnText = document.getElementById('btn-submit-text');
       const alertBox = document.getElementById('auth-alert');
       const successBox = document.getElementById('auth-success');
+      const passwordField = document.getElementById('login-password');
+      const togglePwBtn = document.getElementById('toggle-login-password');
+
+      if (togglePwBtn && passwordField) {
+        togglePwBtn.addEventListener('click', () => {
+          const reveal = passwordField.type === 'password';
+          passwordField.type = reveal ? 'text' : 'password';
+          togglePwBtn.setAttribute('aria-pressed', String(reveal));
+          togglePwBtn.setAttribute('aria-label', reveal ? 'Ocultar senha' : 'Mostrar senha');
+          const icon = togglePwBtn.querySelector('i');
+          if (icon) icon.className = reveal ? 'ti ti-eye-off' : 'ti ti-eye';
+        });
+      }
 
       tabSignIn.addEventListener('click', () => {
         isSignUpMode = false;
         tabSignIn.className = 'btn auth-tab-btn active w-50';
+        tabSignIn.setAttribute('aria-selected', 'true');
         tabSignUp.className = 'btn auth-tab-btn inactive w-50';
+        tabSignUp.setAttribute('aria-selected', 'false');
         nameGroup.classList.add('d-none');
+        if (passwordField) passwordField.setAttribute('autocomplete', 'current-password');
         authTitle.innerText = 'Acessar Metrifique-se CRM';
         authSubtitle.innerText = 'Entre com suas credenciais salvas na nuvem';
         submitBtnText.innerText = 'Entrar no CRM';
@@ -285,12 +338,82 @@
       tabSignUp.addEventListener('click', () => {
         isSignUpMode = true;
         tabSignUp.className = 'btn auth-tab-btn active w-50';
+        tabSignUp.setAttribute('aria-selected', 'true');
         tabSignIn.className = 'btn auth-tab-btn inactive w-50';
+        tabSignIn.setAttribute('aria-selected', 'false');
         nameGroup.classList.remove('d-none');
+        if (passwordField) passwordField.setAttribute('autocomplete', 'new-password');
         authTitle.innerText = 'Criar Nova Conta';
         authSubtitle.innerText = 'Cadastre-se na plataforma com Supabase Auth';
         submitBtnText.innerText = 'Cadastrar e Acessar';
       });
+
+      // Native dialog for Forgot Password
+      const forgotDialog = document.getElementById('forgot-password-dialog');
+      const forgotBtn = document.getElementById('btn-forgot-password');
+      const forgotForm = document.getElementById('forgot-password-form');
+      const forgotEmail = document.getElementById('forgot-email-input');
+      const forgotFeedback = document.getElementById('forgot-reset-feedback');
+      const forgotCloseBtn = document.getElementById('forgot-close-btn');
+      const forgotCancelBtn = document.getElementById('forgot-cancel-btn');
+
+      if (forgotDialog) {
+        forgotDialog.addEventListener('close', () => {
+          forgotDialog.returnValue = '';
+        });
+
+        if (!('closedBy' in HTMLDialogElement.prototype)) {
+          let pressedOutside = false;
+          const isOutside = (ev) => {
+            const r = forgotDialog.getBoundingClientRect();
+            return ev.clientX < r.left || ev.clientX > r.right || ev.clientY < r.top || ev.clientY > r.bottom;
+          };
+          forgotDialog.addEventListener('pointerdown', (ev) => { pressedOutside = isOutside(ev); });
+          forgotDialog.addEventListener('pointerup', (ev) => {
+            if (pressedOutside && isOutside(ev) && forgotDialog.open) forgotDialog.close('');
+            pressedOutside = false;
+          });
+        }
+      }
+
+      if (forgotBtn && forgotDialog) {
+        forgotBtn.addEventListener('click', () => {
+          const emailVal = (document.getElementById('login-email')?.value || '').trim();
+          if (forgotEmail && emailVal) forgotEmail.value = emailVal;
+          if (forgotFeedback) {
+            forgotFeedback.className = 'alert d-none py-2 fs-2 mb-3';
+            forgotFeedback.textContent = '';
+          }
+          forgotDialog.showModal();
+          if (forgotEmail) forgotEmail.focus();
+        });
+      }
+
+      if (forgotCloseBtn && forgotDialog) forgotCloseBtn.addEventListener('click', () => forgotDialog.close('cancel'));
+      if (forgotCancelBtn && forgotDialog) forgotCancelBtn.addEventListener('click', () => forgotDialog.close('cancel'));
+
+      if (forgotForm && forgotDialog) {
+        forgotForm.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          const submitBtn = document.getElementById('forgot-submit-btn');
+          if (submitBtn) submitBtn.disabled = true;
+          try {
+            const result = await window.crmStore.requestPasswordReset(forgotEmail.value);
+            if (forgotFeedback) {
+              forgotFeedback.className = 'alert alert-success py-2 fs-2 mb-3 bg-success bg-opacity-20 text-white border-0';
+              forgotFeedback.textContent = result.message;
+            }
+            if (window.mqUI) window.mqUI.toast(result.message, { type: 'success', duration: 6000 });
+          } catch (err) {
+            if (forgotFeedback) {
+              forgotFeedback.className = 'alert alert-danger py-2 fs-2 mb-3 bg-danger bg-opacity-20 text-white border-0';
+              forgotFeedback.textContent = err.message || 'Não foi possível solicitar a recuperação.';
+            }
+          } finally {
+            if (submitBtn) submitBtn.disabled = false;
+          }
+        });
+      }
 
       document.getElementById('login-form').addEventListener('submit', async (e) => {
         e.preventDefault();

@@ -3,51 +3,63 @@
 
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="color-scheme" content="light dark">
   <title>Base de Leads | Metrifique-se CRM</title>
   <link rel="shortcut icon" type="image/png" href="../assets/images/logos/icon.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
   <link rel="stylesheet" href="../assets/css/styles.min.css" />
   <link rel="stylesheet" href="../assets/css/metrifiquese-theme.css" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
   
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="../assets/js/supabase-client.js"></script>
-  <script src="../assets/js/whitelabel-theme.js"></script>
-  <script src="../assets/js/notifications-manager.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script defer src="../assets/js/ui-toolkit.js"></script>
+  <script defer src="../assets/js/supabase-client.js"></script>
+  <script defer src="../assets/js/whitelabel-theme.js"></script>
+  <script defer src="../assets/js/notifications-manager.js"></script>
 </head>
 
 <body>
+  <a class="skip-link" href="#main-content">Pular para o conteúdo principal</a>
+
   <!-- TOP NAVBAR HEADER -->
   <header class="app-header hs-header d-flex align-items-center justify-content-between px-3">
     <div class="d-flex align-items-center gap-2">
       <a href="./dashboard.html" class="navbar-brand me-1">
-        <img src="../assets/images/logos/logoblack.png" height="30" alt="Logo" class="hs-brand-logo" />
+        <img src="../assets/images/logos/logoblack.png" height="30" alt="Logo Metrifique-se" class="hs-brand-logo" />
       </a>
-      <button class="btn btn-light text-secondary border-0 rounded-circle p-2 sidebartoggler" id="sidebarCollapseToggle" title="Recolher / Expandir Menu Lateral">
-        <i class="ti ti-layout-sidebar-left-collapse fs-5"></i>
+      <button type="button" class="btn btn-light text-secondary border-0 rounded-circle p-2 sidebartoggler" id="sidebarCollapseToggle" title="Recolher / Expandir Menu Lateral" aria-label="Recolher ou expandir menu lateral">
+        <i class="ti ti-layout-sidebar-left-collapse fs-5" aria-hidden="true"></i>
       </button>
     </div>
 
-    <div class="d-flex align-items-center gap-3">
-      <div class="input-group input-group-sm d-none d-lg-flex" style="width: 240px;">
-        <span class="input-group-text bg-light border-0 text-muted"><i class="ti ti-search"></i></span>
-        <input type="text" class="form-control bg-light text-dark border-0" placeholder="Buscar global (CRM)...">
-      </div>
+    <div class="d-flex align-items-center gap-2 gap-md-3">
+      <button type="button" class="btn btn-light text-secondary border-0 rounded-pill px-3 py-1 d-none d-lg-inline-flex align-items-center gap-2 fs-2" data-global-search-trigger title="Busca global no CRM (Ctrl/Cmd + K)" aria-label="Abrir busca global no CRM">
+        <i class="ti ti-search" aria-hidden="true"></i>
+        <span>Buscar no CRM...</span>
+        <kbd class="ms-1 small">⌘K</kbd>
+      </button>
 
-      <a href="./configuracoes-whitelabel.html" class="text-secondary fs-5" title="Configurações Whitelabel"><i class="ti ti-settings"></i></a>
-      <a href="#" class="text-secondary fs-5 position-relative" title="Notificações" onclick="window.notificationsManager && window.notificationsManager.markAllRead(); alert('Todas as notificações foram lidas.');"><i class="ti ti-bell"></i></a>
+      <button type="button" class="btn btn-light text-secondary border-0 rounded-circle p-2 d-inline-flex align-items-center justify-content-center" data-theme-toggle title="Alternar tema claro/escuro" aria-label="Alternar tema claro/escuro">
+        <i class="ti ti-moon fs-5" aria-hidden="true"></i>
+      </button>
+
+      <a href="./configuracoes-whitelabel.html" class="text-secondary fs-5" title="Configurações Whitelabel" aria-label="Configurações Whitelabel"><i class="ti ti-settings" aria-hidden="true"></i></a>
+      <button type="button" class="btn btn-link p-1 text-secondary fs-5 position-relative text-decoration-none" title="Notificações" aria-label="Notificações"><i class="ti ti-bell" aria-hidden="true"></i></button>
 
       <div class="dropdown">
-        <a href="#" class="d-flex align-items-center text-dark text-decoration-none dropdown-toggle" data-bs-toggle="dropdown">
-          <img src="../assets/images/profile/user-1.jpg" width="30" height="30" class="rounded-circle me-2 header-user-avatar">
+        <a href="#" class="d-flex align-items-center text-dark text-decoration-none dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+          <img src="../assets/images/profile/user-1.jpg" alt="" width="30" height="30" class="rounded-circle me-2 header-user-avatar">
           <span class="d-none d-md-inline fs-2 fw-semibold header-user-name">Guilherme Garcia</span>
         </a>
         <ul class="dropdown-menu dropdown-menu-end">
-          <li><a class="dropdown-item" href="./perfil.html"><i class="ti ti-user me-2"></i>Meu Perfil</a></li>
-          <li><a class="dropdown-item" href="./admin-tenants.html"><i class="ti ti-building-store me-2"></i>Gestão de Empresas</a></li>
-          <li><a class="dropdown-item" href="./configuracoes-whitelabel.html"><i class="ti ti-palette me-2"></i>Painel Whitelabel</a></li>
+          <li><a class="dropdown-item" href="./perfil.html"><i class="ti ti-user me-2" aria-hidden="true"></i>Meu Perfil</a></li>
+          <li><a class="dropdown-item" href="./admin-tenants.html"><i class="ti ti-building-store me-2" aria-hidden="true"></i>Gestão de Empresas</a></li>
+          <li><a class="dropdown-item" href="./configuracoes-whitelabel.html"><i class="ti ti-palette me-2" aria-hidden="true"></i>Painel Whitelabel</a></li>
           <li><hr class="dropdown-divider"></li>
-          <li><a class="dropdown-item text-danger" href="./login.html" onclick="event.preventDefault(); window.crmStore.logout();"><i class="ti ti-logout me-2"></i>Sair</a></li>
+          <li><a class="dropdown-item text-danger" href="./login.html" onclick="event.preventDefault(); window.crmStore && window.crmStore.logout();"><i class="ti ti-logout me-2" aria-hidden="true"></i>Sair</a></li>
         </ul>
       </div>
     </div>
@@ -58,27 +70,27 @@
     
     <aside class="left-sidebar">
       <div>
-        <nav class="sidebar-nav scroll-sidebar" data-simplebar="">
+        <nav class="sidebar-nav scroll-sidebar" aria-label="Menu principal" data-simplebar="">
           <ul id="sidebarnav">
             <li class="nav-small-cap">
-              <i class="ti ti-dots nav-small-cap-icon fs-4"></i>
+              <i class="ti ti-dots nav-small-cap-icon fs-4" aria-hidden="true"></i>
               <span class="hide-menu">CRM MENU</span>
             </li>
             <li class="sidebar-item">
               <a class="sidebar-link text-primary fw-bold" href="./admin-tenants.html">
-                <span><i class="ti ti-building-store"></i></span>
+                <span><i class="ti ti-building-store" aria-hidden="true"></i></span>
                 <span class="hide-menu">Gestão de Empresas</span>
               </a>
             </li>
             <li class="sidebar-item">
               <a class="sidebar-link" href="./dashboard.html">
-                <span><i class="ti ti-layout-dashboard"></i></span>
+                <span><i class="ti ti-layout-dashboard" aria-hidden="true"></i></span>
                 <span class="hide-menu">Dashboard</span>
               </a>
             </li>
             <li class="sidebar-item selected">
-              <a class="sidebar-link" href="./leads.html">
-                <span><i class="ti ti-users"></i></span>
+              <a class="sidebar-link" href="./leads.html" aria-current="page">
+                <span><i class="ti ti-users" aria-hidden="true"></i></span>
                 <span class="hide-menu">Base de Leads</span>
               </a>
             </li>
@@ -124,19 +136,25 @@
     </aside>
 
     <div class="body-wrapper">
-      <div class="container-fluid pt-3">
+      <main id="main-content" class="container-fluid pt-3" tabindex="-1">
         <!-- Page Control Bar -->
         <div class="card shadow-sm border-0 mb-4">
           <div class="card-body p-4">
+            <h1 class="h4 fw-bold mb-3 text-dark d-flex align-items-center gap-2">
+              Base de Leads &amp; Contatos
+              <span id="total-leads-count" class="badge bg-light-primary text-primary fs-2">0</span>
+            </h1>
             <div class="row g-3 align-items-center justify-content-between">
               <div class="col-md-5">
+                <label for="search-leads-input" class="visually-hidden">Buscar contatos por nome, e-mail ou empresa</label>
                 <div class="input-group">
-                  <span class="input-group-text bg-white border-end-0"><i class="ti ti-search text-muted"></i></span>
-                  <input type="text" id="search-leads-input" class="form-control border-start-0 ps-0" placeholder="Buscar por nome, email ou empresa...">
+                  <span class="input-group-text bg-white border-end-0"><i class="ti ti-search text-muted" aria-hidden="true"></i></span>
+                  <input type="search" id="search-leads-input" class="form-control border-start-0 ps-0" placeholder="Buscar por nome, email ou empresa..." enterkeyhint="search">
                 </div>
               </div>
 
-              <div class="col-md-4">
+              <div class="col-md-3 col-lg-4">
+                <label for="filter-stage-select" class="visually-hidden">Filtrar por estágio de vida</label>
                 <select id="filter-stage-select" class="form-select">
                   <option value="all">Todos os Estágios de Vida</option>
                   <option value="lead">Lead</option>
@@ -148,17 +166,17 @@
                 </select>
               </div>
 
-              <div class="col-md-3 text-end d-flex gap-2 justify-content-end">
-                <button class="btn btn-outline-secondary d-inline-flex align-items-center gap-1 fw-bold" onclick="window.leadsManager && window.leadsManager.exportCSV()" title="Exportar lista de contatos como CSV">
-                  <i class="ti ti-download fs-5"></i>
-                  <span class="d-none d-lg-inline">Exportar</span>
+              <div class="col-md-4 col-lg-3 text-end d-flex gap-2 justify-content-end flex-wrap">
+                <button type="button" class="btn btn-outline-secondary d-inline-flex align-items-center gap-1 fw-bold" onclick="window.leadsManager && window.leadsManager.exportCSV()" title="Exportar lista de contatos como CSV" aria-label="Exportar lista de contatos como CSV">
+                  <i class="ti ti-download fs-5" aria-hidden="true"></i>
+                  <span class="d-none d-xl-inline">Exportar</span>
                 </button>
-                <button class="btn btn-outline-primary d-inline-flex align-items-center gap-1 fw-bold" data-bs-toggle="modal" data-bs-target="#importCSVModal">
-                  <i class="ti ti-upload fs-5"></i>
-                  <span class="d-none d-lg-inline">Importar CSV</span>
+                <button type="button" class="btn btn-outline-primary d-inline-flex align-items-center gap-1 fw-bold" data-bs-toggle="modal" data-bs-target="#importCSVModal" aria-label="Importar contatos via CSV">
+                  <i class="ti ti-upload fs-5" aria-hidden="true"></i>
+                  <span class="d-none d-xl-inline">Importar CSV</span>
                 </button>
-                <button class="btn btn-primary d-inline-flex align-items-center justify-content-center gap-2 py-2 px-3 fw-bold shadow-sm" data-bs-toggle="modal" data-bs-target="#addLeadModal">
-                  <i class="ti ti-user-plus fs-5"></i>
+                <button type="button" class="btn btn-primary d-inline-flex align-items-center justify-content-center gap-2 py-2 px-3 fw-bold shadow-sm" data-bs-toggle="modal" data-bs-target="#addLeadModal">
+                  <i class="ti ti-user-plus fs-5" aria-hidden="true"></i>
                   <span>Criar Contato</span>
                 </button>
               </div>
@@ -169,17 +187,18 @@
         <!-- Leads Table Card -->
         <div class="card shadow-sm border-0">
           <div class="card-body p-0">
-            <div class="table-responsive">
+            <div class="table-responsive mq-table-wrapper" tabindex="0">
               <table class="table table-hover align-middle mb-0">
+                <caption class="visually-hidden">Lista de contatos e leads do CRM</caption>
                 <thead class="bg-light">
                   <tr>
-                    <th class="ps-4" style="width: 22%;">Contato</th>
-                    <th style="width: 22%;">Empresa & Cargo</th>
-                    <th style="width: 13%;">Estágio de Vida</th>
-                    <th style="width: 13%;">Lead Score</th>
-                    <th style="width: 12%;">Origem</th>
-                    <th style="width: 10%;">Tags</th>
-                    <th class="text-end pe-4" style="width: 8%; min-width: 140px;">Ações</th>
+                    <th scope="col" class="ps-4" style="width: 22%;">Contato</th>
+                    <th scope="col" style="width: 22%;">Empresa &amp; Cargo</th>
+                    <th scope="col" style="width: 13%;">Estágio de Vida</th>
+                    <th scope="col" style="width: 13%;">Lead Score</th>
+                    <th scope="col" style="width: 12%;">Origem</th>
+                    <th scope="col" style="width: 10%;">Tags</th>
+                    <th scope="col" class="text-end pe-4" style="width: 8%; min-width: 140px;">Ações</th>
                   </tr>
                 </thead>
                 <tbody id="leads-table-body">
@@ -189,7 +208,7 @@
             </div>
           </div>
         </div>
-      </div>
+      </main>
     </div>
   </div>
 
@@ -198,32 +217,32 @@
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title fw-bold"><i class="ti ti-user-plus text-primary me-2"></i> Criar Novo Contato</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          <h5 class="modal-title fw-bold"><i class="ti ti-user-plus text-primary me-2" aria-hidden="true"></i> Criar Novo Contato</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
         </div>
         <form id="new-lead-form">
           <div class="modal-body">
             <div class="mb-3">
-              <label class="form-label">Nome Completo *</label>
+              <label for="lead-name-input" class="form-label">Nome Completo *</label>
               <input type="text" id="lead-name-input" class="form-control" placeholder="Ex: Carlos Eduardo" required>
             </div>
             <div class="mb-3">
-              <label class="form-label">E-mail *</label>
-              <input type="email" id="lead-email-input" class="form-control" placeholder="carlos@empresa.com" required>
+              <label for="lead-email-input" class="form-label">E-mail *</label>
+              <input type="email" id="lead-email-input" class="form-control" placeholder="carlos@empresa.com" required spellcheck="false">
             </div>
             <div class="row">
               <div class="col-md-6 mb-3">
-                <label class="form-label">Telefone / WhatsApp</label>
-                <input type="text" id="lead-phone-input" class="form-control" placeholder="(11) 98765-4321">
+                <label for="lead-phone-input" class="form-label">Telefone / WhatsApp</label>
+                <input type="tel" inputmode="tel" autocomplete="tel" id="lead-phone-input" class="form-control" placeholder="(11) 98765-4321">
               </div>
               <div class="col-md-6 mb-3">
-                <label class="form-label">Empresa</label>
+                <label for="lead-company-input" class="form-label">Empresa</label>
                 <input type="text" id="lead-company-input" class="form-control" placeholder="Nome da empresa">
               </div>
             </div>
             <div class="row">
               <div class="col-md-6 mb-3">
-                <label class="form-label">Origem do Lead</label>
+                <label for="lead-source-input" class="form-label">Origem do Lead</label>
                 <select id="lead-source-input" class="form-select">
                   <option value="Google Ads">Google Ads</option>
                   <option value="Facebook Ads">Facebook Ads</option>
@@ -233,8 +252,8 @@
                 </select>
               </div>
               <div class="col-md-6 mb-3">
-                <label class="form-label">Score Inicial</label>
-                <input type="number" id="lead-score-input" class="form-control" value="10">
+                <label for="lead-score-input" class="form-label">Score Inicial</label>
+                <input type="number" min="0" id="lead-score-input" class="form-control" value="10">
               </div>
             </div>
           </div>
@@ -247,13 +266,73 @@
     </div>
   </div>
 
+  <!-- Modal Editar Lead (substitui prompts sequenciais) -->
+  <div class="modal fade" id="editLeadModal" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title fw-bold"><i class="ti ti-edit text-primary me-2" aria-hidden="true"></i> Editar Dados do Contato</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+        </div>
+        <form id="edit-lead-form">
+          <input type="hidden" id="edit-lead-id">
+          <div class="modal-body">
+            <div class="mb-3">
+              <label for="edit-lead-name" class="form-label fw-semibold">Nome Completo *</label>
+              <input type="text" id="edit-lead-name" class="form-control" required>
+            </div>
+            <div class="mb-3">
+              <label for="edit-lead-email" class="form-label fw-semibold">E-mail *</label>
+              <input type="email" id="edit-lead-email" class="form-control" spellcheck="false" required>
+            </div>
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label for="edit-lead-phone" class="form-label fw-semibold">Telefone / WhatsApp</label>
+                <input type="tel" inputmode="tel" autocomplete="tel" id="edit-lead-phone" class="form-control">
+              </div>
+              <div class="col-md-6 mb-3">
+                <label for="edit-lead-company" class="form-label fw-semibold">Empresa</label>
+                <input type="text" id="edit-lead-company" class="form-control">
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label for="edit-lead-job-title" class="form-label fw-semibold">Cargo</label>
+                <input type="text" id="edit-lead-job-title" class="form-control" placeholder="Ex: Diretor Comercial">
+              </div>
+              <div class="col-md-6 mb-3">
+                <label for="edit-lead-score" class="form-label fw-semibold">Lead Score (Pontos)</label>
+                <input type="number" min="0" id="edit-lead-score" class="form-control" value="10">
+              </div>
+            </div>
+            <div class="mb-2">
+              <label for="edit-lead-lifecycle" class="form-label fw-semibold">Estágio de Vida</label>
+              <select id="edit-lead-lifecycle" class="form-select">
+                <option value="lead">Lead</option>
+                <option value="mql">MQL (Marketing Qualified)</option>
+                <option value="sql">SQL (Sales Qualified)</option>
+                <option value="opportunity">Oportunidade</option>
+                <option value="customer">Cliente</option>
+                <option value="lost">Perdido</option>
+              </select>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
+            <button type="submit" class="btn btn-primary fw-bold">Salvar Alterações</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
   <!-- Modal Detalhes & Perfil 3 Colunas -->
   <div class="modal fade" id="leadDetailModal" tabindex="-1">
     <div class="modal-dialog modal-xl">
       <div class="modal-content">
         <div class="modal-header border-bottom bg-light py-3">
-          <h5 class="modal-title fw-bold text-dark"><i class="ti ti-id text-primary me-2"></i> Perfil 360° do Contato</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          <h5 class="modal-title fw-bold text-dark"><i class="ti ti-id text-primary me-2" aria-hidden="true"></i> Perfil 360° do Contato</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
         </div>
         <div class="modal-body p-4" id="lead-modal-details">
           <!-- Conteúdo gerado dinamicamente -->
@@ -267,37 +346,37 @@
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title fw-bold"><i class="ti ti-circle-plus text-primary me-2"></i> Nova Tarefa / Atividade</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          <h5 class="modal-title fw-bold"><i class="ti ti-circle-plus text-primary me-2" aria-hidden="true"></i> Nova Tarefa / Atividade</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
         </div>
         <form id="new-task-form">
           <div class="modal-body">
             <input type="hidden" id="task-lead-id">
             <div class="mb-3">
-              <label class="form-label fw-semibold">Tipo de Atividade *</label>
+              <span class="form-label fw-semibold d-block">Tipo de Atividade *</span>
               <div class="d-flex gap-2 flex-wrap">
                 <input type="radio" class="btn-check" name="task-type" id="type-note"    value="note"    checked>
-                <label class="btn btn-sm btn-outline-primary"  for="type-note"><i class="ti ti-notes me-1"></i>Nota</label>
+                <label class="btn btn-sm btn-outline-primary"  for="type-note"><i class="ti ti-notes me-1" aria-hidden="true"></i>Nota</label>
                 <input type="radio" class="btn-check" name="task-type" id="type-task"    value="task">
-                <label class="btn btn-sm btn-outline-danger"   for="type-task"><i class="ti ti-circle-check me-1"></i>Tarefa</label>
+                <label class="btn btn-sm btn-outline-danger"   for="type-task"><i class="ti ti-circle-check me-1" aria-hidden="true"></i>Tarefa</label>
                 <input type="radio" class="btn-check" name="task-type" id="type-call"    value="call">
-                <label class="btn btn-sm btn-outline-warning"  for="type-call"><i class="ti ti-phone me-1"></i>Ligação</label>
+                <label class="btn btn-sm btn-outline-warning"  for="type-call"><i class="ti ti-phone me-1" aria-hidden="true"></i>Ligação</label>
                 <input type="radio" class="btn-check" name="task-type" id="type-email"   value="email">
-                <label class="btn btn-sm btn-outline-info"     for="type-email"><i class="ti ti-mail me-1"></i>E-mail</label>
+                <label class="btn btn-sm btn-outline-info"     for="type-email"><i class="ti ti-mail me-1" aria-hidden="true"></i>E-mail</label>
                 <input type="radio" class="btn-check" name="task-type" id="type-meeting" value="meeting">
-                <label class="btn btn-sm btn-outline-success"  for="type-meeting"><i class="ti ti-calendar me-1"></i>Reunião</label>
+                <label class="btn btn-sm btn-outline-success"  for="type-meeting"><i class="ti ti-calendar me-1" aria-hidden="true"></i>Reunião</label>
               </div>
             </div>
             <div class="mb-3">
-              <label class="form-label fw-semibold">Título *</label>
+              <label for="task-title-input" class="form-label fw-semibold">Título *</label>
               <input type="text" id="task-title-input" class="form-control" placeholder="Ex: Ligar para fechar proposta" required>
             </div>
             <div class="mb-3">
-              <label class="form-label fw-semibold">Descrição / Anotação</label>
+              <label for="task-desc-input" class="form-label fw-semibold">Descrição / Anotação</label>
               <textarea id="task-desc-input" class="form-control" rows="3" placeholder="Detalhes da atividade..."></textarea>
             </div>
             <div class="mb-3" id="task-due-date-wrapper">
-              <label class="form-label fw-semibold">Data de Vencimento</label>
+              <label for="task-due-date-input" class="form-label fw-semibold">Data de Vencimento</label>
               <input type="datetime-local" id="task-due-date-input" class="form-control">
             </div>
           </div>
@@ -315,8 +394,8 @@
     <div class="modal-dialog modal-lg">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title fw-bold"><i class="ti ti-upload text-primary me-2"></i> Importar Contatos via CSV</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          <h5 class="modal-title fw-bold"><i class="ti ti-upload text-primary me-2" aria-hidden="true"></i> Importar Contatos via CSV</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
         </div>
         <div class="modal-body">
           <!-- Step 1: Upload -->
@@ -327,13 +406,13 @@
               <small class="text-muted">A primeira linha deve ser o cabeçalho. Separador: vírgula ou ponto-e-vírgula.</small>
             </div>
             <div class="mb-3">
-              <label class="form-label fw-semibold">Selecione o arquivo .csv ou .txt</label>
+              <label for="csv-file-input" class="form-label fw-semibold">Selecione o arquivo .csv ou .txt</label>
               <input type="file" id="csv-file-input" class="form-control" accept=".csv,.txt">
             </div>
             <div class="mb-3">
-              <a href="#" onclick="window.leadsManager && window.leadsManager.downloadCSVTemplate(); return false;" class="btn btn-sm btn-outline-secondary">
-                <i class="ti ti-download me-1"></i> Baixar modelo de planilha
-              </a>
+              <button type="button" onclick="window.leadsManager && window.leadsManager.downloadCSVTemplate();" class="btn btn-sm btn-outline-secondary">
+                <i class="ti ti-download me-1" aria-hidden="true"></i> Baixar modelo de planilha
+              </button>
             </div>
           </div>
 
@@ -341,15 +420,16 @@
           <div id="csv-step-preview" style="display:none;">
             <div class="d-flex align-items-center justify-content-between mb-2">
               <strong id="csv-preview-count" class="text-dark">0 contatos encontrados</strong>
-              <button class="btn btn-sm btn-light" onclick="window.leadsManager && window.leadsManager.resetCSVImport()">
-                <i class="ti ti-arrow-left me-1"></i> Voltar
+              <button type="button" class="btn btn-sm btn-light" onclick="window.leadsManager && window.leadsManager.resetCSVImport()">
+                <i class="ti ti-arrow-left me-1" aria-hidden="true"></i> Voltar
               </button>
             </div>
-            <div class="table-responsive" style="max-height: 280px; overflow-y: auto;">
+            <div class="table-responsive" tabindex="0" style="max-height: 280px; overflow-y: auto;">
               <table class="table table-sm table-bordered mb-0">
+                <caption class="visually-hidden">Pré-visualização dos contatos do CSV</caption>
                 <thead class="bg-light">
                   <tr>
-                    <th>Nome</th><th>E-mail</th><th>Telefone</th><th>Empresa</th><th>Origem</th>
+                    <th scope="col">Nome</th><th scope="col">E-mail</th><th scope="col">Telefone</th><th scope="col">Empresa</th><th scope="col">Origem</th>
                   </tr>
                 </thead>
                 <tbody id="csv-preview-body"></tbody>
@@ -366,26 +446,27 @@
         <div class="modal-footer">
           <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
           <button type="button" class="btn btn-primary d-none" id="csv-import-confirm-btn" onclick="window.leadsManager && window.leadsManager.confirmCSVImport()">
-            <i class="ti ti-upload me-1"></i> Importar Contatos
+            <i class="ti ti-upload me-1" aria-hidden="true"></i> Importar Contatos
           </button>
         </div>
       </div>
     </div>
   </div>
 
-  <script src="../assets/libs/jquery/dist/jquery.min.js"></script>
-  <script src="../assets/libs/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-  <script src="../assets/js/sidebarmenu.js"></script>
-  <script src="../assets/js/app.min.js"></script>
-  <script src="../assets/js/leads-manager.js"></script>
-  <script src="../assets/js/tasks-manager.js"></script>
+  <script defer src="../assets/libs/jquery/dist/jquery.min.js"></script>
+  <script defer src="../assets/libs/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+  <script defer src="../assets/js/sidebarmenu.js"></script>
+  <script defer src="../assets/js/app.min.js"></script>
+  <script defer src="../assets/js/leads-manager.js"></script>
+  <script defer src="../assets/js/tasks-manager.js"></script>
 
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       const user = window.crmStore ? window.crmStore.getUser() : null;
       if (user) {
-        document.querySelectorAll('.header-user-name').forEach(el => el.innerText = user.full_name);
-        document.querySelectorAll('.header-user-avatar').forEach(img => img.src = user.avatar_url);
+        document.querySelectorAll('.header-user-name').forEach(el => el.innerText = user.full_name || 'Usuário');
+        const safeAvatar = window.mqSecurity ? window.mqSecurity.safeUrl(user.avatar_url, '../assets/images/profile/user-1.jpg') : (user.avatar_url || '../assets/images/profile/user-1.jpg');
+        document.querySelectorAll('.header-user-avatar').forEach(img => { img.src = safeAvatar; });
       }
     });
   </script>
