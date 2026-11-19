@@ -266,7 +266,7 @@ class KanbanManager {
       const totalValue = stageDeals.reduce((sum, d) => sum + (parseFloat(d.value) || 0), 0);
       const safeStageId = escAttr(stage.id);
       const safeStageName = esc(stage.name);
-      const safeStageColor = /^#[0-9a-fA-F]{6}$/.test(stage.color || '') ? stage.color : '#FF7A59';
+      const safeStageColor = /^#[0-9a-fA-F]{6}$/.test(stage.color || '') ? stage.color : '#143E2B';
 
       const cardsHtml = stageDeals.map(deal => {
         const lead = leads.find(l => l.id === deal.lead_id) || { name: 'Contato não associado', company: '' };

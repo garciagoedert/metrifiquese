@@ -1,35 +1,83 @@
 /* ====================================================================
-   METRIFIQUE-SE CRM & WHITELABEL - MODERN DESIGN SYSTEM & THEME
+   METRIFIQUE-SE CRM & WHITELABEL - CLEAN BOLD MATERIAL UI DESIGN SYSTEM
+   Neutral Zinc Palette + Dark Brand Green (#143E2B)
    Font: Plus Jakarta Sans (loaded via HTML <link> for faster CRP)
    ==================================================================== */
 
 :root {
   color-scheme: light dark;
-  --hs-orange: #FF7A59;
-  --hs-orange-hover: #FF5C35;
-  --hs-navy: #1E293B;
-  --hs-navy-dark: #0F172A;
-  --hs-teal: #00A4BD;
-  --hs-light-bg: #F8FAFC;
-  --hs-card-border: #E2E8F0;
 
-  --bs-primary: #FF7A59;
-  --bs-primary-rgb: 255, 122, 89;
-  --theme-primary: #FF7A59;
+  /* Tier 1: Brand & Neutral Palette Tokens */
+  --mq-brand-green: #143E2B;
+  --mq-brand-green-hover: #1B543B;
+  --mq-brand-green-active: #0E2C1E;
+  --mq-brand-emerald: #15803D;
+
+  --mq-zinc-50: #FAFAFA;
+  --mq-zinc-100: #F4F4F5;
+  --mq-zinc-150: #F5F5F7;
+  --mq-zinc-200: #E4E4E7;
+  --mq-zinc-300: #D4D4D8;
+  --mq-zinc-500: #8E8E98;
+  --mq-zinc-600: #52525B;
+  --mq-zinc-800: #27272A;
+  --mq-zinc-900: #18181B;
+  --mq-zinc-950: #09090B;
+
+  /* Tier 2: Semantic Surface, Border & Text Tokens (Light Mode Default) */
+  --mq-bg: var(--mq-zinc-150);
+  --mq-surface: #FFFFFF;
+  --mq-surface-elevated: #FFFFFF;
+  --mq-surface-subtle: var(--mq-zinc-100);
+  --mq-surface-hover: var(--mq-zinc-200);
+  --mq-border: var(--mq-zinc-200);
+  --mq-border-strong: var(--mq-zinc-500);
+  --mq-heading: var(--mq-zinc-950);
+  --mq-text: var(--mq-zinc-800);
+  --mq-muted: var(--mq-zinc-600);
+
+  /* Brand & Dynamic Theme Tokens */
+  --theme-primary: var(--mq-brand-green);
+  --theme-primary-hover: var(--mq-brand-green-hover);
+  --theme-primary-active: var(--mq-brand-green-active);
   --theme-primary-fg: #FFFFFF;
+  --theme-primary-text: var(--theme-primary);
+  --theme-primary-soft: rgba(20, 62, 43, 0.1);
+  --theme-primary-soft-hover: rgba(20, 62, 43, 0.16);
+
+  /* Compatibility aliases for Bootstrap & template variables */
+  --hs-orange: #143E2B;
+  --hs-orange-hover: #1B543B;
+  --hs-navy: #18181B;
+  --hs-navy-dark: #09090B;
+  --hs-teal: #143E2B;
+  --hs-light-bg: #F5F5F7;
+  --hs-card-border: #E4E4E7;
+
+  --bs-primary: #143E2B;
+  --bs-primary-rgb: 20, 62, 43;
   --bs-body-font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 
-  /* Semantic surface & text tokens */
-  --mq-bg: #F8FAFC;
-  --mq-surface: #FFFFFF;
-  --mq-surface-subtle: #F1F5F9;
-  --mq-border: #E2E8F0;
-  --mq-text: #334155;
-  --mq-heading: #0F172A;
-  --mq-muted: #64748B;
+  /* Material UI Layered Elevation Shadows */
+  --mq-elev-1: 0 1px 2px rgba(9, 9, 11, 0.05), 0 1px 3px rgba(9, 9, 11, 0.04);
+  --mq-elev-2: 0 4px 12px -2px rgba(9, 9, 11, 0.08), 0 2px 4px -1px rgba(9, 9, 11, 0.04);
+  --mq-elev-3: 0 12px 28px -6px rgba(9, 9, 11, 0.14), 0 4px 10px -2px rgba(9, 9, 11, 0.05);
+  --mq-elev-4: 0 24px 48px -12px rgba(9, 9, 11, 0.24), 0 8px 16px -4px rgba(9, 9, 11, 0.08);
+
   --mq-target-size: 24px;
-  --mq-scrollbar-track: light-dark(#F1F5F9, #1E293B);
-  --mq-scrollbar-thumb: light-dark(#94A3B8, #475569);
+  --mq-scrollbar-track: light-dark(#F4F4F5, #18181B);
+  --mq-scrollbar-thumb: light-dark(#A1A1AA, #52525B);
+  --in-oklab: ;
+}
+
+@supports (background: linear-gradient(in oklab, white, black)) {
+  :root {
+    --in-oklab: in oklab;
+    --theme-primary-hover: color-mix(in oklab, var(--theme-primary) 86%, white);
+    --theme-primary-active: color-mix(in oklab, var(--theme-primary) 82%, black);
+    --theme-primary-soft: color-mix(in oklab, var(--theme-primary) 10%, transparent);
+    --theme-primary-soft-hover: color-mix(in oklab, var(--theme-primary) 16%, transparent);
+  }
 }
 
 :root[data-theme="light"] {
@@ -38,15 +86,36 @@
 
 :root[data-theme="dark"] {
   color-scheme: dark;
-  --mq-bg: #0F172A;
-  --mq-surface: #1E293B;
-  --mq-surface-subtle: #0F172A;
-  --mq-border: #334155;
-  --mq-text: #E2E8F0;
-  --mq-heading: #F8FAFC;
-  --mq-muted: #94A3B8;
-  --hs-light-bg: #0F172A;
-  --hs-card-border: #334155;
+  --mq-bg: #09090B;
+  --mq-surface: #121215;
+  --mq-surface-elevated: #18181B;
+  --mq-surface-subtle: #1F1F23;
+  --mq-surface-hover: #27272A;
+  --mq-border: #27272A;
+  --mq-border-strong: #52525B;
+  --mq-heading: #FAFAFA;
+  --mq-text: #E4E4E7;
+  --mq-muted: #A1A1AA;
+  --hs-light-bg: #09090B;
+  --hs-card-border: #27272A;
+
+  /* Maintain WCAG AA readable contrast on dark backgrounds for green/dark accents */
+  --theme-primary-text: #6EE7B7;
+  --theme-primary-soft: rgba(34, 197, 94, 0.16);
+  --theme-primary-soft-hover: rgba(34, 197, 94, 0.24);
+
+  --mq-elev-1: 0 1px 2px rgba(0, 0, 0, 0.35), 0 1px 3px rgba(0, 0, 0, 0.28);
+  --mq-elev-2: 0 6px 16px -2px rgba(0, 0, 0, 0.48), 0 2px 6px -1px rgba(0, 0, 0, 0.32);
+  --mq-elev-3: 0 16px 32px -6px rgba(0, 0, 0, 0.6), 0 4px 12px -2px rgba(0, 0, 0, 0.38);
+  --mq-elev-4: 0 24px 52px -12px rgba(0, 0, 0, 0.72), 0 8px 20px -4px rgba(0, 0, 0, 0.45);
+}
+
+@supports (color: color-mix(in oklab, white, black)) {
+  :root[data-theme="dark"] {
+    --theme-primary-text: color-mix(in oklab, var(--theme-primary) 42%, #86EFAC);
+    --theme-primary-soft: color-mix(in oklab, var(--theme-primary) 30%, transparent);
+    --theme-primary-soft-hover: color-mix(in oklab, var(--theme-primary) 42%, transparent);
+  }
 }
 
 /* Dynamic accessible contrast foreground for brand primary color */
@@ -71,7 +140,7 @@
 
 html {
   accent-color: var(--theme-primary);
-  scroll-padding-top: 76px;
+  scroll-padding-top: 80px;
   scroll-padding-bottom: env(safe-area-inset-bottom, 0px);
   scrollbar-color: var(--mq-scrollbar-thumb) var(--mq-scrollbar-track);
 }
@@ -90,12 +159,12 @@ html {
   }
 }
 
-body {
+html:not([data-fixed-theme]) body {
   font-family: var(--bs-body-font-family);
   background-color: var(--mq-bg) !important;
   color: var(--mq-text) !important;
   font-size: 0.925rem;
-  line-height: 1.6;
+  line-height: 1.55;
   overflow-wrap: break-word;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -105,10 +174,23 @@ body {
   overflow-wrap: anywhere;
 }
 
-h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6 {
+/* Bold & Clean Editorial Hierarchy */
+html:not([data-fixed-theme]) :is(h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6) {
   color: var(--mq-heading) !important;
   font-weight: 700;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.025em;
+}
+
+html:not([data-fixed-theme]) :is(h1, .h1, .h4) {
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+
+.card h2 {
+  font-weight: 800;
+  font-size: clamp(1.5rem, 1.25rem + 0.85vw, 1.95rem);
+  letter-spacing: -0.035em;
+  font-variant-numeric: tabular-nums;
 }
 
 h1, h2, h3 {
@@ -149,10 +231,10 @@ input, button, select, textarea {
   padding: 0.65rem 1.1rem;
   background-color: var(--theme-primary);
   color: var(--theme-primary-fg);
-  border-radius: 8px;
+  border-radius: 10px;
   font-weight: 700;
   text-decoration: none;
-  box-shadow: 0 8px 24px rgb(0 0 0 / 0.25);
+  box-shadow: var(--mq-elev-3);
 }
 
 /* Keyboard-only visible focus ring (WCAG 2.4.7 / 1.4.11) */
@@ -176,95 +258,12 @@ input, button, select, textarea {
   }
 }
 
-/* 1. CRM TOP NAVBAR HEADER */
-
-/* -------------------------------------------------------------------
-   Material‑UI‑style button overrides (bold, clean, brand‑green accent)
-   ------------------------------------------------------------------- */
-:root {
-  /* Brand colors */
-  --brand-green: #0A5F2A;               /* dark brand green */
-  --brand-green-light: #2F7A4B;         /* lighter shade for hover */
-  --brand-green-dark: #0A3B1F;          /* darker shade for active */
-  --mq-primary-main: var(--brand-green);
-  --mq-primary-light: var(--brand-green-light);
-  --mq-primary-dark: var(--brand-green-dark);
-  --mq-primary-contrast: #FFFFFF;
-}
-
-/* Base button style – replaces Bootstrap btn */
-.btn {
-  display: inline‑flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.25rem;
-  border: none;
-  border-radius: 8px;
-  padding: 0.5rem 1rem;
-  font-weight: 600;
-  font-size: 0.875rem;
-  text-transform: uppercase;
-  letter‑spacing: 0.05em;
-  background-color: var(--mq-primary-main);
-  color: var(--mq-primary-contrast);
-  box-shadow: 0 2px 4px rgba(0,0,0,0.08);
-  transition: background 0.2s, box‑shadow 0.2s, transform 0.1s;
-}
-.btn:hover {
-  background-color: var(--mq-primary-light);
-  box-shadow: 0 4px 8px rgba(0,0,0,0.12);
-}
-.btn:active {
-  background-color: var(--mq-primary-dark);
-  transform: scale(0.97);
-}
-
-/* Secondary button (outline) */
-.btn.btn-outline {
-  background: transparent;
-  border: 2px solid var(--mq-primary-main);
-  color: var(--mq-primary-main);
-}
-.btn.btn-outline:hover {
-  background: var(--mq-primary-light);
-  color: var(--mq-primary-contrast);
-}
-
-/* Card style – clean surface with subtle elevation */
-.card {
-  background: var(--mq-surface);
-  border-radius: 12px;
-  border: 1px solid var(--mq-border);
-  box-shadow: 0 1px 3px rgba(0,0,0,0.07);
-  padding: 1rem;
-}
-.card:hover {
-  box-shadow: 0 4px 12px rgba(0,0,0,0.10);
-}
-
-/* Input / textarea – consistent look */
-input, textarea, select {
-  border: 1px solid var(--mq-border);
-  border-radius: 6px;
-  padding: 0.5rem 0.75rem;
-  background: var(--mq-surface);
-  color: var(--mq-text);
-}
-input:focus, textarea:focus, select:focus {
-  outline: 2px solid var(--mq-primary-main);
-  outline-offset: 2px;
-}
-
-/* End of Material UI overrides */
-
-/* -------------------------------------------------------------------
-   1. CRM TOP NAVBAR HEADER (original styles continue below)
-   ------------------------------------------------------------------- */
+/* 1. CRM TOP NAVBAR HEADER (Material AppBar) */
 .app-header.hs-header {
   background-color: var(--mq-surface) !important;
   border-bottom: 1px solid var(--mq-border) !important;
-  box-shadow: 0 2px 10px rgba(15, 23, 42, 0.04) !important;
-  height: 60px;
+  box-shadow: none !important;
+  min-height: 64px;
   position: fixed;
   top: 0;
   left: 0;
@@ -272,6 +271,13 @@ input:focus, textarea:focus, select:focus {
   z-index: 1050;
   padding: 0 1.5rem;
   view-transition-name: app-header;
+}
+
+@supports (background-color: color-mix(in oklab, white, transparent)) {
+  .app-header.hs-header {
+    background-color: color-mix(in oklab, var(--mq-surface) 92%, transparent) !important;
+    backdrop-filter: blur(12px);
+  }
 }
 
 .hs-header .nav-link,
@@ -287,11 +293,53 @@ input:focus, textarea:focus, select:focus {
 }
 
 .hs-header a.text-light:hover {
-  color: var(--hs-orange) !important;
+  color: var(--theme-primary-text) !important;
 }
 
 .hs-header .header-user-name {
   color: var(--mq-heading) !important;
+}
+
+.hs-header .btn-light:not([data-global-search-trigger]),
+.hs-header .btn-link {
+  background-color: transparent !important;
+  color: var(--mq-muted) !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  min-block-size: 38px;
+  min-inline-size: 38px;
+}
+
+.hs-header .btn-light:not([data-global-search-trigger]):hover,
+.hs-header .btn-link:hover {
+  background-color: var(--mq-surface-subtle) !important;
+  color: var(--mq-heading) !important;
+}
+
+.hs-header [data-global-search-trigger] {
+  background-color: var(--mq-surface-subtle) !important;
+  border: 1px solid var(--mq-border) !important;
+  color: var(--mq-muted) !important;
+  min-block-size: 38px;
+  padding: 0.35rem 0.9rem !important;
+  font-weight: 600;
+  box-shadow: none !important;
+}
+
+.hs-header [data-global-search-trigger]:hover {
+  background-color: var(--mq-surface-hover) !important;
+  color: var(--mq-heading) !important;
+  border-color: var(--mq-border-strong) !important;
+}
+
+.hs-header [data-global-search-trigger] kbd {
+  background-color: var(--mq-surface);
+  color: var(--mq-muted);
+  border: 1px solid var(--mq-border);
+  border-radius: 6px;
+  padding: 0.1rem 0.4rem;
+  font-size: 0.72rem;
+  font-weight: 700;
 }
 
 .hs-header .input-group-text,
@@ -305,104 +353,187 @@ input:focus, textarea:focus, select:focus {
   color: var(--mq-muted) !important;
 }
 
-/* 2. CARDS & ELEVATION */
-.card {
+/* 2. CARDS & MATERIAL PAPER ELEVATION */
+.card:not(.login-card-dark, .feature-card-dark) {
   background-color: var(--mq-surface);
   color: var(--mq-text);
-  border-radius: 12px !important;
+  border-radius: 16px !important;
   border: 1px solid var(--mq-border) !important;
-  box-shadow: 0 4px 12px -2px rgba(15, 23, 42, 0.05) !important;
-  transition: box-shadow 0.2s ease;
+  box-shadow: var(--mq-elev-1) !important;
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .card {
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  .card:not(.login-card-dark, .feature-card-dark) {
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
   }
 }
 
-.card:hover {
-  box-shadow: 0 8px 24px -4px rgba(15, 23, 42, 0.08) !important;
+.card:not(.login-card-dark, .feature-card-dark):hover {
+  box-shadow: var(--mq-elev-2) !important;
 }
 
-/* 3. PRIMARY BUTTONS & ACCENTS */
+/* 3. MATERIAL UI BUTTON SYSTEM */
+:where(.btn) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  min-block-size: 40px;
+  padding: 0.5rem 1.15rem;
+  border-radius: 10px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  transition: background-color 0.18s ease, border-color 0.18s ease, color 0.18s ease, box-shadow 0.18s ease, transform 0.12s ease;
+}
+
+.btn.btn-sm {
+  min-block-size: 34px;
+  padding: 0.35rem 0.85rem;
+  font-size: 0.825rem;
+  border-radius: 8px;
+}
+
+.btn.btn-link {
+  background-color: transparent !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+  min-block-size: auto;
+}
+
 .btn-primary,
-.bg-primary {
+.bg-primary:not(.bg-opacity-10, .bg-opacity-25) {
   background-color: var(--theme-primary) !important;
   border-color: var(--theme-primary) !important;
   color: var(--theme-primary-fg) !important;
-  font-weight: 600;
-  border-radius: 8px;
-  padding: 0.5rem 1.25rem;
-  box-shadow: 0 2px 6px rgba(255, 122, 89, 0.25);
-  transition: background-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
 }
 
-.btn-primary:hover,
+.btn-primary {
+  box-shadow: var(--mq-elev-1);
+}
+
+.btn-primary:hover:not(:disabled),
 .btn-primary:focus-visible {
-  background-color: var(--hs-orange-hover) !important;
-  border-color: var(--hs-orange-hover) !important;
-  box-shadow: 0 4px 14px rgba(255, 122, 89, 0.4);
+  background-color: var(--theme-primary-hover) !important;
+  border-color: var(--theme-primary-hover) !important;
+  color: var(--theme-primary-fg) !important;
+  box-shadow: var(--mq-elev-2);
+}
+
+.btn-primary:active:not(:disabled) {
+  background-color: var(--theme-primary-active) !important;
+  border-color: var(--theme-primary-active) !important;
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .btn-primary:hover {
+  .btn-primary:hover:not(:disabled) {
     transform: translateY(-1px);
   }
 }
 
 .btn-outline-primary {
-  color: var(--theme-primary) !important;
-  border-color: var(--theme-primary) !important;
-  border-radius: 8px;
-  font-weight: 600;
-  transition: background-color 0.2s ease, color 0.2s ease;
+  background-color: transparent;
+  color: var(--theme-primary-text) !important;
+  border: 1.5px solid var(--theme-primary-text) !important;
+  border-radius: 10px;
+  font-weight: 700;
 }
 
-.btn-outline-primary:hover {
+.btn-outline-primary:hover:not(:disabled) {
   background-color: var(--theme-primary) !important;
+  border-color: var(--theme-primary) !important;
   color: var(--theme-primary-fg) !important;
+  box-shadow: var(--mq-elev-1);
 }
 
-/* SOFT LIGHT BUTTONS */
-.btn-light-primary {
-  background-color: rgba(255, 122, 89, 0.12) !important;
-  color: var(--theme-primary) !important;
-  border: none !important;
-  font-weight: 600;
-  transition: background-color 0.2s ease, color 0.2s ease;
+.btn-outline-secondary {
+  background-color: var(--mq-surface);
+  color: var(--mq-text) !important;
+  border: 1px solid var(--mq-border) !important;
 }
-.btn-light-primary:hover {
+
+.btn-outline-secondary:hover:not(:disabled) {
+  background-color: var(--mq-surface-subtle) !important;
+  border-color: var(--mq-border-strong) !important;
+  color: var(--mq-heading) !important;
+}
+
+.btn-light {
+  background-color: var(--mq-surface-subtle);
+  color: var(--mq-text);
+  border: 1px solid var(--mq-border);
+}
+
+.btn-light:hover:not(:disabled) {
+  background-color: var(--mq-surface-hover);
+  color: var(--mq-heading);
+}
+
+.btn-success {
+  background-color: var(--mq-brand-green) !important;
+  border-color: var(--mq-brand-green) !important;
+  color: #FFFFFF !important;
+  box-shadow: var(--mq-elev-1);
+}
+
+.btn-success:hover:not(:disabled) {
+  background-color: var(--mq-brand-green-hover) !important;
+  border-color: var(--mq-brand-green-hover) !important;
+  box-shadow: var(--mq-elev-2);
+}
+
+/* Soft Surface Accent Buttons */
+.btn-light-primary {
+  background-color: var(--theme-primary-soft) !important;
+  color: var(--theme-primary-text) !important;
+  border: 1px solid transparent !important;
+  font-weight: 700;
+}
+
+.btn-light-primary:hover:not(:disabled) {
   background-color: var(--theme-primary) !important;
   color: var(--theme-primary-fg) !important;
 }
 
 .btn-light-danger {
   background-color: #FEF2F2 !important;
-  color: #EF4444 !important;
-  border: 1px solid #FCA5A5 !important;
-  transition: background-color 0.2s ease, color 0.2s ease;
+  color: #DC2626 !important;
+  border: 1px solid #FECACA !important;
 }
-.btn-light-danger:hover {
-  background-color: #EF4444 !important;
+
+.btn-light-danger:hover:not(:disabled) {
+  background-color: #DC2626 !important;
   color: #FFFFFF !important;
-  border-color: #EF4444 !important;
+  border-color: #DC2626 !important;
 }
 
 .btn-light-success {
-  background-color: #F0FDF4 !important;
-  color: #16A34A !important;
-  border: 1px solid #86EFAC !important;
+  background-color: #ECFDF5 !important;
+  color: #15803D !important;
+  border: 1px solid #A7F3D0 !important;
+}
+
+.btn-light-info {
+  background-color: #F4F4F5 !important;
+  color: #27272A !important;
+  border: 1px solid #D4D4D8 !important;
+}
+
+.btn-light-warning {
+  background-color: #FFFBEB !important;
+  color: #B45309 !important;
+  border: 1px solid #FDE68A !important;
 }
 
 .text-primary, a.text-primary {
-  color: var(--theme-primary) !important;
+  color: var(--theme-primary-text) !important;
 }
 
+/* Material Chips & Status Badges */
 .badge {
-  font-weight: 600;
-  border-radius: 6px;
-  padding: 0.4em 0.75em;
+  font-weight: 700;
+  border-radius: 8px;
+  padding: 0.38em 0.72em;
   letter-spacing: 0.01em;
 }
 
@@ -411,9 +542,59 @@ input:focus, textarea:focus, select:focus {
   color: var(--theme-primary-fg) !important;
 }
 
+.bg-primary.bg-opacity-10,
+.bg-light-primary,
 .badge.bg-light-primary {
-  background-color: rgba(255, 122, 89, 0.12) !important;
-  color: var(--theme-primary) !important;
+  background-color: var(--theme-primary-soft) !important;
+  color: var(--theme-primary-text) !important;
+}
+
+.bg-light-success {
+  background-color: #ECFDF5 !important;
+  color: #15803D !important;
+}
+
+.bg-light-info {
+  background-color: var(--mq-surface-subtle) !important;
+  color: var(--mq-heading) !important;
+}
+
+.bg-light-warning {
+  background-color: #FFFBEB !important;
+  color: #B45309 !important;
+}
+
+.bg-light-danger {
+  background-color: #FEF2F2 !important;
+  color: #DC2626 !important;
+}
+
+:root[data-theme="dark"] .btn-light-danger,
+:root[data-theme="dark"] .bg-light-danger {
+  background-color: rgba(220, 38, 38, 0.18) !important;
+  color: #FCA5A5 !important;
+  border-color: rgba(220, 38, 38, 0.35) !important;
+}
+
+:root[data-theme="dark"] .btn-light-success,
+:root[data-theme="dark"] .bg-light-success {
+  background-color: rgba(22, 163, 74, 0.2) !important;
+  color: #86EFAC !important;
+  border-color: rgba(34, 197, 94, 0.35) !important;
+}
+
+:root[data-theme="dark"] .btn-light-warning,
+:root[data-theme="dark"] .bg-light-warning {
+  background-color: rgba(217, 119, 6, 0.2) !important;
+  color: #FCD34D !important;
+  border-color: rgba(217, 119, 6, 0.35) !important;
+}
+
+:root[data-theme="dark"] .btn-light-info,
+:root[data-theme="dark"] .bg-light-info {
+  background-color: rgba(255, 255, 255, 0.08) !important;
+  color: #E4E4E7 !important;
+  border-color: rgba(255, 255, 255, 0.14) !important;
 }
 
 /* 4. ACTION PILLS (Edit, Email, Call, Log, Task) */
@@ -434,9 +615,9 @@ input:focus, textarea:focus, select:focus {
 }
 
 .hs-action-pill:hover {
-  border-color: var(--theme-primary) !important;
-  color: var(--theme-primary) !important;
-  background-color: rgba(255, 122, 89, 0.1) !important;
+  border-color: var(--theme-primary-text) !important;
+  color: var(--theme-primary-text) !important;
+  background-color: var(--theme-primary-soft) !important;
 }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -455,14 +636,14 @@ input:focus, textarea:focus, select:focus {
 
 .hs-deal-progress-bar {
   height: 100%;
-  background: linear-gradient(90deg, #00A4BD 0%, var(--theme-primary) 100%);
+  background: linear-gradient(90deg var(--in-oklab), var(--theme-primary) 0%, #22C55E 100%);
   border-radius: 4px;
 }
 
 /* 6. SIDEBAR & CONTAINER FULL-WIDTH LAYOUT */
 .body-wrapper {
   display: block;
-  margin-top: 60px;
+  margin-top: 64px;
 }
 
 .body-wrapper .container-fluid {
@@ -479,34 +660,109 @@ input:focus, textarea:focus, select:focus {
 }
 
 .left-sidebar {
-  top: 60px !important;
-  height: calc(100vh - 60px) !important;
-  height: calc(100dvh - 60px) !important;
+  top: 64px !important;
+  height: calc(100vh - 64px) !important;
+  height: calc(100dvh - 64px) !important;
   border-right: 1px solid var(--mq-border);
   background: var(--mq-surface);
   view-transition-name: left-sidebar;
 }
 
-.sidebar-nav ul .sidebar-item.selected > .sidebar-link {
-  background-color: var(--theme-primary) !important;
-  color: var(--theme-primary-fg) !important;
+.sidebar-nav ul .sidebar-item:not(.selected) > .sidebar-link {
+  color: var(--mq-muted) !important;
   font-weight: 600;
-  border-radius: 8px;
-}
-
-.sidebar-nav ul .sidebar-link {
-  color: var(--mq-muted);
-  font-weight: 500;
-  border-radius: 8px;
+  border-radius: 10px;
   margin-bottom: 2px;
 }
 
-.sidebar-nav ul .sidebar-link:hover {
-  color: var(--theme-primary);
-  background: rgba(255, 122, 89, 0.08);
+.sidebar-nav ul .sidebar-item:not(.selected) > .sidebar-link i {
+  color: var(--mq-muted);
 }
 
-/* 7. TABLES & RESPONSIVE CONTAINER LAYOUT */
+.sidebar-nav ul .sidebar-item:not(.selected) > .sidebar-link:hover {
+  color: var(--mq-heading) !important;
+  background: var(--mq-surface-subtle) !important;
+}
+
+.sidebar-nav ul .sidebar-item:not(.selected) > .sidebar-link:hover i {
+  color: var(--theme-primary-text) !important;
+}
+
+.sidebar-nav ul .sidebar-item.selected > .sidebar-link {
+  background-color: var(--theme-primary) !important;
+  color: var(--theme-primary-fg) !important;
+  font-weight: 700;
+  border-radius: 10px;
+  box-shadow: var(--mq-elev-2);
+}
+
+/* 7. MATERIAL OUTLINED FORM CONTROLS, DROPDOWNS & MODALS */
+html:not([data-fixed-theme]) :where(.form-control:not(.border-0), .form-select:not(.border-0)) {
+  border: 1.5px solid var(--mq-border-strong);
+  border-radius: 10px;
+  padding: 0.55rem 0.85rem;
+  background-color: var(--mq-surface);
+  color: var(--mq-heading);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+html:not([data-fixed-theme]) :where(.form-control:not(.border-0), .form-select:not(.border-0)):hover:not(:disabled, :focus) {
+  border-color: var(--mq-heading);
+}
+
+html:not([data-fixed-theme]) :where(.form-control:not(.border-0), .form-select:not(.border-0)):focus {
+  border-color: var(--theme-primary);
+  box-shadow: 0 0 0 3px var(--theme-primary-soft);
+}
+
+.input-group .input-group-text {
+  border-color: var(--mq-border-strong);
+  background-color: var(--mq-surface);
+  color: var(--mq-muted);
+}
+
+.dropdown-menu {
+  background-color: var(--mq-surface-elevated);
+  border: 1px solid var(--mq-border) !important;
+  border-radius: 14px !important;
+  padding: 0.45rem !important;
+  box-shadow: var(--mq-elev-3) !important;
+}
+
+.dropdown-item {
+  border-radius: 8px;
+  padding: 0.55rem 0.85rem;
+  font-weight: 600;
+  color: var(--mq-text);
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.dropdown-item:hover,
+.dropdown-item:focus-visible {
+  background-color: var(--mq-surface-subtle);
+  color: var(--mq-heading);
+}
+
+.dropdown-item.active,
+.dropdown-item:active {
+  background-color: var(--theme-primary-soft);
+  color: var(--theme-primary-text);
+}
+
+.modal-content {
+  background-color: var(--mq-surface-elevated);
+  color: var(--mq-text);
+  border: 1px solid var(--mq-border) !important;
+  border-radius: 20px !important;
+  box-shadow: var(--mq-elev-4) !important;
+}
+
+.modal-header,
+.modal-footer {
+  border-color: var(--mq-border) !important;
+}
+
+/* 8. TABLES & RESPONSIVE CONTAINER LAYOUT */
 .table-responsive,
 .mq-table-wrapper {
   overflow: auto !important;
@@ -528,11 +784,11 @@ input:focus, textarea:focus, select:focus {
 }
 
 .table th {
-  font-size: 0.775rem !important;
+  font-size: 0.72rem !important;
   text-transform: uppercase !important;
-  letter-spacing: 0.05em !important;
+  letter-spacing: 0.06em !important;
   color: var(--mq-muted) !important;
-  font-weight: 700 !important;
+  font-weight: 800 !important;
   padding: 0.85rem 1rem !important;
   background-color: var(--mq-surface-subtle) !important;
   border-bottom: 1px solid var(--mq-border) !important;
@@ -542,6 +798,11 @@ input:focus, textarea:focus, select:focus {
   padding: 1rem 1rem !important;
   vertical-align: middle !important;
   border-bottom: 1px solid var(--mq-border) !important;
+}
+
+.table-hover > tbody > tr:hover > * {
+  background-color: var(--mq-surface-subtle) !important;
+  color: var(--mq-heading);
 }
 
 @container (width < 640px) {
@@ -561,7 +822,7 @@ input:focus, textarea:focus, select:focus {
   .mq-table-wrapper tbody tr {
     margin-block-end: 1rem;
     border: 1px solid var(--mq-border);
-    border-radius: 12px;
+    border-radius: 14px;
     background: var(--mq-surface);
     padding: 0.5rem 0;
   }
@@ -593,7 +854,7 @@ input:focus, textarea:focus, select:focus {
   }
 }
 
-/* 8. NAVBAR LOGO & MOBILE ADJUSTMENTS */
+/* 9. NAVBAR LOGO & MOBILE ADJUSTMENTS */
 .navbar {
   padding-top: 12px !important;
   padding-bottom: 12px !important;
@@ -624,7 +885,7 @@ input:focus, textarea:focus, select:focus {
   }
 }
 
-/* 9. POST-INTERACTION VALIDATION (:user-invalid / :user-valid) */
+/* 10. POST-INTERACTION VALIDATION (:user-invalid / :user-valid) */
 :is(.form-control, .form-select):is(:user-invalid, .user-invalid-fallback) {
   border-color: #DC2626 !important;
   background-color: rgba(220, 38, 38, 0.05) !important;
@@ -646,14 +907,14 @@ input:focus, textarea:focus, select:focus {
   display: block;
 }
 
-/* 10. MODERN NATIVE <dialog> MODALS */
+/* 11. MODERN NATIVE <dialog> MODALS */
 dialog.mq-dialog {
   border: 1px solid var(--mq-border);
-  border-radius: 16px;
+  border-radius: 20px;
   padding: 0;
-  background: var(--mq-surface);
+  background: var(--mq-surface-elevated);
   color: var(--mq-text);
-  box-shadow: 0 24px 60px -12px rgb(15 23 42 / 0.35);
+  box-shadow: var(--mq-elev-4);
   max-inline-size: min(460px, calc(100vw - 2rem));
   inline-size: 100%;
   margin: auto;
@@ -671,8 +932,8 @@ dialog.mq-dialog:modal {
 dialog.mq-dialog::backdrop {
   overflow: hidden;
   overscroll-behavior: contain;
-  background: rgb(15 23 42 / 0.55);
-  backdrop-filter: blur(3px);
+  background: rgba(9, 9, 11, 0.55);
+  backdrop-filter: blur(4px);
 }
 
 .mq-dialog-form {
@@ -703,8 +964,8 @@ dialog.mq-dialog::backdrop {
 }
 
 .mq-dialog-icon--primary {
-  background: rgba(255, 122, 89, 0.14);
-  color: var(--theme-primary);
+  background: var(--theme-primary-soft);
+  color: var(--theme-primary-text);
 }
 
 .mq-dialog-title {
@@ -777,15 +1038,15 @@ dialog.mq-dialog::backdrop {
   width: 34px;
   height: 34px;
   border-radius: 8px;
-  background: rgba(255, 122, 89, 0.12);
-  color: var(--theme-primary);
+  background: var(--theme-primary-soft);
+  color: var(--theme-primary-text);
   display: inline-flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
 }
 
-/* 11. POPOVER="MANUAL" STACKABLE TOASTS */
+/* 12. POPOVER="MANUAL" STACKABLE TOASTS */
 .mq-toast-region {
   position: fixed;
   inset-block-end: max(1rem, env(safe-area-inset-bottom, 0px));
@@ -807,11 +1068,11 @@ dialog.mq-dialog::backdrop {
   align-items: flex-start;
   gap: 0.75rem;
   padding: 0.85rem 1rem;
-  border-radius: 12px;
+  border-radius: 14px;
   border: 1px solid var(--mq-border);
-  background: var(--mq-surface);
+  background: var(--mq-surface-elevated);
   color: var(--mq-heading);
-  box-shadow: 0 14px 30px -6px rgb(15 23 42 / 0.22);
+  box-shadow: var(--mq-elev-3);
   opacity: 0;
   transform: translateY(10px);
   transition: opacity 0.2s ease-out, transform 0.2s ease-out, display 0.2s ease-out, overlay 0.2s ease-out;
@@ -846,7 +1107,7 @@ dialog.mq-dialog::backdrop {
 .mq-toast--warning { border-inline-start: 4px solid #D97706; }
 .mq-toast--warning .mq-toast-icon { color: #D97706; }
 .mq-toast--info { border-inline-start: 4px solid var(--theme-primary); }
-.mq-toast--info .mq-toast-icon { color: var(--theme-primary); }
+.mq-toast--info .mq-toast-icon { color: var(--theme-primary-text); }
 
 .mq-toast-icon {
   font-size: 1.25rem;
@@ -888,7 +1149,7 @@ dialog.mq-dialog::backdrop {
   color: var(--mq-heading);
 }
 
-/* 12. INLINE COPY FEEDBACK TIP */
+/* 13. INLINE COPY FEEDBACK TIP */
 .mq-copy-wrap {
   position: relative;
   display: inline-flex;
@@ -918,7 +1179,7 @@ dialog.mq-dialog::backdrop {
   color: #DC2626;
 }
 
-/* 13. KANBAN HANDLE & TOUCH FRIENDLY SCROLL */
+/* 14. KANBAN HANDLE & TOUCH FRIENDLY SCROLL */
 .kanban-drag-handle {
   cursor: grab;
   touch-action: none;
@@ -941,11 +1202,11 @@ dialog.mq-dialog::backdrop {
 .kanban-column.is-drop-target {
   outline: 2px dashed var(--theme-primary);
   outline-offset: -4px;
-  background-color: rgba(255, 122, 89, 0.06) !important;
+  background-color: var(--theme-primary-soft) !important;
 }
 
-/* 14. DARK MODE SURFACE OVERRIDES FOR BOOTSTRAP UTILITY CLASSES */
-:root[data-theme="dark"] body,
+/* 15. DARK MODE SURFACE OVERRIDES FOR BOOTSTRAP UTILITY CLASSES */
+:root[data-theme="dark"] html:not([data-fixed-theme]) body,
 :root[data-theme="dark"] .page-wrapper {
   background-color: var(--mq-bg) !important;
   color: var(--mq-text) !important;
@@ -953,7 +1214,7 @@ dialog.mq-dialog::backdrop {
 
 :root[data-theme="dark"] .bg-white,
 :root[data-theme="dark"] .left-sidebar,
-:root[data-theme="dark"] .card,
+:root[data-theme="dark"] .card:not(.login-card-dark, .feature-card-dark),
 :root[data-theme="dark"] .modal-content,
 :root[data-theme="dark"] .dropdown-menu,
 :root[data-theme="dark"] .list-group-item {
@@ -966,46 +1227,65 @@ dialog.mq-dialog::backdrop {
 :root[data-theme="dark"] .modal-header.bg-light,
 :root[data-theme="dark"] .modal-footer.bg-light,
 :root[data-theme="dark"] .kanban-column {
-  background-color: #0F172A !important;
+  background-color: var(--mq-surface-subtle) !important;
   color: var(--mq-text) !important;
   border-color: var(--mq-border) !important;
 }
 
 :root[data-theme="dark"] .text-dark,
 :root[data-theme="dark"] .dropdown-item {
-  color: #F1F5F9 !important;
+  color: var(--mq-heading) !important;
 }
 
 :root[data-theme="dark"] .dropdown-item:hover {
-  background-color: #334155 !important;
+  background-color: var(--mq-surface-hover) !important;
 }
 
 :root[data-theme="dark"] .text-muted,
 :root[data-theme="dark"] .text-secondary {
-  color: #94A3B8 !important;
+  color: var(--mq-muted) !important;
 }
 
-:root[data-theme="dark"] .form-control,
-:root[data-theme="dark"] .form-select,
+:root[data-theme="dark"] .form-control:not(.border-0),
+:root[data-theme="dark"] .form-select:not(.border-0),
 :root[data-theme="dark"] .input-group-text {
-  background-color: #0F172A !important;
-  color: #F8FAFC !important;
-  border-color: #334155 !important;
+  background-color: var(--mq-bg) !important;
+  color: var(--mq-heading) !important;
+  border-color: var(--mq-border-strong) !important;
 }
 
 :root[data-theme="dark"] .chat-messages-area {
-  background-color: #0B1220 !important;
-  background-image: radial-gradient(#1E293B 0.75px, transparent 0.75px) !important;
+  background-color: #0B0B0E !important;
+  background-image: radial-gradient(#27272A 0.75px, transparent 0.75px) !important;
 }
 
 :root[data-theme="dark"] .message-bubble.bg-white {
-  background-color: #1E293B !important;
-  color: #F8FAFC !important;
-  border-color: #334155 !important;
+  background-color: var(--mq-surface-elevated) !important;
+  color: var(--mq-heading) !important;
+  border-color: var(--mq-border) !important;
 }
 
 @media (prefers-reduced-motion: reduce) {
   .spin-animate {
     animation: none !important;
+  }
+}
+
+/* 16. FORCED COLORS MODE (HIGH CONTRAST) */
+@media (forced-colors: active) {
+  .card,
+  .dropdown-menu,
+  .modal-content,
+  dialog.mq-dialog,
+  .mq-toast[popover],
+  .left-sidebar,
+  .app-header.hs-header {
+    border: 1px solid CanvasText !important;
+  }
+
+  .sidebar-nav ul .sidebar-item.selected > .sidebar-link,
+  :where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+    outline: 2px solid Highlight !important;
+    outline-offset: 2px;
   }
 }

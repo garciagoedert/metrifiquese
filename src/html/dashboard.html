@@ -10,6 +10,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
+  <link rel="stylesheet" href="../assets/css/styles.min.css" />
   <link rel="stylesheet" href="../assets/css/metrifiquese-theme.css" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
   
@@ -164,8 +165,8 @@
           .hover-translate-y { transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease; }
           .hover-translate-y:hover {
             transform: translateY(-4px);
-            box-shadow: 0 10px 20px -5px rgba(93, 135, 255, 0.18) !important;
-            border-color: #5D87FF !important;
+            box-shadow: 0 10px 20px -5px color-mix(in oklab, var(--theme-primary) 16%, transparent) !important;
+            border-color: var(--theme-primary) !important;
           }
           @media (prefers-reduced-motion: reduce) {
             .hover-translate-y:hover { transform: none; }
@@ -173,13 +174,13 @@
         </style>
 
         <!-- Widget de Onboarding Guiado Setup (0-100%) -->
-        <div id="onboarding-guide-widget" class="card shadow-sm border-0 mb-4 bg-white rounded-4 overflow-hidden" style="border-left: 5px solid #5D87FF !important;">
+        <div id="onboarding-guide-widget" class="card shadow-sm border-0 mb-4 bg-white rounded-4 overflow-hidden" style="border-left: 4px solid var(--theme-primary) !important;">
           <div class="card-body p-4">
             
             <!-- Top Header & Progress Row -->
             <div class="d-flex align-items-center justify-content-between flex-wrap gap-3 mb-4 pb-3 border-bottom">
               <div class="d-flex align-items-center gap-3">
-                <div class="p-3 bg-primary bg-opacity-10 text-primary rounded-3 d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;" aria-hidden="true">
+                <div class="p-3 bg-light-primary text-primary rounded-3 d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;" aria-hidden="true">
                   <i class="ti ti-rocket fs-7"></i>
                 </div>
                 <div>
@@ -198,7 +199,7 @@
                     <strong class="text-primary fs-4 fw-black" id="onboarding-pct-text">80% Concluído</strong>
                   </div>
                   <div class="progress rounded-pill bg-white border" style="width: 130px; height: 10px;">
-                    <div class="progress-bar rounded-pill" id="onboarding-bar-fill" style="width: 80%; background: linear-gradient(90deg, #5D87FF 0%, #13DEB9 100%);"></div>
+                    <div class="progress-bar rounded-pill" id="onboarding-bar-fill" style="width: 80%; background: linear-gradient(90deg, var(--theme-primary) 0%, #22C55E 100%);"></div>
                   </div>
                 </div>
                 <button type="button" id="onboarding-dismiss-btn" class="btn btn-sm btn-light-danger text-danger p-2 rounded-circle hover-shadow" title="Ocultar Guia de Setup" aria-label="Ocultar guia de inicialização">

@@ -37,8 +37,8 @@ const INITIAL_DEMO_DATA = {
       name: 'Metrifique-se CRM (Master)',
       slug: 'metrifiquese-master',
       logo_url: '/src/assets/images/logos/logoblack.png',
-      primary_color: '#FF7A59',
-      secondary_color: '#00A4BD',
+      primary_color: '#143E2B',
+      secondary_color: '#18181B',
       custom_domain: 'crm.metrifiquese.com.br',
       plan: 'Master / Super Admin',
       monthly_price: 0,
@@ -57,7 +57,7 @@ const INITIAL_DEMO_DATA = {
       role: 'Super Admin Plataforma',
       crm_role: 'admin',
       is_super_admin: true,
-      avatar_url: 'https://instagram.ffln1-1.fna.fbcdn.net/v/t51.82787-19/658968988_17956763901106219_4353182039587841370_n.jpg?stp=dst-jpg_s640x640_tt6&efg=eyJ2ZW5jb2RlX3RhZyI6InByb2ZpbGVfcGljLmRqYW5nby4xMDgwLmMyIn0&_nc_ht=instagram.ffln1-1.fna.fbcdn.net&_nc_cat=107&_nc_oc=Q6cZ2gHQ7zmgXpwEmvIUUSDkCUd6C0alcKSp971qs39wUvaAXRPpJ7ZZ-8D-PVC9rAzxHr1fNlaD1pe1iR2PdpYlCCxi&_nc_ohc=D_qV0EMM3bAQ7kNvwEhm8-2&_nc_gid=3q7MmEdXmEkyWixry7GE7g&edm=AAZTMJEBAAAA&ccb=7-5&oh=00_AQEsTlniOhUeINunzYKRs8jcV-xr0pMOKFeckOynLzUZSw&oe=6A73BCD6&_nc_sid=49cb7f'
+      avatar_url: '/src/assets/images/profile/user-1.jpg'
     }
   ],
   session: {
@@ -189,9 +189,9 @@ class LocalCRMStore {
         id: t.id,
         name: t.name,
         slug: t.slug || (t.name ? t.name.toLowerCase().replace(/[^a-z0-9]/g, '-') : 'tenant'),
-        logo_url: t.logo_url || '/src/assets/images/logos/metrifiquese.svg',
-        primary_color: t.primary_color || '#FF7A59',
-        secondary_color: t.secondary_color || '#00A4BD',
+        logo_url: t.logo_url || '/src/assets/images/logos/logoblack.png',
+        primary_color: t.primary_color || '#143E2B',
+        secondary_color: t.secondary_color || '#18181B',
         custom_domain: t.custom_domain || '',
         plan: t.plan || 'Plano Agência Whitelabel',
         monthly_price: parseFloat(t.monthly_price) || 0,
@@ -215,10 +215,21 @@ class LocalCRMStore {
         const { data: dbTenants, error } = await supabaseClient.from('tenants').select('*');
         if (!error && dbTenants) {
           const storeData = this.getData();
-          
+
           const masterTenant = INITIAL_DEMO_DATA.tenants[0];
-          if (!dbTenants.some(t => t.id === masterTenant.id)) {
+          const remoteMaster = dbTenants.find(t => t.id === masterTenant.id);
+          if (!remoteMaster) {
             dbTenants.unshift(masterTenant);
+          } else if (!remoteMaster.primary_color || remoteMaster.primary_color.toUpperCase() === '#FF7A59') {
+            remoteMaster.primary_color = '#143E2B';
+            if (!remoteMaster.secondary_color || remoteMaster.secondary_color.toUpperCase() === '#00A4BD') {
+              remoteMaster.secondary_color = '#18181B';
+            }
+            supabaseClient.from('tenants').upsert([{
+              id: remoteMaster.id,
+              primary_color: remoteMaster.primary_color,
+              secondary_color: remoteMaster.secondary_color
+            }]).then(() => {}).catch(() => {});
           }
 
           const hasChanged = JSON.stringify(storeData.tenants) !== JSON.stringify(dbTenants);
@@ -333,13 +344,16 @@ class LocalCRMStore {
           let updated = false;
 
           dbProfiles.forEach(p => {
+            const safeRemoteAvatar = (p.avatar_url && !p.avatar_url.includes('fbcdn.net') && !p.avatar_url.includes('instagram.'))
+              ? p.avatar_url
+              : '/src/assets/images/profile/user-1.jpg';
             let u = (storeData.users || []).find(user => 
               user.id === p.id || 
               (user.email && p.email && user.email.toLowerCase() === p.email.toLowerCase()) || 
               (user.is_super_admin && p.email === 'paulo@southsea.com.br')
             );
             if (u) {
-              if (p.avatar_url !== undefined && u.avatar_url !== p.avatar_url) { u.avatar_url = p.avatar_url; updated = true; }
+              if (p.avatar_url !== undefined && u.avatar_url !== safeRemoteAvatar) { u.avatar_url = safeRemoteAvatar; updated = true; }
               if (p.full_name && u.full_name !== p.full_name) { u.full_name = p.full_name; updated = true; }
               if (p.password && u.password !== p.password) { u.password = p.password; updated = true; }
               if (p.crm_role && u.crm_role !== p.crm_role) { u.crm_role = p.crm_role; updated = true; }
@@ -354,7 +368,7 @@ class LocalCRMStore {
                 role: p.role || 'Membro da Equipe',
                 crm_role: p.crm_role || 'vendedor',
                 is_super_admin: p.email === 'paulo@southsea.com.br',
-                avatar_url: p.avatar_url || '/src/assets/images/profile/user-1.jpg'
+                avatar_url: safeRemoteAvatar
               };
               if (!storeData.users) storeData.users = [];
               storeData.users.push(newUser);
@@ -366,7 +380,7 @@ class LocalCRMStore {
               (storeData.session.user.email && p.email && storeData.session.user.email.toLowerCase() === p.email.toLowerCase()) ||
               (storeData.session.user.is_super_admin && p.email === 'paulo@southsea.com.br')
             )) {
-              if (p.avatar_url !== undefined && storeData.session.user.avatar_url !== p.avatar_url) { storeData.session.user.avatar_url = p.avatar_url; updated = true; }
+              if (p.avatar_url !== undefined && storeData.session.user.avatar_url !== safeRemoteAvatar) { storeData.session.user.avatar_url = safeRemoteAvatar; updated = true; }
               if (p.full_name && storeData.session.user.full_name !== p.full_name) { storeData.session.user.full_name = p.full_name; updated = true; }
             }
           });
@@ -458,11 +472,18 @@ class LocalCRMStore {
           masterUser.email = 'paulo@southsea.com.br';
           masterUser.full_name = 'Paulo Garcia';
           masterUser.is_super_admin = true;
+          if (!masterUser.avatar_url || masterUser.avatar_url.includes('fbcdn.net') || masterUser.avatar_url.includes('instagram.')) {
+            masterUser.avatar_url = '/src/assets/images/profile/user-1.jpg';
+            updated = true;
+          }
         }
 
         // Ensure session structure exists
         if (!data.session) {
           data.session = { user: null, active_tenant_id: null, is_authenticated: false };
+          updated = true;
+        } else if (data.session.user && (!data.session.user.avatar_url || data.session.user.avatar_url.includes('fbcdn.net') || data.session.user.avatar_url.includes('instagram.'))) {
+          data.session.user.avatar_url = '/src/assets/images/profile/user-1.jpg';
           updated = true;
         }
 
@@ -470,6 +491,18 @@ class LocalCRMStore {
         if (!data.tenants) {
           data.tenants = INITIAL_DEMO_DATA.tenants;
           updated = true;
+        } else {
+          const masterTenant = data.tenants.find(t => t.id === 'tenant-demo-001');
+          if (masterTenant) {
+            if (!masterTenant.primary_color || masterTenant.primary_color.toUpperCase() === '#FF7A59') {
+              masterTenant.primary_color = '#143E2B';
+              updated = true;
+            }
+            if (!masterTenant.secondary_color || masterTenant.secondary_color.toUpperCase() === '#00A4BD') {
+              masterTenant.secondary_color = '#18181B';
+              updated = true;
+            }
+          }
         }
 
         // Clean out legacy demo tenants (tenant-002, tenant-003)
@@ -625,8 +658,8 @@ class LocalCRMStore {
       name: name,
       slug: slug,
       logo_url: logoUrl || '/src/assets/images/logos/metrifiquese.svg',
-      primary_color: primaryColor || '#FF7A59',
-      secondary_color: '#00A4BD',
+      primary_color: primaryColor || '#143E2B',
+      secondary_color: '#18181B',
       custom_domain: domain || `${slug}.metrifiquese.com.br`,
       plan: plan || 'Plano Agência Whitelabel',
       monthly_price: parseFloat(monthlyPrice) || 297.00,
@@ -1075,7 +1108,7 @@ class LocalCRMStore {
       name: fullName + ' CRM',
       slug: slug,
       logo_url: '/src/assets/images/logos/metrifiquese.svg',
-      primary_color: '#FF7A59',
+      primary_color: '#143E2B',
       custom_domain: `${slug}.metrifiquese.com.br`,
       plan: 'Plano Agência Whitelabel',
       monthly_price: 297.00,
@@ -1681,7 +1714,7 @@ class LocalCRMStore {
         title: 'Solicitar Demonstração / Orçamento',
         description: 'Preencha os campos abaixo para que nossa equipe entre em contato.',
         button_text: 'Receber Apresentação Comercial',
-        button_color: '#FF7A59',
+        button_color: '#143E2B',
         theme_mode: 'light',
         source: 'Formulário do Site',
         redirect_url: '',

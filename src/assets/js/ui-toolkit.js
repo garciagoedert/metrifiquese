@@ -32,7 +32,7 @@
     },
 
     escapeAttr(val) {
-      return this.escapeHtml(val);
+      return mqSecurity.escapeHtml(val);
     },
 
     safeUrl(url, fallback = '') {
@@ -920,6 +920,15 @@
         const icon = btn.querySelector('i');
         if (icon) {
           icon.className = isDark ? 'ti ti-sun fs-5' : 'ti ti-moon fs-5';
+        }
+      });
+
+      document.querySelectorAll('img.hs-brand-logo').forEach((img) => {
+        const rawSrc = img.getAttribute('src') || '';
+        if (rawSrc.endsWith('logoblack.png') || rawSrc.endsWith('logowhite.png')) {
+          const targetFile = isDark ? 'logowhite.png' : 'logoblack.png';
+          const nextSrc = rawSrc.replace(/logo(?:black|white)\.png$/, targetFile);
+          if (nextSrc !== rawSrc) img.setAttribute('src', nextSrc);
         }
       });
     },

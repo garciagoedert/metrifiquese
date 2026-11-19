@@ -75,7 +75,7 @@ class FormsManager {
 
     container.innerHTML = forms.map(f => {
       const publicLink = `${baseUrl}?${this.buildFormQueryParams(f)}`;
-      const safeHex = /^#[0-9a-fA-F]{6}$/.test(f.button_color || '') ? f.button_color : '#FF7A59';
+      const safeHex = /^#[0-9a-fA-F]{6}$/.test(f.button_color || '') ? f.button_color : '#143E2B';
       const safeId = escAttr(f.id);
       const safeTitle = esc(f.title || 'Formulário Sem Título');
       return `
@@ -138,7 +138,7 @@ class FormsManager {
     document.getElementById('form-title-input').value = form ? form.title : 'Solicitar Orçamento / Demonstração';
     document.getElementById('form-desc-input').value = form ? form.description : 'Preencha os dados abaixo para receber um contato exclusivo da nossa equipe.';
     document.getElementById('form-button-text-input').value = form ? form.button_text : 'Quero Receber Orçamento';
-    document.getElementById('form-button-color-input').value = form ? form.button_color : '#FF7A59';
+    document.getElementById('form-button-color-input').value = form ? form.button_color : '#143E2B';
     document.getElementById('form-source-input').value = form ? form.source : 'Formulário do Site';
     document.getElementById('form-success-msg-input').value = form ? form.success_message : 'Obrigado! Recebemos seus dados com sucesso e entraremos em contato em breve.';
     document.getElementById('form-redirect-url-input').value = form ? (form.redirect_url || '') : '';
@@ -178,7 +178,7 @@ class FormsManager {
     const title = document.getElementById('form-title-input').value || 'Título do Formulário';
     const desc = document.getElementById('form-desc-input').value || 'Descrição do formulário...';
     const btnText = document.getElementById('form-button-text-input').value || 'Enviar';
-    const btnColor = document.getElementById('form-button-color-input').value || '#FF7A59';
+    const btnColor = document.getElementById('form-button-color-input').value || '#143E2B';
     const theme = document.getElementById('form-theme-select').value || 'light';
 
     const hasName = document.getElementById('field-name-chk').checked;

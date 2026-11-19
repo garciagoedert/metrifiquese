@@ -21,14 +21,29 @@ class WhitelabelThemeEngine {
     }
   }
 
-  sanitizeHexColor(color, fallback = '#FF7A59') {
+  sanitizeHexColor(color, fallback = '#143E2B') {
     if (typeof color !== 'string') return fallback;
     const trimmed = color.trim();
     return /^#[0-9A-Fa-f]{3,8}$/.test(trimmed) ? trimmed : fallback;
   }
 
+  hexToRgbTriplet(hex) {
+    const clean = this.sanitizeHexColor(hex, '#143E2B').slice(1);
+    let r, g, b;
+    if (clean.length === 3 || clean.length === 4) {
+      r = parseInt(clean[0] + clean[0], 16);
+      g = parseInt(clean[1] + clean[1], 16);
+      b = parseInt(clean[2] + clean[2], 16);
+    } else {
+      r = parseInt(clean.slice(0, 2), 16);
+      g = parseInt(clean.slice(2, 4), 16);
+      b = parseInt(clean.slice(4, 6), 16);
+    }
+    return `${r}, ${g}, ${b}`;
+  }
+
   computeContrastColor(hex) {
-    const clean = this.sanitizeHexColor(hex, '#FF7A59').slice(1);
+    const clean = this.sanitizeHexColor(hex, '#143E2B').slice(1);
     let r, g, b;
     if (clean.length === 3 || clean.length === 4) {
       r = parseInt(clean[0] + clean[0], 16) / 255;
@@ -41,15 +56,17 @@ class WhitelabelThemeEngine {
     }
     const toLinear = (c) => (c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4));
     const luminance = 0.2126 * toLinear(r) + 0.7152 * toLinear(g) + 0.0722 * toLinear(b);
-    return luminance > 0.17913 ? '#0F172A' : '#FFFFFF';
+    return luminance > 0.17913 ? '#09090B' : '#FFFFFF';
   }
 
   applyThemeTokens(primaryColor, logoUrl, tenantName) {
-    const safeColor = this.sanitizeHexColor(primaryColor, '#FF7A59');
+    const safeColor = this.sanitizeHexColor(primaryColor, '#143E2B');
     const fgColor = this.computeContrastColor(safeColor);
+    const rgbTriplet = this.hexToRgbTriplet(safeColor);
 
     const root = document.documentElement;
     root.style.setProperty('--bs-primary', safeColor);
+    root.style.setProperty('--bs-primary-rgb', rgbTriplet);
     root.style.setProperty('--theme-primary', safeColor);
     root.style.setProperty('--hs-orange', safeColor);
     root.style.setProperty('--theme-primary-fg', fgColor);
@@ -62,42 +79,40 @@ class WhitelabelThemeEngine {
     }
 
     customStyleEl.textContent = `
-      .btn-primary, .bg-primary, .badge.bg-primary {
+      .btn-primary,
+      .bg-primary:not(.bg-opacity-10, .bg-opacity-25),
+      .badge.bg-primary {
         background-color: var(--theme-primary) !important;
         border-color: var(--theme-primary) !important;
         color: var(--theme-primary-fg) !important;
       }
       .btn-outline-primary {
-        color: var(--theme-primary) !important;
-        border-color: var(--theme-primary) !important;
+        color: var(--theme-primary-text, var(--theme-primary)) !important;
+        border-color: var(--theme-primary-text, var(--theme-primary)) !important;
       }
-      .btn-outline-primary:hover {
+      .btn-outline-primary:hover:not(:disabled) {
         background-color: var(--theme-primary) !important;
+        border-color: var(--theme-primary) !important;
         color: var(--theme-primary-fg) !important;
       }
       .text-primary, a.text-primary {
-        color: var(--theme-primary) !important;
+        color: var(--theme-primary-text, var(--theme-primary)) !important;
       }
       .hs-action-pill:hover {
-        border-color: var(--theme-primary) !important;
-        color: var(--theme-primary) !important;
-        background-color: rgba(255, 122, 89, 0.08) !important;
-      }
-      .sidebar-nav ul .sidebar-item.selected > .sidebar-link {
-        background-color: var(--theme-primary) !important;
-        color: var(--theme-primary-fg) !important;
-        border-radius: 8px;
+        border-color: var(--theme-primary-text, var(--theme-primary)) !important;
+        color: var(--theme-primary-text, var(--theme-primary)) !important;
+        background-color: var(--theme-primary-soft, color-mix(in oklab, var(--theme-primary) 10%, transparent)) !important;
       }
       .hs-nav-tabs .nav-link.active {
-        color: var(--theme-primary) !important;
+        color: var(--theme-primary-text, var(--theme-primary)) !important;
         border-bottom-color: var(--theme-primary) !important;
       }
 
       /* Enhanced Sidebar Aesthetic & Collapsed State */
       .left-sidebar {
         background-color: var(--mq-surface, #FFFFFF) !important;
-        border-right: 1px solid var(--mq-border, #E2E8F0) !important;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03) !important;
+        border-right: 1px solid var(--mq-border, #E4E4E7) !important;
+        box-shadow: none !important;
         transition: width 0.25s ease, left 0.25s ease !important;
       }
       .sidebar-nav ul .sidebar-item {
@@ -108,7 +123,7 @@ class WhitelabelThemeEngine {
         align-items: center;
         gap: 12px;
         padding: 10px 14px;
-        color: var(--mq-muted, #475569) !important;
+        color: var(--mq-muted, #52525B) !important;
         font-weight: 600;
         font-size: 0.88rem;
         border-radius: 10px !important;
@@ -117,15 +132,15 @@ class WhitelabelThemeEngine {
       }
       .sidebar-nav ul .sidebar-link i {
         font-size: 1.25rem;
-        color: var(--mq-muted, #64748B);
+        color: var(--mq-muted, #52525B);
         transition: transform 0.2s ease, color 0.2s ease;
       }
       .sidebar-nav ul .sidebar-link:hover {
-        background-color: var(--mq-surface-subtle, #F1F5F9) !important;
-        color: var(--mq-heading, #0F172A) !important;
+        background-color: var(--mq-surface-subtle, #F4F4F5) !important;
+        color: var(--mq-heading, #09090B) !important;
       }
       .sidebar-nav ul .sidebar-link:hover i {
-        color: var(--theme-primary) !important;
+        color: var(--theme-primary-text, var(--theme-primary)) !important;
       }
       @media (prefers-reduced-motion: no-preference) {
         .sidebar-nav ul .sidebar-link:hover i {
@@ -135,14 +150,15 @@ class WhitelabelThemeEngine {
       .sidebar-nav ul .sidebar-item.selected > .sidebar-link {
         background: var(--theme-primary) !important;
         color: var(--theme-primary-fg) !important;
-        box-shadow: 0 4px 12px rgba(255, 122, 89, 0.25) !important;
+        font-weight: 700;
+        box-shadow: var(--mq-elev-2, 0 4px 12px -2px rgba(9, 9, 11, 0.14)) !important;
       }
       .sidebar-nav ul .sidebar-item.selected > .sidebar-link i {
         color: var(--theme-primary-fg) !important;
       }
       .nav-small-cap {
         padding: 16px 14px 6px 14px !important;
-        color: var(--mq-muted, #94A3B8) !important;
+        color: var(--mq-muted, #71717A) !important;
         font-size: 0.68rem !important;
         font-weight: 800 !important;
         letter-spacing: 0.08em;
@@ -175,11 +191,15 @@ class WhitelabelThemeEngine {
       }
     `;
 
-    const safeLogo = window.mqSecurity ? window.mqSecurity.safeUrl(logoUrl, '') : logoUrl;
+    const isDarkTheme = document.documentElement.getAttribute('data-theme') === 'dark';
+    let resolvedLogo = window.mqSecurity ? window.mqSecurity.safeUrl(logoUrl, '') : logoUrl;
+    if (resolvedLogo && (resolvedLogo.endsWith('logoblack.png') || resolvedLogo.endsWith('logowhite.png'))) {
+      resolvedLogo = resolvedLogo.replace(/logo(?:black|white)\.png$/, isDarkTheme ? 'logowhite.png' : 'logoblack.png');
+    }
     const logoImgs = document.querySelectorAll('.logo-img img, .brand-logo img, .hs-brand-logo');
     logoImgs.forEach((img) => {
-      if (safeLogo) {
-        img.src = safeLogo;
+      if (resolvedLogo) {
+        img.src = resolvedLogo;
       }
       if (tenantName) {
         img.alt = tenantName;
@@ -193,7 +213,7 @@ class WhitelabelThemeEngine {
 
   applyTenantTheme() {
     const tenant = window.crmStore ? window.crmStore.getTenant() : null;
-    const primaryColor = (tenant && tenant.primary_color) ? tenant.primary_color : '#FF7A59';
+    const primaryColor = (tenant && tenant.primary_color) ? tenant.primary_color : '#143E2B';
     this.applyThemeTokens(primaryColor, tenant?.logo_url, tenant?.name);
   }
 

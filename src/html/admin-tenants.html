@@ -10,6 +10,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
+  <link rel="stylesheet" href="../assets/css/styles.min.css" />
   <link rel="stylesheet" href="../assets/css/metrifiquese-theme.css" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
   
@@ -303,9 +304,9 @@
               <div class="col-md-4 mb-3">
                 <label for="tenant-color-picker" class="form-label fw-semibold">Cor Primária da Marca</label>
                 <div class="d-flex align-items-center gap-2">
-                  <input type="color" id="tenant-color-picker" class="form-control form-control-color" value="#00A4BD" aria-label="Seletor visual da cor da marca">
+                  <input type="color" id="tenant-color-picker" class="form-control form-control-color" value="#143E2B" aria-label="Seletor visual da cor da marca">
                   <label for="tenant-color-hex" class="visually-hidden">Código hexadecimal da cor</label>
-                  <input type="text" id="tenant-color-hex" class="form-control" value="#00A4BD" spellcheck="false">
+                  <input type="text" id="tenant-color-hex" class="form-control" value="#143E2B" spellcheck="false">
                 </div>
               </div>
             </div>
@@ -415,9 +416,9 @@
             <div class="mb-3">
               <label for="edit-tenant-color-picker" class="form-label fw-semibold">Cor Primária da Marca</label>
               <div class="d-flex align-items-center gap-2">
-                <input type="color" id="edit-tenant-color-picker" class="form-control form-control-color" value="#00A4BD" aria-label="Seletor visual da cor da marca">
+                <input type="color" id="edit-tenant-color-picker" class="form-control form-control-color" value="#143E2B" aria-label="Seletor visual da cor da marca">
                 <label for="edit-tenant-color-hex" class="visually-hidden">Código hexadecimal da cor</label>
-                <input type="text" id="edit-tenant-color-hex" class="form-control" value="#00A4BD" spellcheck="false">
+                <input type="text" id="edit-tenant-color-hex" class="form-control" value="#143E2B" spellcheck="false">
               </div>
             </div>
           </div>
@@ -656,7 +657,7 @@
           const tenantUsers = window.crmStore.getUsersByTenant(t.id);
           const isSuspended = t.status === 'suspended';
           const priceDisplay = (t.monthly_price !== undefined ? parseFloat(t.monthly_price) : (t.plan.includes('Enterprise') ? 597 : 297));
-          const safeHexColor = /^#[0-9a-fA-F]{6}$/.test(t.primary_color || '') ? t.primary_color : '#FF7A59';
+          const safeHexColor = /^#[0-9a-fA-F]{6}$/.test(t.primary_color || '') ? t.primary_color : '#143E2B';
           const safeTenantId = escAttr(t.id);
           const safeTenantName = esc(t.name);
 
@@ -786,8 +787,8 @@
         document.getElementById('edit-tenant-status').value = tenant.status || 'active';
         document.getElementById('edit-tenant-billing-date').value = tenant.next_billing_date || '';
         document.getElementById('edit-tenant-billing-phone').value = tenant.billing_phone || '';
-        document.getElementById('edit-tenant-color-picker').value = tenant.primary_color || '#FF7A59';
-        document.getElementById('edit-tenant-color-hex').value = tenant.primary_color || '#FF7A59';
+        document.getElementById('edit-tenant-color-picker').value = tenant.primary_color || '#143E2B';
+        document.getElementById('edit-tenant-color-hex').value = tenant.primary_color || '#143E2B';
 
         const modalEl = document.getElementById('editTenantModal');
         if (modalEl && window.bootstrap) {

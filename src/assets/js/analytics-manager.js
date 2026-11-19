@@ -189,6 +189,9 @@ class AnalyticsManager {
     if (!chartEl || !window.ApexCharts) return;
 
     const stats = this.getCRMStats();
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    const axisColor = isDark ? '#A1A1AA' : '#52525B';
+    const headingAxisColor = isDark ? '#FAFAFA' : '#09090B';
 
     if (this.charts.funnel) { try { this.charts.funnel.destroy(); } catch(e){} }
 
@@ -196,7 +199,7 @@ class AnalyticsManager {
       series: [{ name: 'Contatos', data: [stats.totalLeads, stats.mqlCount, stats.oppCount, stats.customerCount] }],
       chart: { type: 'bar', height: 320, fontFamily: "'Plus Jakarta Sans', sans-serif", toolbar: { show: false } },
       plotOptions: { bar: { borderRadius: 8, horizontal: true, distributed: true, barHeight: '55%' } },
-      colors: ['#FF7A59', '#00A4BD', '#F59E0B', '#10B981'],
+      colors: ['#143E2B', '#27272A', '#1E6B47', '#52525B'],
       dataLabels: {
         enabled: true,
         style: { fontSize: '13px', fontWeight: 700, colors: ['#FFF'] },
@@ -204,9 +207,9 @@ class AnalyticsManager {
       },
       xaxis: {
         categories: ['Leads Capturados', 'MQL (Qualificados)', 'Oportunidades', 'Clientes Fechados'],
-        labels: { style: { colors: '#475569', fontSize: '12px', fontWeight: 600 } }
+        labels: { style: { colors: axisColor, fontSize: '12px', fontWeight: 600 } }
       },
-      yaxis: { labels: { style: { colors: '#0F172A', fontSize: '13px', fontWeight: 700 } } },
+      yaxis: { labels: { style: { colors: headingAxisColor, fontSize: '13px', fontWeight: 700 } } },
       legend: { show: false }
     });
     this.charts.funnel.render();
@@ -227,15 +230,18 @@ class AnalyticsManager {
     const labels = Object.keys(sourceCounts);
     const series = Object.values(sourceCounts);
 
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    const legendLabelColor = isDark ? '#E4E4E7' : '#27272A';
+
     if (this.charts.sources) { try { this.charts.sources.destroy(); } catch(e){} }
 
     this.charts.sources = new ApexCharts(chartEl, {
       series: series.length ? series : [1],
       labels: labels.length ? labels : ['Sem dados'],
       chart: { type: 'donut', height: 310, fontFamily: "'Plus Jakarta Sans', sans-serif" },
-      colors: ['#FF7A59', '#00A4BD', '#10B981', '#F59E0B', '#7D52F4', '#FA896B'],
+      colors: ['#143E2B', '#27272A', '#1E6B47', '#52525B', '#15803D', '#71717A'],
       dataLabels: { enabled: true, style: { fontSize: '12px', fontWeight: 700 } },
-      legend: { position: 'bottom', fontSize: '13px', fontWeight: 600, labels: { colors: '#334155' } }
+      legend: { position: 'bottom', fontSize: '13px', fontWeight: 600, labels: { colors: legendLabelColor } }
     });
     this.charts.sources.render();
   }
@@ -270,6 +276,9 @@ class AnalyticsManager {
       if (deal.status === 'won' || deal.stage_id === 'stage-5') wonByMonth[idx] += val;
     });
 
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    const axisColor = isDark ? '#A1A1AA' : '#52525B';
+
     // If no real data at all, show zeros (not fake data)
     if (this.charts.revenue) { try { this.charts.revenue.destroy(); } catch(e){} }
 
@@ -279,16 +288,16 @@ class AnalyticsManager {
         { name: 'Receita Ganha (R$)',  data: wonByMonth  }
       ],
       chart: { type: 'area', height: 320, fontFamily: "'Plus Jakarta Sans', sans-serif", toolbar: { show: false } },
-      colors: ['#5D87FF', '#13DEB9'],
+      colors: ['#18181B', '#143E2B'],
       stroke: { curve: 'smooth', width: 3 },
       fill: { type: 'gradient', gradient: { shadeIntensity: 1, opacityFrom: 0.4, opacityTo: 0.05 } },
       xaxis: {
         categories: labels,
-        labels: { style: { colors: '#475569', fontSize: '12px', fontWeight: 600 } }
+        labels: { style: { colors: axisColor, fontSize: '12px', fontWeight: 600 } }
       },
       yaxis: {
         labels: {
-          style: { colors: '#475569', fontSize: '12px', fontWeight: 600 },
+          style: { colors: axisColor, fontSize: '12px', fontWeight: 600 },
           formatter: val => 'R$ ' + val.toLocaleString('pt-BR', { minimumFractionDigits: 0 })
         }
       },
