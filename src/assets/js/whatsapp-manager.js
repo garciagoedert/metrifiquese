@@ -221,6 +221,15 @@ class WhatsAppManager {
       }
     });
 
+    tablist.addEventListener('dblclick', (e) => {
+      const tab = e.target.closest('[role="tab"]');
+      if (!tab) return;
+      const tabId = tab.getAttribute('data-wa-tab');
+      if (tabId && tabId !== 'all') {
+        this.renameAccountPrompt(tabId);
+      }
+    });
+
     window.addEventListener('resize', () => this.updateTablistScrollHints());
   }
 
@@ -312,6 +321,7 @@ class WhatsAppManager {
     tablist.innerHTML = tabsData.map(tab => {
       const isSelected = tab.id === this.activeAccountFilter;
       const safeId = escAttr(tab.id);
+      const renameTitle = tab.id !== 'all' ? ' title="Duplo clique para renomear esta aba"' : '';
       return `
         <button type="button"
                 role="tab"
@@ -319,7 +329,7 @@ class WhatsAppManager {
                 id="wa-tab-${safeId}"
                 data-wa-tab="${safeId}"
                 aria-selected="${isSelected ? 'true' : 'false'}"
-                tabindex="${isSelected ? '0' : '-1'}"
+                tabindex="${isSelected ? '0' : '-1'}"${renameTitle}
                 ${isSelected ? 'focusgroupstart' : ''}>
           <span class="wa-status-dot ${tab.dotClass}" style="${tab.dotStyle}" aria-hidden="true"></span>
           <span>${esc(tab.label)}</span>
@@ -334,6 +344,7 @@ class WhatsAppManager {
     }
 
     this.updateSidebarChannelTitle();
+    this.updateRenameButtonVisibility();
     this.updateTablistScrollHints();
   }
 
@@ -371,6 +382,7 @@ class WhatsAppManager {
     }
 
     this.updateSidebarChannelTitle();
+    this.updateRenameButtonVisibility();
     this.refreshConfigUI();
     this.renderChatList();
 
@@ -384,6 +396,25 @@ class WhatsAppManager {
         this.currentChatId = null;
         this.renderEmptyThreadState();
       }
+    }
+  }
+
+  updateRenameButtonVisibility() {
+    const renameBtn = document.getElementById('wa-rename-active-tab-btn');
+    if (!renameBtn) return;
+    const isAll = this.activeAccountFilter === 'all';
+    renameBtn.classList.toggle('d-none', isAll);
+    renameBtn.classList.toggle('d-inline-flex', !isAll);
+  }
+
+  renameActiveAccountTab() {
+    if (this.activeAccountFilter && this.activeAccountFilter !== 'all') {
+      this.renameAccountPrompt(this.activeAccountFilter);
+      return;
+    }
+    const accounts = this.getAccounts();
+    if (accounts.length > 0) {
+      this.renameAccountPrompt(accounts[0].id);
     }
   }
 
@@ -1469,17 +1500,17 @@ class WhatsAppManager {
 
       return `
         <button type="button" class="wa-chat-item ${isSelected ? 'is-selected' : ''}" onclick="${clickHandler}">
-          <div class="d-flex align-items-center gap-3">
+          <div class="wa-chat-item-row">
             <div class="position-relative flex-shrink-0">
               <img src="${avatarSrc}" width="44" height="44" class="rounded-circle object-fit-cover shadow-sm" alt="" onerror="this.src='../assets/images/profile/user-1.jpg'">
               <span class="position-absolute bottom-0 end-0 p-1 ${isVirtual ? 'bg-secondary' : 'bg-success'} border border-white rounded-circle" aria-hidden="true"></span>
             </div>
-            <div class="flex-grow-1 min-w-0">
+            <div class="wa-chat-item-body">
               <div class="d-flex align-items-center justify-content-between gap-2 mb-1">
                 <h6 class="mb-0 fw-semibold text-truncate fs-3 text-dark">${esc(chat.name)}</h6>
                 <span class="text-muted flex-shrink-0" style="font-size: 11px;">${esc(chat.last_message_time || '')}</span>
               </div>
-              <p class="mb-1 text-muted text-truncate fs-2">
+              <p class="mb-1 text-muted fs-2 wa-chat-item-preview">
                 ${esc(chat.last_message || 'Nenhuma mensagem')}
               </p>
               <div class="d-flex align-items-center justify-content-between gap-1">

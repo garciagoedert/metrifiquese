@@ -235,6 +235,10 @@
               <!-- Renderizado dinamicamente via whatsapp-manager.js -->
             </div>
             <div class="d-flex align-items-center gap-2 flex-shrink-0 ms-2">
+              <button type="button" id="wa-rename-active-tab-btn" class="btn btn-sm btn-light py-1 px-2 d-inline-flex align-items-center gap-1" onclick="window.whatsAppManager.renameActiveAccountTab()" title="Renomear aba atual do WhatsApp" aria-label="Renomear aba atual do WhatsApp">
+                <i class="ti ti-pencil fs-4" aria-hidden="true"></i>
+                <span class="d-none d-md-inline">Renomear</span>
+              </button>
               <button type="button" class="btn btn-sm btn-outline-primary py-1 px-2 d-inline-flex align-items-center gap-1" onclick="window.whatsAppManager.openAddAccountFlow()" title="Conectar outro número de WhatsApp">
                 <i class="ti ti-plus fs-4" aria-hidden="true"></i>
                 <span class="d-none d-sm-inline">Novo WhatsApp</span>
@@ -283,7 +287,7 @@
               </div>
 
               <!-- Lista de conversas com scroll -->
-              <div id="whatsapp-chat-list" class="flex-grow-1 overflow-auto">
+              <div id="whatsapp-chat-list" class="flex-grow-1 overflow-y-auto overflow-x-hidden">
                 <!-- Preenchido via whatsapp-manager.js -->
               </div>
 

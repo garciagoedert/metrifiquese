@@ -1541,8 +1541,17 @@ dialog.mq-dialog::backdrop {
 }
 
 /* Chat Items & Channel Chips */
+#whatsapp-chat-list {
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
 .wa-chat-item {
+  display: block;
   width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
   text-align: start;
   border: 0;
   border-bottom: 1px solid var(--mq-border);
@@ -1550,6 +1559,28 @@ dialog.mq-dialog::backdrop {
   padding: 0.85rem 1rem;
   background: transparent;
   transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.wa-chat-item-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  min-width: 0;
+}
+
+.wa-chat-item-body {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.wa-chat-item-preview {
+  display: block;
+  width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .wa-chat-item:hover {
